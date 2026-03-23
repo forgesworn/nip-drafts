@@ -1,0 +1,6 @@
+flowchart LR
+    OR["Outcome Report"] -->|triggers| ES["NIP-ESCROW\nRelease / Forfeit"]
+    OC["Outcome Challenge"] -->|stake via| LK["NIP-ESCROW\nLock"]
+    RL["Outcome Ruling"] -->|re-settles| ES
+    LK -->|if challenger wins| RL2["NIP-ESCROW\nRelease (stake returned)"]
+    LK -->|if challenger loses| FF["NIP-ESCROW\nForfeit (stake lost)"]

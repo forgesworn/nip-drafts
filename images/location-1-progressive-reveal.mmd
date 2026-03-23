@@ -1,0 +1,35 @@
+sequenceDiagram
+    autonumber
+    participant S as Subscriber
+    participant R as Relay
+    participant P as Publisher
+
+    rect rgb(27, 45, 61)
+        Note over S,P: Phase 1 — Public Discovery (precision 4-5, ~5-40 km)
+        P->>R: kind:20500 Presence Beacon<br/>g=gcpu, status=available
+        P->>R: kind:20500 Beacon (30s interval)
+        S->>R: REQ {kinds:[20500], #g:[9-cell neighbours]}
+        R-->>S: Matching beacons
+        Note over S: Sees approximate area only
+    end
+
+    rect rgb(45, 45, 27)
+        Note over S,P: Phase 2 — Consent Established (application-specific)
+        S->>P: Consent exchange (out of band)
+        P-->>S: Consent acknowledged
+    end
+
+    rect rgb(27, 61, 45)
+        Note over S,P: Phase 3 — Active Sharing (exact coordinates, NIP-44 encrypted)
+        P->>R: kind:20501 Location Update<br/>NIP-44 encrypted to Subscriber<br/>consent=explicit
+        R-->>S: Encrypted location update
+        Note over S: Decrypts: lat, lon,<br/>accuracy, bearing, speed
+        P->>R: kind:20501 (every few seconds)
+        R-->>S: Encrypted location update
+    end
+
+    rect rgb(61, 27, 27)
+        Note over S,P: Termination — context ends
+        Note over P: Stops publishing
+        Note over R: Ephemeral events expire<br/>via NIP-40 expiration tags
+    end

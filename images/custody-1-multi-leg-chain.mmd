@@ -1,0 +1,33 @@
+sequenceDiagram
+    autonumber
+    participant A as Sender
+    participant R as Relay
+    participant B as Courier
+    participant C as Hub
+    participant D as Recipient
+
+    rect rgb(27, 45, 61)
+        Note over A,D: Leg 1 — Sender to Courier
+        A->>R: kind:30573 Evidence<br/>departure condition photo
+        A->>R: kind:30572 Transfer<br/>custody_from: A, custody_to: B<br/>condition_grade: excellent
+        R-->>B: Notification
+        B->>R: kind:30573 Evidence<br/>receipt condition confirmed
+    end
+
+    rect rgb(45, 45, 27)
+        Note over A,D: Leg 2 — Courier to Hub
+        B->>R: kind:30573 Evidence<br/>departure scan
+        B->>R: kind:30572 Transfer<br/>custody_from: B, custody_to: C<br/>custody_handoff_ref: Leg 1 event ID
+        R-->>C: Notification
+        C->>R: kind:30573 Evidence<br/>receipt condition: good
+    end
+
+    rect rgb(27, 61, 45)
+        Note over A,D: Leg 3 — Hub to Recipient
+        C->>R: kind:30573 Evidence<br/>departure condition
+        C->>R: kind:30572 Transfer<br/>custody_from: C, custody_to: D<br/>custody_handoff_ref: Leg 2 event ID
+        R-->>D: Notification
+        D->>R: kind:30573 Evidence<br/>delivery confirmed, photo
+    end
+
+    Note over A,D: Full chain verifiable:<br/>Transfer 1 ← Transfer 2 ← Transfer 3<br/>Each linked by custody_handoff_ref

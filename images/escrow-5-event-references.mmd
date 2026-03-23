@@ -1,0 +1,25 @@
+flowchart LR
+    OE["Originating Event\n(NIP-15 / NIP-99 / etc.)"]
+    Q["kind:30530\nQuote"]
+    T["kind:30531\nPayment Terms"]
+    L["kind:30532\nLock"]
+    R["kind:30533\nRelease"]
+    F["kind:30534\nForfeit"]
+    Tick["kind:30536\nStreaming Tick"]
+    Rcpt["kind:30535\nReceipt"]
+    Tip["kind:30537\nTip"]
+
+    OE --> Q --> T --> L
+    L --> R
+    L --> F
+    T --> Tick
+    Rcpt --> Tip
+
+    style Q fill:#2d2d1b,stroke:#f5a623,color:#f0f0f0
+    style T fill:#2d2d1b,stroke:#f5a623,color:#f0f0f0
+    style L fill:#2d2d1b,stroke:#f5a623,color:#f0f0f0
+    style R fill:#1b3d2d,stroke:#16c79a,color:#f0f0f0
+    style F fill:#1b3d2d,stroke:#16c79a,color:#f0f0f0
+    style Rcpt fill:#1b3d2d,stroke:#16c79a,color:#f0f0f0
+    style Tick fill:#1b3d2d,stroke:#16c79a,color:#f0f0f0
+    style Tip fill:#1b3d2d,stroke:#16c79a,color:#f0f0f0

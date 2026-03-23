@@ -1,0 +1,25 @@
+flowchart TD
+    classDef green fill:#1b3d2d,stroke:#16c79a,color:#f0f0f0
+    classDef yellow fill:#2d2d1b,stroke:#f5a623,color:#f0f0f0
+    classDef blue fill:#1b2d3d,stroke:#0f3460,color:#f0f0f0
+    classDef red fill:#3d1b1b,stroke:#e94560,color:#f0f0f0
+
+    PROPOSAL([Proposer publishes<br/>kind:30574 Proposal<br/>voters: N, threshold: T]):::blue
+
+    PROPOSAL --> VOTING[VOTING OPEN<br/>Voters cast kind:30575]:::yellow
+
+    VOTING --> VOTE{New vote<br/>received}:::blue
+
+    VOTE --> VALID{Voter pubkey<br/>in proposal p tags?}:::yellow
+    VALID -- "No" --> IGNORE([Ignore vote]):::red
+    VALID -- "Yes" --> TALLY[Update tally:<br/>agree / disagree / abstain]:::blue
+
+    TALLY --> AGREE_CHECK{agree count<br/> >= threshold T?}:::yellow
+    AGREE_CHECK -- "Yes" --> PASSED([CONSENSUS PASSED]):::green
+
+    AGREE_CHECK -- "No" --> DISAGREE_CHECK{disagree count ><br/>N minus T?}:::yellow
+    DISAGREE_CHECK -- "Yes" --> FAILED_MATH([CONSENSUS FAILED<br/>Threshold unreachable]):::red
+
+    DISAGREE_CHECK -- "No" --> DEADLINE{Expiration<br/>reached?}:::yellow
+    DEADLINE -- "Yes" --> FAILED_TIME([CONSENSUS FAILED<br/>Deadline passed]):::red
+    DEADLINE -- "No" --> VOTING

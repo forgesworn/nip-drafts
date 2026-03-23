@@ -1,0 +1,25 @@
+flowchart TD
+    classDef green fill:#1b3d2d,stroke:#16c79a,color:#f0f0f0
+    classDef yellow fill:#2d2d1b,stroke:#f5a623,color:#f0f0f0
+    classDef blue fill:#1b2d3d,stroke:#0f3460,color:#f0f0f0
+    classDef red fill:#3d1b1b,stroke:#e94560,color:#f0f0f0
+
+    CREATE([Proposer publishes<br/>kind:30570 Gate<br/>gate_status: pending]):::blue
+
+    CREATE --> PENDING
+
+    PENDING[PENDING<br/>Awaiting reviewer responses]:::yellow
+
+    PENDING --> RESPONSE{Reviewer publishes<br/>kind:30571 Response}:::blue
+
+    RESPONSE -- "decision: revise" --> REVISION[REVISION REQUESTED<br/>Proposer updates<br/>kind:30570 with changes]:::yellow
+    REVISION --> PENDING
+
+    RESPONSE -- "decision: rejected<br/>(any reviewer)" --> REJECTED([REJECTED]):::red
+
+    RESPONSE -- "decision: approved" --> CHECK{All gate_authority<br/>reviewers approved?}:::yellow
+
+    CHECK -- "No, still waiting<br/>on other reviewers" --> PENDING
+    CHECK -- "Yes, all approved" --> APPROVED([APPROVED<br/>Proceed to next phase]):::green
+
+    PENDING -- "expiration reached<br/>without resolution" --> EXPIRED([EXPIRED]):::red

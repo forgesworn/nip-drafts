@@ -1,0 +1,34 @@
+sequenceDiagram
+    actor R as Requester
+    actor P as Provider
+    participant EA as Escrow Agent (optional)
+
+    P->>R: kind:30530 Quote
+    Note right of P: Provider proposes price
+
+    R->>P: kind:30531 Payment Terms
+    Note left of R: Parties agree on payment type,<br/>trust model, and rail
+
+    R->>EA: kind:30532 Lock
+    Note left of R: Funds committed — hold invoice,<br/>Cashu HTLC, or similar
+
+    rect rgb(27, 45, 61)
+        Note over R,P: Work phase
+        loop Streaming ticks (if streaming payment)
+            R-->>P: kind:30536 Streaming Tick (gift-wrapped)
+        end
+    end
+
+    alt Happy path
+        R->>EA: kind:30533 Release
+        Note left of R: Funds released to provider
+    else Breach of terms
+        EA-->>P: kind:30534 Forfeit (gift-wrapped)
+        Note right of EA: Funds penalized (NIP-59)
+    end
+
+    P-->>R: kind:30535 Payment Receipt (gift-wrapped)
+    Note right of P: Settlement recorded with<br/>cryptographic proof (NIP-59)
+
+    R-->>P: kind:30537 Tip (gift-wrapped, optional)
+    Note left of R: Post-completion gratuity (NIP-59)
