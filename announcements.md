@@ -41,7 +41,7 @@ The progressive reveal model means precision increases only when trust does. Pub
 
 Useful for delivery tracking, field service dispatch, event coordination, fleet management, or any Nostr app that needs "who is near me?" without a centralised location server.
 
-Build with this: a Nostr meetup app that shows who's nearby without exposing exact locations. A privacy-first find-my-friends that works without Google or Apple. A protest coordination tool where organisers share location only with verified participants. A wildlife tracking network where researchers share animal sighting coordinates with collaborators.
+Build with this: a Nostr meetup app that shows who's nearby without exposing exact locations. A privacy-first find-my-friends that works without Google or Apple. A wildlife tracking network where researchers share animal sighting coordinates with collaborators. A food truck finder that shows live locations without a centralised app.
 
 https://github.com/forgesworn/nip-drafts/blob/main/NIP-LOCATION.md
 
@@ -61,7 +61,7 @@ What makes it different from labels: NIP-32 labels are regular events. You canno
 
 Reference implementation with builders, parsers, validators, and 17 frozen test vectors: https://github.com/forgesworn/nostr-attestations
 
-Build with this: a professional licensing registry where trade bodies issue verifiable credentials on Nostr. A product authenticity system where manufacturers attest provenance. A peer endorsement network where your reputation follows your keypair across clients. A fact-checking layer where journalists sign claims about sources.
+Build with this: a restaurant review system where ratings are signed and verifiable, not anonymous. A Nostr-native recommendation engine where endorsements carry real weight. A fact-checking layer where journalists sign claims about sources. A music credits system where session musicians get cryptographic proof of their contribution.
 
 The spec: https://github.com/forgesworn/nostr-attestations/blob/main/NIP-VA.md
 
@@ -171,7 +171,7 @@ The verification algorithm is six steps: discover requirements, discover credent
 
 Different from NIP-58 badges: badges celebrate ("you earned this"). Credentials gate ("you need this to participate").
 
-Build with this: a professional network where qualifications are verifiable, not just claimed in a bio. A tutoring platform that checks teaching credentials before connecting tutors with students. A conference speaker directory where organisers can verify claimed expertise. A co-working space that gates access to specialist equipment based on certified training.
+Build with this: a conference where speakers prove their claimed expertise before being listed on the programme. A Nostr client that shows a verified checkmark when someone's professional claim is backed by an issuer. A community wiki where only editors with verified credentials can approve changes to sensitive topics.
 
 https://github.com/forgesworn/nip-drafts/blob/main/NIP-CREDENTIALS.md
 
@@ -193,7 +193,7 @@ NIP-03 (OpenTimestamps) proves an event existed at a time. NIP-EVIDENCE adds wha
 
 Useful for inspections, insurance claims, compliance audits, dispute resolution, or any workflow where "signed facts" need to be discoverable by type, location, or related event.
 
-Build with this: an inspection app where engineers photograph defects with geolocation and timestamp. An insurance claims system where evidence is immutable from the moment of capture. A compliance audit trail that any regulator can verify independently. A citizen journalism tool where photos carry verifiable metadata about when and where they were taken.
+Build with this: a citizen journalism tool where photos carry verifiable metadata about when and where they were taken. A home renovation log where before/after photos are timestamped and geolocated. A birdwatching app where sightings carry structured evidence. A community mapping project where contributors submit verified survey data.
 
 https://github.com/forgesworn/nip-drafts/blob/main/NIP-EVIDENCE.md
 
