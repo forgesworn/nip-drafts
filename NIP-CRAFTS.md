@@ -55,6 +55,7 @@ Clients that understand crafts read the `craft:*` tags for proficiency levels, t
     "kind": 30510,
     "tags": [
         ["d", "<pubkey>_profile"],
+        ["alt", "Craft practitioner profile: master blacksmith, architectural ironwork"],
         ["t", "domain:metalwork"],
         ["t", "skill:forge_work"],
         ["t", "skill:wrought_iron"],
@@ -80,6 +81,8 @@ Clients that understand crafts read the `craft:*` tags for proficiency levels, t
 The `craft:*` tags are the extension layer on top of NIP-PROVIDER-PROFILES. The `domain`, `skill`, and `credential` tags (plus their `t`-tag equivalents for relay indexing) follow the standard Provider Profile conventions. The `craft:*` tags add craft-specific semantics that generic clients can safely ignore.
 
 ### Craft-Specific Tag Vocabulary
+
+> **Extensibility:** The `craft:*` tag namespace is open. Applications MAY define additional tags following the `craft:<attribute>` convention. The tags listed here are RECOMMENDED for interoperability.
 
 These tags extend a `kind:30510` Provider Profile for craft practitioners:
 
@@ -117,7 +120,7 @@ Craft practitioners are discovered using standard NIP-PROVIDER-PROFILES filters 
 ]
 ```
 
-After fetching matching profiles, clients post-filter by `craft:*` tags (proficiency, tradition, endangerment, etc.) client-side.
+> **Note:** Tags prefixed with `craft:` are multi-letter tags. Standard relays index only single-letter tags. Discovery SHOULD use `#t` and `#g` filters as shown above. Clients post-filter by `craft:*` tag values (proficiency, tradition, endangerment, etc.) after fetching matching events; these are client-side filters only.
 
 ---
 
@@ -132,6 +135,7 @@ A documented craft technique - the "living archive" primitive. Each record descr
     "created_at": 1709740800,
     "tags": [
         ["d", "lime-pointing-flush-finish"],
+        ["alt", "Technique record: Flush Lime Pointing with NHL 3.5"],
         ["craft:category", "building_conservation"],
         ["craft:skill", "lime_work"],
         ["craft:technique_name", "Flush Lime Pointing with NHL 3.5"],
@@ -194,7 +198,7 @@ Certain techniques (e.g. conservation methods that could enable theft if publish
 ]
 ```
 
-> **Note:** Tags prefixed with `craft:` are multi-letter tags. Standard relays index only single-letter tags. Discovery SHOULD use `#l` (NIP-32 labels) and `authors` filters as shown above. Clients post-filter by `craft:*` tag values after fetching matching events.
+> **Note:** Tags prefixed with `craft:` are multi-letter tags. Standard relays index only single-letter tags. Discovery SHOULD use `#l` (NIP-32 labels) and `authors` filters as shown above. Clients post-filter by `craft:*` tag values after fetching matching events; these are client-side filters only.
 
 ---
 
@@ -271,6 +275,10 @@ sequenceDiagram
 
 ## Relationship to Existing NIPs
 
+### NIP-23 (Long-form Content)
+
+NIP-23 (Long-form Content) is generic article publishing. Kind 30401 Technique Records carry structured craft-specific metadata (difficulty levels, tool and material requirements, safety warnings, prerequisite chains, endangerment status) that enables machine-readable discovery, progression tracking, and cross-referencing. A NIP-23 article cannot express prerequisite dependencies or endangerment registries in a relay-filterable way.
+
 ### NIP-PROVIDER-PROFILES (Kind 30510)
 
 NIP-PROVIDER-PROFILES defines general-purpose provider profiles for service discovery. Craft practitioner identity composes directly with Provider Profiles using `craft:*` extension tags. This NIP does **not** define a separate Skill Profile kind; the Provider Profile is the canonical home for practitioner identity. See [Composing with NIP-PROVIDER-PROFILES](#composing-with-nip-provider-profiles) above for the full tag vocabulary and example.
@@ -309,6 +317,7 @@ NIP-REPUTATION defines Credential Attestations for third-party verification of q
   "created_at": 1709740800,
   "tags": [
     ["d", "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2_profile"],
+    ["alt", "Craft practitioner profile: master blacksmith, architectural ironwork"],
     ["t", "domain:metalwork"],
     ["t", "skill:forge_work"],
     ["t", "skill:wrought_iron"],
@@ -349,6 +358,7 @@ NIP-REPUTATION defines Credential Attestations for third-party verification of q
   "created_at": 1709740800,
   "tags": [
     ["d", "lime-pointing-flush-finish"],
+    ["alt", "Technique record: Flush Lime Pointing with NHL 3.5"],
     ["craft:category", "building_conservation"],
     ["craft:skill", "lime_work"],
     ["craft:technique_name", "Flush Lime Pointing with NHL 3.5"],

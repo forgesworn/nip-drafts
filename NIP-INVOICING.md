@@ -61,9 +61,10 @@ Invoices are addressable; a provider can update an invoice by republishing with 
     ["invoice_number", "INV-2026-0042"],
     ["amount", "27800"],
     ["currency", "GBP"],
-    ["line_item", "{\"description\":\"Logo design, base fee\",\"quantity\":\"1\",\"unit_price\":\"20000\",\"tax\":\"4000\"}"],
-    ["line_item", "{\"description\":\"Two revision rounds\",\"quantity\":\"2\",\"unit_price\":\"1500\",\"tax\":\"600\"}"],
-    ["line_item", "{\"description\":\"Stock image licence\",\"quantity\":\"1\",\"unit_price\":\"200\",\"tax\":\"0\"}"],
+    ["alt", "Invoice INV-2026-0042: 27800 GBP"],
+    ["line_item", "Logo design, base fee", "1", "20000", "4000"],
+    ["line_item", "Two revision rounds", "2", "1500", "600"],
+    ["line_item", "Stock image licence", "1", "200", "0"],
     ["p", "<requester-hex-pubkey>"],
     ["payment_terms", "net_14"],
     ["due_date", "1710950400"],
@@ -81,11 +82,11 @@ Tags:
 
 * `d` (REQUIRED): Addressable event identifier. RECOMMENDED format: a human-readable invoice number (e.g. `INV-2026-0042`) or an application-specific identifier.
 * `t` (REQUIRED): Protocol family marker. MUST be `"invoice"`.
-* `e` (REQUIRED): References the originating event -- a NIP-15 marketplace order, a NIP-99 classified listing, a service agreement, or any application-specific event.
+* `e` (RECOMMENDED): References the originating event -- a NIP-15 marketplace order, a NIP-99 classified listing, a service agreement, or any application-specific event. Invoices for work agreed off-platform MAY omit the `e` tag.
 * `invoice_number` (REQUIRED): Human-readable sequential invoice identifier for the provider's accounting records. MUST be a non-empty string.
 * `amount` (REQUIRED): Total invoice amount in smallest currency unit (pence for GBP, cents for USD, satoshis for SAT).
 * `currency` (REQUIRED): ISO 4217 currency code or cryptocurrency code (e.g. `GBP`, `USD`, `EUR`, `SAT`, `BTC`).
-* `line_item` (REQUIRED, multiple): Repeatable -- one tag per billable entry. Value is a JSON string (see [Line Item Format](#line-item-format) below).
+* `line_item` (REQUIRED, multiple): Repeatable -- one tag per billable entry. Format: `["line_item", "<description>", "<quantity>", "<unit_price>", "<tax>"]`. See [Line Item Format](#line-item-format) below.
 * `p` (RECOMMENDED): Invoice recipient's hex pubkey.
 * `payment_terms` (RECOMMENDED): Payment terms code (see [Payment Terms Codes](#payment-terms-codes) below).
 * `due_date` (RECOMMENDED): Payment due date as a Unix timestamp.
@@ -102,21 +103,18 @@ Tags:
 
 ### Line Item Format
 
-Each `line_item` tag value is a JSON string with the following structure:
+Each `line_item` tag is a structured multi-value tag array with positional elements:
 
-```json
-{
-  "description": "Logo design, base fee",
-  "quantity": "1",
-  "unit_price": "20000",
-  "tax": "4000"
-}
+```
+["line_item", "<description>", "<quantity>", "<unit_price>", "<tax>"]
 ```
 
-- `description` (string, required): Human-readable description of the work or item
-- `quantity` (string, required): Number of units (integer or decimal string)
-- `unit_price` (string, required): Price per unit in smallest currency unit
-- `tax` (string, optional): Tax amount for this line item in smallest currency unit (default: `"0"`)
+| Position | Field         | Required | Description                                                      |
+|----------|---------------|----------|------------------------------------------------------------------|
+| 1        | `description` | Yes      | Human-readable description of the work or item                   |
+| 2        | `quantity`    | Yes      | Number of units (integer or decimal string)                      |
+| 3        | `unit_price`  | Yes      | Price per unit in smallest currency unit                         |
+| 4        | `tax`         | No       | Tax amount for this line item in smallest currency unit (default: `"0"`) |
 
 ### Payment Terms Codes
 
@@ -137,11 +135,11 @@ Each `line_item` tag value is a JSON string with the following structure:
 |------------------|----------|----------|--------------------------------------------|
 | `d`              | MUST     | No       | Addressable event identifier               |
 | `t`              | MUST     | No       | Protocol family marker                     |
-| `e`              | MUST     | No       | Reference to originating event             |
+| `e`              | SHOULD   | No       | Reference to originating event             |
 | `invoice_number` | MUST     | No       | Human-readable invoice identifier          |
 | `amount`         | MUST     | No       | Total invoice amount (smallest unit)       |
 | `currency`       | MUST     | No       | Currency code                              |
-| `line_item`      | MUST     | Yes      | Itemised billable entry (JSON string)      |
+| `line_item`      | MUST     | Yes      | Itemised billable entry (positional array)  |
 | `p`              | SHOULD   | No       | Invoice recipient pubkey                   |
 | `payment_terms`  | SHOULD   | No       | Payment terms code                         |
 | `due_date`       | SHOULD   | No       | Payment due date (Unix timestamp)          |
@@ -174,7 +172,7 @@ Discover a specific invoice by its `d` tag:
 {"kinds": [30588], "#d": ["INV-2026-0042"], "authors": ["<provider-hex-pubkey>"]}
 ```
 
-> **Note:** Tags such as `invoice_number`, `payment_terms`, `line_item`, and `tax_rate` are multi-letter tags. Standard relays index only single-letter tags (`d`, `e`, `p`, `t`). Discovery SHOULD use `kinds`, `authors`, `#p`, and `#d` filters as shown above. Multi-letter tag values are available after fetching the event.
+> **Note:** Tags such as `invoice_number`, `payment_terms`, `line_item`, and `tax_rate` are multi-letter tags. Standard relays index only single-letter tags (`d`, `e`, `p`, `t`). Discovery SHOULD use `kinds`, `authors`, `#p`, and `#d` filters as shown above. Multi-letter tag values are available after fetching the event and SHOULD be applied as client-side filters.
 
 ---
 
@@ -201,6 +199,7 @@ A payer records full payment of invoice INV-2026-0042 via Lightning:
   "created_at": 1709740800,
   "tags": [
     ["d", "INV-2026-0042:receipt"],
+    ["alt", "Payment receipt for invoice INV-2026-0042: 27800 GBP"],
     ["e", "<invoice-event-id>", "wss://relay.example.com"],
     ["payer", "<payer-hex-pubkey>"],
     ["payee", "<provider-hex-pubkey>"],
@@ -228,6 +227,7 @@ First milestone payment of 50000 pence against a larger invoice, paid by bank tr
   "created_at": 1709740800,
   "tags": [
     ["d", "INV-2026-0099:receipt:001"],
+    ["alt", "Partial payment receipt for invoice INV-2026-0099: 50000 GBP (milestone 1)"],
     ["e", "<invoice-event-id>", "wss://relay.example.com"],
     ["payer", "<payer-hex-pubkey>"],
     ["payee", "<provider-hex-pubkey>"],
@@ -251,6 +251,7 @@ Second milestone payment completing the invoice:
   "created_at": 1709827200,
   "tags": [
     ["d", "INV-2026-0099:receipt:002"],
+    ["alt", "Partial payment receipt for invoice INV-2026-0099: 50000 GBP (milestone 2)"],
     ["e", "<invoice-event-id>", "wss://relay.example.com"],
     ["payer", "<payer-hex-pubkey>"],
     ["payee", "<provider-hex-pubkey>"],
@@ -291,15 +292,16 @@ A freelance photographer submits an expense claim for costs incurred during a co
   "tags": [
     ["d", "EXP-2026-0042:gate:expense_claim"],
     ["t", "approval-gate"],
+    ["alt", "Expense approval gate: 8400 GBP for design project"],
     ["gate_type", "approval"],
     ["gate_authority", "<client-hex-pubkey>"],
     ["gate_status", "pending"],
     ["e", "<originating-event-id>", "wss://relay.example.com"],
     ["amount", "8400"],
     ["currency", "GBP"],
-    ["line_item", "{\"description\":\"Stock images, Shutterstock licence x3\",\"amount\":\"4500\",\"category\":\"materials\"}"],
-    ["line_item", "{\"description\":\"Express courier, prototype delivery\",\"amount\":\"1200\",\"category\":\"travel\"}"],
-    ["line_item", "{\"description\":\"Adobe Illustrator monthly licence\",\"amount\":\"2700\",\"category\":\"equipment\"}"],
+    ["line_item", "Stock images, Shutterstock licence x3", "1", "4500", "0"],
+    ["line_item", "Express courier, prototype delivery", "1", "1200", "0"],
+    ["line_item", "Adobe Illustrator monthly licence", "1", "2700", "0"],
     ["e", "<evidence-event-id-1>", "wss://relay.example.com"],
     ["e", "<evidence-event-id-2>", "wss://relay.example.com"],
     ["expiration", "1710950400"]
@@ -314,7 +316,7 @@ Key conventions for expense Approval Gates:
 
 * `gate_type` SHOULD be `"approval"`.
 * `amount` and `currency` tags carry the total reimbursement amount.
-* `line_item` tags use the same JSON format as Invoice line items, with `description`, `amount`, and `category` fields. The `category` field uses the [Expense Categories](#expense-categories) vocabulary.
+* `line_item` tags use the same positional format as Invoice line items: `["line_item", "<description>", "<quantity>", "<unit_price>", "<tax>"]`. For expenses, the `quantity` is typically `"1"` and `unit_price` is the expense amount.
 * `e` tags reference both the originating event (the transaction or agreement) and NIP-EVIDENCE records (kind 30578) for receipt documentation. Clients distinguish evidence references by resolving the referenced events.
 * The `amount` MUST equal the sum of all `line_item` amounts.
 
@@ -330,6 +332,7 @@ The client approves the expense claim:
   "tags": [
     ["d", "EXP-2026-0042:gate:expense_claim:response:<client-hex-pubkey>"],
     ["t", "approval-response"],
+    ["alt", "Expense approval response: approved for reimbursement"],
     ["e", "<gate-event-id>", "wss://relay.example.com"],
     ["decision", "approved"],
     ["p", "<provider-hex-pubkey>"]
@@ -482,10 +485,10 @@ All validation rules for NIP-INVOICING events. Implementations MUST enforce thes
 | Rule      | Event Kind(s)              | Requirement                                                                                |
 |-----------|----------------------------|--------------------------------------------------------------------------------------------|
 | V-INV-01  | 30588 (Invoice)            | MUST include at least one `line_item` tag                                                  |
-| V-INV-02  | 30588 (Invoice)            | Each `line_item` value MUST be valid JSON containing `description`, `quantity`, and `unit_price` |
+| V-INV-02  | 30588 (Invoice)            | Each `line_item` tag MUST contain at least 4 elements: tag name, description, quantity, and unit_price |
 | V-INV-03  | 30588 (Invoice)            | `amount` MUST equal the sum of all line item totals (quantity x unit_price + tax) minus `discount` |
 | V-INV-04  | 30588 (Invoice)            | `invoice_number` MUST be a non-empty string                                                |
-| V-INV-05  | 30588 (Invoice)            | MUST reference an originating event via `e` tag                                            |
+| V-INV-05  | 30588 (Invoice)            | SHOULD reference an originating event via `e` tag. Invoices for work agreed off-platform MAY omit it |
 | V-INV-06  | 30588 (Invoice)            | `payment_terms` value MUST be one of the defined codes when present                        |
 | V-INV-07  | 30588 (Invoice)            | `due_date` MUST be a valid future Unix timestamp when present                              |
 | V-INV-08  | 30535 (Receipt for invoice)| `e` tag MUST reference a valid Kind 30588 invoice event                                    |
@@ -508,13 +511,14 @@ All examples use timestamp `1709740800` (2024-03-06T12:00:00Z) and placeholder h
   "tags": [
     ["d", "INV-2026-0042"],
     ["t", "invoice"],
+    ["alt", "Invoice INV-2026-0042: 27800 GBP"],
     ["e", "dddd4444eeee5555ffff6666aaaa1111bbbb2222cccc3333dddd4444eeee5555"],
     ["invoice_number", "INV-2026-0042"],
     ["amount", "27800"],
     ["currency", "GBP"],
-    ["line_item", "{\"description\":\"Logo design, base fee\",\"quantity\":\"1\",\"unit_price\":\"20000\",\"tax\":\"4000\"}"],
-    ["line_item", "{\"description\":\"Two revision rounds\",\"quantity\":\"2\",\"unit_price\":\"1500\",\"tax\":\"600\"}"],
-    ["line_item", "{\"description\":\"Stock image licence\",\"quantity\":\"1\",\"unit_price\":\"200\",\"tax\":\"0\"}"],
+    ["line_item", "Logo design, base fee", "1", "20000", "4000"],
+    ["line_item", "Two revision rounds", "2", "1500", "600"],
+    ["line_item", "Stock image licence", "1", "200", "0"],
     ["p", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3"],
     ["payment_terms", "net_14"],
     ["due_date", "1710950400"],
@@ -543,6 +547,7 @@ All examples use timestamp `1709740800` (2024-03-06T12:00:00Z) and placeholder h
   "created_at": 1709740800,
   "tags": [
     ["d", "INV-2026-0042:receipt"],
+    ["alt", "Payment receipt for invoice INV-2026-0042: 27800 GBP"],
     ["e", "aaaa1111bbbb2222cccc3333dddd4444eeee5555ffff6666aaaa1111bbbb2222"],
     ["payer", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3"],
     ["payee", "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"],
@@ -566,6 +571,7 @@ All examples use timestamp `1709740800` (2024-03-06T12:00:00Z) and placeholder h
   "created_at": 1709740800,
   "tags": [
     ["d", "INV-2026-0099:receipt:001"],
+    ["alt", "Partial payment receipt for invoice INV-2026-0099: 50000 GBP"],
     ["e", "aaaa1111bbbb2222cccc3333dddd4444eeee5555ffff6666aaaa1111bbbb2222"],
     ["payer", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3"],
     ["payee", "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"],
@@ -590,15 +596,16 @@ All examples use timestamp `1709740800` (2024-03-06T12:00:00Z) and placeholder h
   "tags": [
     ["d", "EXP-2026-0042:gate:expense_claim"],
     ["t", "approval-gate"],
+    ["alt", "Expense approval gate: 8400 GBP for design project"],
     ["gate_type", "approval"],
     ["gate_authority", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3"],
     ["gate_status", "pending"],
     ["e", "dddd4444eeee5555ffff6666aaaa1111bbbb2222cccc3333dddd4444eeee5555"],
     ["amount", "8400"],
     ["currency", "GBP"],
-    ["line_item", "{\"description\":\"Stock images, Shutterstock licence x3\",\"amount\":\"4500\",\"category\":\"materials\"}"],
-    ["line_item", "{\"description\":\"Express courier, prototype delivery\",\"amount\":\"1200\",\"category\":\"travel\"}"],
-    ["line_item", "{\"description\":\"Adobe Illustrator monthly licence\",\"amount\":\"2700\",\"category\":\"equipment\"}"],
+    ["line_item", "Stock images, Shutterstock licence x3", "1", "4500", "0"],
+    ["line_item", "Express courier, prototype delivery", "1", "1200", "0"],
+    ["line_item", "Adobe Illustrator monthly licence", "1", "2700", "0"],
     ["e", "eeee1111ffff2222aaaa3333bbbb4444cccc5555dddd6666eeee1111ffff2222"],
     ["e", "ffff2222aaaa3333bbbb4444cccc5555dddd6666eeee1111ffff2222aaaa3333"],
     ["expiration", "1710950400"]
@@ -691,6 +698,6 @@ A reference implementation is available in the [`@trott/sdk`](https://github.com
 A minimal implementation requires:
 
 1. A Nostr client that supports addressable event publishing.
-2. Invoice rendering logic -- parsing `line_item` tags and computing totals for display.
+2. Invoice rendering logic -- parsing `line_item` tag arrays and computing totals for display.
 3. Payment tracking -- querying Kind 30535 Receipts by `e` tag reference to the invoice event and computing outstanding balances.
 4. (Optional) Expense reimbursement -- creating NIP-APPROVAL Gates with expense line items and NIP-EVIDENCE references.

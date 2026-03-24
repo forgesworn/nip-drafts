@@ -59,6 +59,7 @@ Published by either party to request a change to the agreed scope. Addressable; 
     "tags": [
         ["d", "order_marketplace_001:variation:001"],
         ["t", "variation-request"],
+        ["alt", "Variation request: addition to order_marketplace_001"],
         ["variation_type", "addition"],
         ["p", "<provider-hex-pubkey>"],
         ["e", "<original-agreement-event-id>", "wss://relay.example.com"],
@@ -79,7 +80,7 @@ Tags:
 * `variation_type` (REQUIRED): Nature of the change. One of `"addition"`, `"removal"`, `"substitution"`, `"modification"`, or `"schedule_change"`.
 * `p` (RECOMMENDED): Other party's hex pubkey.
 * `e` (RECOMMENDED): Event ID of the original scope or agreement event.
-* `amount` (OPTIONAL): Estimated cost impact in smallest currency unit (pence for GBP, cents for USD, satoshis for SAT).
+* `amount` (OPTIONAL): Estimated cost impact (delta from original, not new total). Positive for increase, negative for decrease. In smallest currency unit (pence for GBP, cents for USD, satoshis for SAT).
 * `currency` (OPTIONAL): Currency code (e.g. `GBP`, `USD`, `EUR`, `SAT`).
 * `schedule_impact_days` (OPTIONAL): Estimated schedule impact in days.
 * `ref` (OPTIONAL): External reference (variation order number, change request ID).
@@ -100,19 +101,31 @@ Tags:
 
 Clients can subscribe to variation requests using standard NIP-01 filters:
 
+All variation requests for a specific agreement:
+
 ```json
-// All variation requests for a specific agreement
 {"kinds": [30579], "#e": ["<original-agreement-event-id>"]}
+```
 
-// All variation requests from a specific party
+All variation requests from a specific party:
+
+```json
 {"kinds": [30579], "authors": ["<requester-pubkey>"]}
+```
 
-// All variation requests addressed to a specific provider
+All variation requests addressed to a specific provider:
+
+```json
 {"kinds": [30579], "#p": ["<provider-pubkey>"]}
+```
 
-// A specific variation request by d-tag
+A specific variation request by d-tag:
+
+```json
 {"kinds": [30579], "#d": ["order_marketplace_001:variation:001"]}
 ```
+
+> **Note:** Tags such as `variation_type`, `amount`, `currency`, and `schedule_impact_days` are multi-letter tags. Standard relays index only single-letter tags (`d`, `e`, `p`, `t`). Discovery SHOULD use `kinds`, `authors`, `#e`, `#p`, and `#d` filters as shown above. Multi-letter tag values are available after fetching the event and SHOULD be applied as client-side filters.
 
 ---
 
@@ -131,6 +144,7 @@ The requester published a Variation Request (kind 30579) asking to add express s
     "created_at": 1698772000,
     "tags": [
         ["d", "order_marketplace_001:variation:001:quote"],
+        ["alt", "Quote for variation: express shipping upgrade, 18000 SAT"],
         ["e", "<variation-request-event-id>", "wss://relay.example.com"],
         ["p", "<requester-hex-pubkey>"],
         ["amount", "18000"],
@@ -176,6 +190,7 @@ After the provider quotes the express shipping upgrade, an Approval Gate is crea
     "tags": [
         ["d", "order_marketplace_001:variation:001:gate:approval"],
         ["t", "approval-gate"],
+        ["alt", "Approval gate for variation: express shipping upgrade"],
         ["gate_type", "approval"],
         ["gate_authority", "<requester-hex-pubkey>"],
         ["gate_status", "pending"],
@@ -201,6 +216,7 @@ The requester approves the variation:
     "tags": [
         ["d", "order_marketplace_001:variation:001:gate:approval:response:<requester-hex-pubkey>"],
         ["t", "approval-response"],
+        ["alt", "Approval response: approved variation for express shipping upgrade"],
         ["e", "<approval-gate-event-id>", "wss://relay.example.com"],
         ["decision", "approved"],
         ["p", "<provider-hex-pubkey>"]
@@ -308,6 +324,7 @@ All examples use timestamp `1709740800` (2024-03-06T12:00:00Z) and placeholder h
     "tags": [
         ["d", "project_alpha:variation:003"],
         ["t", "variation-request"],
+        ["alt", "Variation request: addition to project_alpha"],
         ["variation_type", "addition"],
         ["p", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3"],
         ["e", "dddd4444eeee5555ffff6666aaaa1111bbbb2222cccc3333dddd4444eeee5555", "wss://relay.example.com"],

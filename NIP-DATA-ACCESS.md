@@ -54,10 +54,13 @@ Published by a data owner (grantor) to authorise a third party (grantee) to read
         ["d", "<grantor_pubkey>:access_grant:<grantee_pubkey>:finance"],
         ["p", "<grantee-hex-pubkey>"],
         ["grantee_type", "human"],
-        ["permissions", "read:30700,read:30701,write:30702"],
-        ["entities", "<entity_event_id_1>,<entity_event_id_2>"],
+        ["permission", "read:30700"],
+        ["permission", "read:30701"],
+        ["permission", "write:30702"],
+        ["entity", "<entity_event_id_1>"],
+        ["entity", "<entity_event_id_2>"],
         ["valid_until", "1710000000"],
-        ["revocable", "true"],
+        ["alt", "Data access grant: read/write finance data, expires 1710000000"],
         ["purpose", "annual_audit"]
     ],
     "content": "<NIP-44 encrypted to grantee: decryption keys for specified entities>",
@@ -73,16 +76,17 @@ Published by a data owner (grantor) to authorise a third party (grantee) to read
 | `d`              | Yes         | `<grantor_pubkey>:access_grant:<grantee_pubkey>:<scope>`. Unique per grantor per grantee per scope. The `<scope>` segment is application-defined (e.g. a domain name, a project identifier, or any string that distinguishes grants to the same grantee). |
 | `p`              | Yes         | Grantee's Nostr pubkey (the party receiving access).                                                                                                              |
 | `grantee_type`   | Recommended | Type of grantee: `human`, `ai_agent`, `operator`, `service`.                                                                                                      |
-| `permissions`    | Yes         | Comma-separated `action:kind` pairs (e.g. `read:30700,write:30701`). Actions are `read` and `write`.                                                              |
-| `entities`       | Yes         | Comma-separated event IDs of the entities the grant covers (e.g. learner profile IDs, patient record IDs, account references).                                     |
+| `permission`     | Yes         | One `action:kind` pair per tag (e.g. `read:30700`). Repeatable. Actions are `read` and `write`.                                                                    |
+| `entity`         | Yes         | Event ID of an entity the grant covers (e.g. learner profile ID, patient record ID, account reference). Repeatable.                                                |
 | `valid_from`     | Optional    | Unix timestamp when access begins. Defaults to event `created_at`.                                                                                                |
-| `valid_until`    | Yes         | Unix timestamp when access expires.                                                                                                                               |
-| `revocable`      | Yes         | Always `true`. Data access grants are always revocable.                                                                                                           |
+| `valid_until`    | Yes         | Unix timestamp when access expires. Grantors SHOULD also include a NIP-40 `expiration` tag matching `valid_until` to enable relay-side garbage collection of expired grants. |
 | `revoked`        | Optional    | Set to `true` to revoke an active grant.                                                                                                                          |
 | `purpose`        | Recommended | Why access is being granted (e.g. `tutoring`, `medical_consultation`, `legal_review`, `annual_audit`).                                                            |
 | `domain`         | Optional    | Application domain this grant applies to (e.g. `education`, `healthcare`, `finance`). Useful for filtering and scoping but not structurally required.              |
 | `reference`      | Optional    | Event ID of a related event this grant pertains to (e.g. an appointment, a project, a case file). Applications MAY use this to link grants to specific workflows.  |
 | `key_generation` | Optional    | Monotonically increasing integer (starting from 1). Tracks which Content Key generation this grant covers. See [Forward-Only Revocation](#forward-only-revocation). |
+
+All grants are revocable by the grantor publishing a replacement event with `["revoked", "true"]`. There is no `revocable` tag; revocability is an inherent property of addressable events.
 
 ---
 
@@ -201,7 +205,7 @@ sequenceDiagram
     participant Grantee
     participant NewGrantee as New Grantee
 
-    Owner->>Relay: Publish Grant (kind 30556)<br/>permissions, entities, valid_until
+    Owner->>Relay: Publish Grant (kind 30556)<br/>permission, entity, valid_until
     Note right of Owner: Content Key encrypted to Grantee (NIP-44)
     Relay-->>Grantee: Grant discoverable via p tag
 
@@ -224,9 +228,9 @@ All validation rules for Kind 30556 events. Implementations MUST enforce these r
 
 | Rule     | Requirement                                                                                                                   |
 |----------|-------------------------------------------------------------------------------------------------------------------------------|
-| V-DAG-01 | MUST include `p` (grantee pubkey), `permissions`, `entities`, and `valid_until` tags.                                        |
+| V-DAG-01 | MUST include `p` (grantee pubkey), at least one `permission` tag, at least one `entity` tag, and a `valid_until` tag.        |
 | V-DAG-02 | Content field MUST be NIP-44 encrypted to the grantee (the pubkey in the `p` tag).                                           |
-| V-DAG-03 | `permissions` tag MUST contain valid `action:kind` pairs where action is `read` or `write` and kind is a numeric event kind. |
+| V-DAG-03 | Each `permission` tag MUST contain a valid `action:kind` pair where action is `read` or `write` and kind is a numeric event kind. |
 | V-DAG-04 | `valid_until` MUST be a Unix timestamp strictly greater than `created_at`.                                                   |
 | V-DAG-05 | Clients MUST reject grants where `valid_until` has passed or where the `revoked` tag is set to `true`.                       |
 | V-DAG-06 | When `key_generation` is present, its value MUST be a positive integer. Clients MUST NOT accept a lower generation than one previously seen for the same `d` tag. |
@@ -248,10 +252,12 @@ A parent grants an AI tutoring service read access to their child's learning rec
     ["d", "<parent_pubkey>:access_grant:<ai_tutor_pubkey>:education"],
     ["p", "<ai-tutor-hex-pubkey>"],
     ["grantee_type", "ai_agent"],
-    ["permissions", "read:30881,read:30882,write:30883"],
-    ["entities", "<learner_profile_event_id>"],
+    ["permission", "read:30881"],
+    ["permission", "read:30882"],
+    ["permission", "write:30883"],
+    ["entity", "<learner_profile_event_id>"],
     ["valid_until", "1738800000"],
-    ["revocable", "true"],
+    ["alt", "Data access grant: AI tutor read/write access to learner records"],
     ["purpose", "ai_tutoring"],
     ["domain", "education"]
   ],
@@ -272,10 +278,12 @@ A patient grants a specialist time-bounded access to their medical records for a
     ["d", "<patient_pubkey>:access_grant:<specialist_pubkey>:healthcare"],
     ["p", "<specialist-hex-pubkey>"],
     ["grantee_type", "human"],
-    ["permissions", "read:30900,read:30901,write:30902"],
-    ["entities", "<patient_record_event_id>"],
+    ["permission", "read:30900"],
+    ["permission", "read:30901"],
+    ["permission", "write:30902"],
+    ["entity", "<patient_record_event_id>"],
     ["valid_until", "1710000000"],
-    ["revocable", "true"],
+    ["alt", "Data access grant: specialist access to patient records for referral"],
     ["purpose", "specialist_referral"],
     ["domain", "healthcare"],
     ["reference", "<appointment_event_id>"]
@@ -297,10 +305,12 @@ An account holder grants a financial adviser read-only access to transaction his
     ["d", "<account_holder_pubkey>:access_grant:<adviser_pubkey>:finance"],
     ["p", "<adviser-hex-pubkey>"],
     ["grantee_type", "human"],
-    ["permissions", "read:30700,read:30701"],
-    ["entities", "<transaction_history_event_id>,<tax_record_event_id>"],
+    ["permission", "read:30700"],
+    ["permission", "read:30701"],
+    ["entity", "<transaction_history_event_id>"],
+    ["entity", "<tax_record_event_id>"],
     ["valid_until", "1709000000"],
-    ["revocable", "true"],
+    ["alt", "Data access grant: adviser read access to financial records for annual review"],
     ["purpose", "annual_review"],
     ["domain", "finance"]
   ],
@@ -320,10 +330,11 @@ A patient changes GP. The old GP retains access to historical records (generatio
   "tags": [
     ["d", "<patient_pubkey>:access_grant:<old_gp_pubkey>:healthcare"],
     ["p", "<old-gp-hex-pubkey>"],
-    ["permissions", "read:30900,read:30901"],
-    ["entities", "<patient_record_event_id>"],
+    ["permission", "read:30900"],
+    ["permission", "read:30901"],
+    ["entity", "<patient_record_event_id>"],
     ["valid_until", "1740000000"],
-    ["revocable", "true"],
+    ["alt", "Data access grant: old GP read access to patient records (generation 1)"],
     ["key_generation", "1"]
   ],
   "content": "<NIP-44 encrypted: CK generation 1>"
@@ -338,10 +349,12 @@ A patient changes GP. The old GP retains access to historical records (generatio
   "tags": [
     ["d", "<patient_pubkey>:access_grant:<new_gp_pubkey>:healthcare"],
     ["p", "<new-gp-hex-pubkey>"],
-    ["permissions", "read:30900,read:30901,write:30902"],
-    ["entities", "<patient_record_event_id>"],
+    ["permission", "read:30900"],
+    ["permission", "read:30901"],
+    ["permission", "write:30902"],
+    ["entity", "<patient_record_event_id>"],
     ["valid_until", "1771536000"],
-    ["revocable", "true"],
+    ["alt", "Data access grant: new GP read/write access to patient records (generation 2)"],
     ["key_generation", "2"]
   ],
   "content": "<NIP-44 encrypted: CK generation 2>"
@@ -355,7 +368,7 @@ A patient changes GP. The old GP retains access to historical records (generatio
 * **Revocation limitations.** Revocation prevents future access but cannot unread previously decrypted data. Grantors SHOULD use the shortest practical `valid_until` window.
 * **Content Key hygiene.** When revoking a grantee, rotate the Content Key for all future content. Re-issue updated grants to remaining grantees with the new CK.
 * **NIP-44 encryption.** The `content` field MUST be NIP-44 encrypted to the grantee. Implementations MUST NOT store raw Content Keys in plaintext on relays.
-* **Grantee validation.** Grantee clients MUST verify grant validity (check `revoked` tag, `valid_until` timestamp, and `key_generation`) before attempting decryption.
+* **Grantee validation.** Grantee clients MUST verify grant validity (check for `revoked` tag, `valid_until` timestamp, and `key_generation`) before attempting decryption.
 * **Relay trust.** As with all addressable events, clients rely on relays to serve the latest version. Clients SHOULD query multiple relays and accept the event with the highest `created_at` for a given coordinate.
 * **Permission scoping.** Grantors SHOULD use the minimum set of permissions required. Granting `write` access to event kinds the grantee does not need to modify increases the attack surface unnecessarily.
 
@@ -383,7 +396,7 @@ Kind 30556 events are typically published publicly (so grantees can discover the
 
 ## Multi-Letter Tag Filtering
 
-This NIP uses several multi-letter tags (`grantee_type`, `permissions`, `entities`, `valid_from`, `valid_until`, `revocable`, `revoked`, `purpose`, `domain`, `reference`, `key_generation`). Standard Nostr relays index only single-letter tags for `#` filter queries. Multi-letter tags are stored in events and readable by clients, but cannot be used in relay-side `REQ` filters. Clients SHOULD filter by `kind` and use single-letter tags (`d`, `p`) for relay queries, then apply multi-letter tag filters client-side.
+This NIP uses several multi-letter tags (`grantee_type`, `permission`, `entity`, `valid_from`, `valid_until`, `revoked`, `purpose`, `domain`, `reference`, `key_generation`). Standard Nostr relays index only single-letter tags for `#` filter queries. Multi-letter tags are stored in events and readable by clients, but cannot be used in relay-side `REQ` filters. Clients SHOULD filter by `kind` and use single-letter tags (`d`, `p`) for relay queries, then apply multi-letter tag filters client-side.
 
 ## Test Vectors
 
@@ -398,10 +411,11 @@ This NIP uses several multi-letter tags (`grantee_type`, `permissions`, `entitie
     ["d", "a1b2c3d4:access_grant:b2c3d4e5:education"],
     ["p", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b200"],
     ["grantee_type", "ai_agent"],
-    ["permissions", "read:30881,read:30882"],
-    ["entities", "c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b20011"],
+    ["permission", "read:30881"],
+    ["permission", "read:30882"],
+    ["entity", "c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b20011"],
     ["valid_until", "1738800000"],
-    ["revocable", "true"],
+    ["alt", "Data access grant: AI tutor read access to learner records"],
     ["purpose", "ai_tutoring"]
   ],
   "content": "<NIP-44 encrypted to grantee: Content Key for learner records>",
@@ -425,4 +439,4 @@ A minimal implementation requires:
 1. A Nostr client that supports addressable event publishing.
 2. NIP-44 encryption support for wrapping Content Keys to grantee pubkeys.
 3. Grant discovery logic: subscribing to `kind:30556` events and filtering by `p` tag (grantee) or `d` tag prefix.
-4. Validity checking: verifying `valid_until`, `revoked` tag, and `key_generation` before decryption.
+4. Validity checking: verifying `valid_until`, absence of `revoked` tag, and `key_generation` before decryption.
