@@ -293,7 +293,7 @@ sequenceDiagram
 
     R->>P: kind:30532 Lock (full budget)
 
-    rect rgb(240, 248, 255)
+    rect rgb(27, 45, 61)
         Note over R,P: Work phase - receipts at each interval
         R->>P: kind:30535 Receipt #1 (amount=100, cumulative=100, tick_number=1)
         R->>P: kind:30535 Receipt #2 (amount=100, cumulative=200, tick_number=2)
@@ -321,7 +321,7 @@ sequenceDiagram
     R->>EA: kind:30532 Lock
     Note left of R: Funds committed - hold invoice,<br/>Cashu HTLC, or similar
 
-    rect rgb(240, 248, 255)
+    rect rgb(27, 45, 61)
         Note over R,P: Work phase
         loop Streaming receipts (if streaming payment)
             R-->>P: kind:30535 Receipt with tick_number (gift-wrapped)
@@ -392,10 +392,10 @@ flowchart LR
     L --> S
     S --> Rcpt
 
-    style NQ fill:#e2d5f1,stroke:#6f42c1
-    style L fill:#fff3cd,stroke:#ffc107
-    style S fill:#d4edda,stroke:#28a745
-    style Rcpt fill:#d4edda,stroke:#28a745
+    style NQ fill:#2d1b3d,stroke:#e94560
+    style L fill:#2d2d1b,stroke:#f5a623
+    style S fill:#1b3d2d,stroke:#16c79a
+    style Rcpt fill:#1b3d2d,stroke:#16c79a
 ```
 
 Legend: <span style="color:#6f42c1">**purple**</span> = upstream (NIP-QUOTE); <span style="color:#ffc107">**yellow**</span> = mutable (updatable via addressable replacement); <span style="color:#28a745">**green**</span> = write-once (first valid instance is canonical)
@@ -412,7 +412,7 @@ sequenceDiagram
     actor R as Requester
     actor P as Provider
 
-    rect rgb(240, 248, 240)
+    rect rgb(27, 61, 45)
         Note over R,P: Scenario A - Happy path
         R->>R: kind:30532 Lock (requester stake)
         P->>P: kind:30532 Lock (provider stake)
@@ -421,7 +421,7 @@ sequenceDiagram
         P->>R: kind:30533 Settlement (outcome=released, provider stake returned)
     end
 
-    rect rgb(255, 243, 205)
+    rect rgb(45, 45, 27)
         Note over R,P: Scenario B - Provider no-show
         R->>R: kind:30532 Lock (requester stake)
         P->>P: kind:30532 Lock (provider stake)
@@ -430,7 +430,7 @@ sequenceDiagram
         R->>R: kind:30533 Settlement (outcome=forfeited, provider stake penalised)
     end
 
-    rect rgb(248, 215, 218)
+    rect rgb(61, 27, 27)
         Note over R,P: Scenario C - Requester breach
         R->>R: kind:30532 Lock (requester stake)
         P->>P: kind:30532 Lock (provider stake)

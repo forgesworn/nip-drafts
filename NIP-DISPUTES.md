@@ -326,7 +326,7 @@ sequenceDiagram
     C-->>A: kind:7543 Dispute Claim (gift-wrapped)
     Note left of C: Filed within dispute window
 
-    rect rgb(240, 248, 255)
+    rect rgb(27, 45, 61)
         Note over C,A: Evidence phase (48-hour window)
         C-->>M: kind:30578 Evidence (gift-wrapped)
         A-->>M: kind:30578 Evidence (gift-wrapped)
@@ -365,13 +365,13 @@ flowchart TD
     ES2 --> RU2["Final Ruling\nkind:30545"]
     RU2 --> SE
 
-    style CF fill:#fff3cd,stroke:#ffc107
-    style ES fill:#fff3cd,stroke:#ffc107
-    style RU fill:#d4edda,stroke:#28a745
-    style SE fill:#d4edda,stroke:#28a745
-    style AP fill:#cce5ff,stroke:#007bff
-    style ES2 fill:#fff3cd,stroke:#ffc107
-    style RU2 fill:#d4edda,stroke:#28a745
+    style CF fill:#2d2d1b,stroke:#f5a623
+    style ES fill:#2d2d1b,stroke:#f5a623
+    style RU fill:#1b3d2d,stroke:#16c79a
+    style SE fill:#1b3d2d,stroke:#16c79a
+    style AP fill:#1b2d3d,stroke:#0f3460
+    style ES2 fill:#2d2d1b,stroke:#f5a623
+    style RU2 fill:#1b3d2d,stroke:#16c79a
 ```
 
 Legend: <span style="color:#ffc107">**yellow**</span> = in progress, <span style="color:#28a745">**green**</span> = terminal, <span style="color:#007bff">**blue**</span> = appeal path
