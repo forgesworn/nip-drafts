@@ -10,9 +10,9 @@ This NIP defines one addressable event kind for announcing paid API services on 
 
 ## Motivation
 
-Paid APIs (inference, data, compute) are proliferating, yet discovery remains centralised. Operators list services on proprietary directories, and consumers discover them through word-of-mouth or platform lock-in. There is no standard way for a service operator to publish a machine-readable announcement that clients can discover via relay queries, filtered by topic, payment method, or capability.
+HTTP 402 "Payment Required" has been reserved in the HTTP specification since 1997 (RFC 2068; now RFC 9110 section 15.5.3). The IETF defined the status code but never specified how services should advertise their payment requirements or how clients should discover paid APIs. Three decades later, paid APIs (inference, data, compute) are proliferating, yet discovery remains centralised. Operators list services on proprietary directories, and consumers discover them through word-of-mouth or platform lock-in.
 
-NIP-L402-SERVICES fills this gap. Any service operator publishes a kind 31402 event describing their API: what it does, how much it costs, and how to pay. Clients (including AI agents) subscribe to relays with standard filters and discover services automatically. The result is a permissionless, censorship-resistant service directory built on Nostr.
+NIP-L402-SERVICES provides the missing discovery layer. Any service operator publishes a kind 31402 event describing their API: what it does, how much it costs, and how to pay. Clients (including AI agents) subscribe to relays with standard filters and discover services automatically. The actual payment and consumption happen over standard HTTP using the 402 challenge-response pattern. The result is a permissionless, censorship-resistant service directory built on Nostr, completing the vision the IETF reserved a status code for.
 
 ## Relationship to Existing NIPs
 
@@ -388,6 +388,7 @@ Validation rules for this event:
 
 - **NIP-01:** Event format, addressable events, relay communication, `REQ` filters.
 - **NIP-40:** `expiration` tag for time-limited announcements.
+- **RFC 9110 section 15.5.3:** HTTP 402 Payment Required status code. This NIP provides the discovery layer for services that use the 402 challenge-response pattern.
 
 ## Reference Implementations
 
