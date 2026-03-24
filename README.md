@@ -38,7 +38,7 @@ All drafts are `draft` `optional` unless noted otherwise.
 | [NIP-SCARCITY](NIP-SCARCITY.md) | Workforce & Resource Scarcity Signals | ecosystem | `draft` | 30599 | NIP-01, NIP-40, NIP-TRUST, NIP-REPUTATION, NIP-PROVENANCE |
 | [NIP-REFERRAL-ROUTING](NIP-REFERRAL-ROUTING.md) | Institutional Referral Routing (Composition Guide) | ecosystem | `draft` `composition-guide` | none | NIP-51, NIP-APPROVAL, NIP-44, NIP-59 |
 | [NIP-COMMUNITY-GOVERNANCE](NIP-COMMUNITY-GOVERNANCE.md) | Community Governance (Composition Guide) | ecosystem | `draft` `composition-guide` | none | NIP-51, NIP-CONSENSUS, NIP-EVIDENCE |
-| [NIP-L402-SERVICES](NIP-L402-SERVICES.md) | Paid API Service Announcements | upstream | `draft` | 31402 | NIP-01, NIP-40 |
+| [NIP-PAID-SERVICES](NIP-PAID-SERVICES.md) | Paid API Service Announcements | upstream | `draft` | 31402 | NIP-01, NIP-40 |
 
 ### Incubating
 
@@ -107,7 +107,7 @@ These NIPs use the following kind ranges:
 - **Regular (7xxx):** 7543 (NIP-DISPUTES)
 - **Ephemeral (20xxx):** 20500-20502
 - **Addressable (30xxx):** 30401, 30404, 30510-30511, 30515, 30517, 30520, 30527-30528, 30530-30533, 30535, 30543, 30545, 30547-30549, 30556, 30565, 30570-30572, 30574-30579, 30582-30584, 30588, 30599
-- **Addressable (31xxx):** 31402 (NIP-L402-SERVICES)
+- **Addressable (31xxx):** 31402 (NIP-PAID-SERVICES)
 
 Kind numbers will need formal allocation when proposed to `nostr-protocol/nips`.
 

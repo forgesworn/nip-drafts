@@ -43,7 +43,7 @@ NIPS=(
   "nip-variation|NIP-VARIATION: Scope & Price Change Management|NIP-VARIATION.md|30579|2"
   "nip-channels|NIP-CHANNELS: Context-Scoped Messaging Primitives|NIP-CHANNELS.md|20502,30565|2"
   "nip-provider-profiles|NIP-PROVIDER-PROFILES: Service Provider Profiles|NIP-PROVIDER-PROFILES.md|30510,30511|2"
-  "nip-l402-services|NIP-L402-SERVICES: Paid API Service Announcements|NIP-L402-SERVICES.md|31402|2"
+  "nip-paid-services|NIP-PAID-SERVICES: Paid API Service Announcements|NIP-PAID-SERVICES.md|31402|2"
   # Batch 2 continued (reviewed via nostr-nip-review)
   "nip-invoicing|NIP-INVOICING: Structured Invoicing|NIP-INVOICING.md|30588|2"
   "nip-provenance|NIP-PROVENANCE: Product & Supply Chain Provenance|NIP-PROVENANCE.md|30404|2"

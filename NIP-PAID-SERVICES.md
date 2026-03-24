@@ -1,12 +1,12 @@
-NIP-L402-SERVICES
-=================
+NIP-PAID-SERVICES
+==================
 
 Paid API Service Announcements
 ---------------------------------
 
 `draft` `optional`
 
-This NIP defines one addressable event kind for announcing paid API services on Nostr. It enables decentralised discovery of HTTP APIs gated by L402, x402, Cashu, or other payment mechanisms, without reliance on a central registry.
+This NIP defines one addressable event kind for announcing paid API services on Nostr. It enables decentralised discovery of HTTP APIs gated by any payment mechanism (L402, x402, Cashu, or others), without reliance on a central registry.
 
 ## Motivation
 
@@ -14,15 +14,32 @@ Paid HTTP APIs already work. Middleware like L402 and x402 gates any endpoint be
 
 What is missing is **discovery**. How does a client find paid APIs without a centralised directory? Operators currently list services on proprietary platforms or rely on word-of-mouth.
 
-NIP-L402-SERVICES adds a decentralised discovery layer. Service operators publish a kind 31402 event on Nostr describing what their API does, how much it costs, and which payment methods it accepts. Clients (including AI agents) subscribe to relays with standard filters and discover services automatically. Nostr handles discovery; HTTP handles payment and consumption. The two are cleanly separated.
+NIP-PAID-SERVICES adds a decentralised discovery layer. Service operators publish a kind 31402 event on Nostr describing what their API does, how much it costs, and which payment methods it accepts. Clients (including AI agents) subscribe to relays with standard filters and discover services automatically. Nostr handles discovery; HTTP handles payment and consumption. The two are cleanly separated.
 
 ## Relationship to Existing NIPs
 
-- **NIP-89 (Application Handlers):** App handlers announce Nostr-native applications that process specific event kinds. L402 service announcements declare HTTP API capabilities gated by payment. Different scope; no overlap.
-- **NIP-99 (Classified Listings):** Classified listings are human-browsed marketplace items with images, descriptions, and prices. L402 service announcements are machine-readable API capability declarations designed for automated discovery and payment. Complementary.
-- **NIP-105 (PR #780, open since 2023):** Also proposes kind 31402 for API service listings. Not merged. This NIP was developed independently with a different tag schema; see [Kind Allocation](#kind-allocation).
-- **NIP-90 (Data Vending Machines):** DVMs are Nostr-native; jobs and results flow through relays as kind 5xxx/6xxx events. L402 services are HTTP-native; Nostr handles discovery only, consumption uses standard REST. DVMs are intent-based ("I want X done"); L402 services are offer-based ("I provide X at Y price"). DVMs keep computation on-relay for composability (job chaining); L402 keeps computation off-relay for efficiency and privacy. They complement each other: a DVM MAY delegate to an L402 service for the actual computation, publishing the result back to the relay.
-- **NIP-57 (Zaps):** Zaps are tips and donations. L402 service announcements declare static price listings for API capabilities. No overlap.
+- **NIP-89 (Application Handlers):** App handlers announce Nostr-native applications that process specific event kinds. Paid service announcements declare HTTP API capabilities gated by payment. Different scope; no overlap.
+- **NIP-105 (PR #780, open since 2023):** Also proposes kind 31402 for API service listings. Not merged, no known implementations. This NIP was developed independently with a different tag schema; see [Kind Allocation](#kind-allocation).
+- **NIP-90 (Data Vending Machines):** DVMs are Nostr-native; jobs and results flow through relays as kind 5xxx/6xxx events. Paid services are HTTP-native; Nostr handles discovery only, consumption uses standard REST. DVMs are intent-based ("I want X done"); paid services are offer-based ("I provide X at Y price"). DVMs keep computation on-relay for composability (job chaining); paid services keep computation off-relay for efficiency and privacy. They complement each other: a DVM MAY delegate to a paid service for the actual computation, publishing the result back to the relay.
+- **NIP-57 (Zaps):** Zaps are tips and donations. Paid service announcements declare static price listings for API capabilities. No overlap.
+
+### Why not NIP-99 (Classified Listings)?
+
+NIP-99 classifieds and kind 31402 paid service announcements serve different consumers with incompatible data models:
+
+| Aspect | NIP-99 Classified Listing | Kind 31402 Paid Service |
+|--------|--------------------------|------------------------|
+| Consumer | Humans browsing a marketplace | Machines (AI agents, API clients) |
+| Price model | Single price per listing | Per-capability pricing with multiple tiers |
+| Payment negotiation | Out-of-band | Machine-readable `pmi` tags with rail-specific parameters |
+| Endpoint declaration | None | `url` tags with multi-transport redundancy |
+| Request/response schema | None | JSON Schema for request and response bodies |
+| Content structure | Free-text description + images | Structured capability array with endpoint paths |
+| Subscription pattern | `{"kinds": [30402]}` returns goods, services, rentals, jobs | `{"kinds": [31402]}` returns only machine-consumable API endpoints |
+
+A client subscribing to NIP-99 to find "APIs that accept Lightning" would receive furniture listings, concert tickets, and apartment rentals in the same feed. The tag schemas are incompatible: NIP-99 uses `price` as a single amount; kind 31402 uses `price` as a per-capability tuple. NIP-99 has no concept of endpoint URLs, payment method identifiers, or request schemas.
+
+Adding an `api` tag to NIP-99 would not resolve this. The content model (free-text vs structured capabilities), the price model (per-listing vs per-capability), and the intended consumer (human vs machine) are fundamentally different.
 
 ## Kind
 
@@ -43,7 +60,7 @@ Kind 31402 is an addressable event (NIP-01). The combination of `pubkey` + `d` t
 | `d`         | REQUIRED    | no         | Unique service identifier. Max 256 characters.                   |
 | `name`      | REQUIRED    | no         | Human-readable service name. Max 256 characters.                 |
 | `url`       | REQUIRED    | yes (1-10) | HTTP endpoint URL. Multiple tags for multi-transport redundancy. Max 2048 characters each. |
-| `about`     | RECOMMENDED | no         | Service description. Max 4096 characters.                        |
+| `summary`   | RECOMMENDED | no         | Service description. Max 4096 characters.                        |
 | `pmi`       | REQUIRED    | yes (1-20) | Payment Method Identifier. See [PMI Values](#canonical-pmi-values). |
 | `price`     | RECOMMENDED | yes (1-100)| Capability pricing. Format below.                                |
 | `s`         | OPTIONAL    | no         | Underlying API endpoint URL that this service proxies. Enables clients to discover all providers proxying the same API (e.g. all proxies for `https://api.openai.com/v1/chat/completions`). When present, the `d` tag SHOULD match the `s` tag value. Max 2048 characters. |
@@ -57,7 +74,7 @@ Kind 31402 is an addressable event (NIP-01). The combination of `pubkey` + `d` t
 ["d", "<service-identifier>"]
 ["name", "<human-readable-name>"]
 ["url", "<endpoint-url>"]
-["about", "<description>"]
+["summary", "<description>"]
 ["pmi", "<rail>", ...additional-elements]
 ["price", "<capability_name>", "<amount>", "<currency>"]
 ["s", "<upstream-api-url>"]
@@ -127,7 +144,7 @@ Future payment rails MAY be added by convention. Implementations SHOULD NOT reje
 
 ## Examples
 
-### AI Inference Service (L402 + Cashu)
+### AI Inference Service (Lightning + Cashu)
 
 ```json
 {
@@ -137,10 +154,10 @@ Future payment rails MAY be added by convention. Implementations SHOULD NOT reje
   "tags": [
     ["d", "llm-inference-v1"],
     ["name", "LLM Inference API"],
-    ["alt", "Paid API: LLM Inference API via L402 and Cashu"],
+    ["alt", "Paid API: LLM Inference API via Lightning and Cashu"],
     ["url", "https://inference.example.com/v1"],
     ["url", "http://inferencexyz123.onion/v1"],
-    ["about", "GPT-4 class inference behind an L402 paywall. Supports chat completions and embeddings."],
+    ["summary", "GPT-4 class inference with Lightning and Cashu payment. Supports chat completions and embeddings."],
     ["pmi", "l402", "lightning"],
     ["pmi", "cashu"],
     ["price", "chat_completion", "100", "sats"],
@@ -165,7 +182,7 @@ Future payment rails MAY be added by convention. Implementations SHOULD NOT reje
     ["name", "Real-Time Market Data"],
     ["alt", "Paid API: Real-Time Market Data via x402 stablecoin"],
     ["url", "https://data.example.com/api"],
-    ["about", "Live and historical market data for equities and crypto. REST and WebSocket."],
+    ["summary", "Live and historical market data for equities and crypto. REST and WebSocket."],
     ["pmi", "x402", "base", "usdc", "0x1234567890abcdef1234567890abcdef12345678"],
     ["price", "snapshot", "5", "cents"],
     ["price", "historical_range", "50", "cents"],
@@ -191,7 +208,7 @@ Future payment rails MAY be added by convention. Implementations SHOULD NOT reje
     ["alt", "Paid API: GPU Compute on Demand via Lightning and X-Cashu"],
     ["url", "https://compute.example.com"],
     ["url", "https://compute.example.hns"],
-    ["about", "On-demand GPU compute for ML training and rendering. A100 instances."],
+    ["summary", "On-demand GPU compute for ML training and rendering. A100 instances."],
     ["pmi", "l402", "lightning"],
     ["pmi", "xcashu"],
     ["price", "gpu_hour_a100", "50000", "sats"],
@@ -240,7 +257,7 @@ Clients discover services using standard NIP-01 `REQ` filters on kind 31402 even
 ["REQ", "sub5", { "kinds": [31402], "limit": 500 }]
 ```
 
-Clients SHOULD filter by `#pmi` to discover only services whose payment method they support. Note: `pmi` is a multi-letter tag; relay support for `#pmi` filtering varies. Clients that cannot filter by `#pmi` at the relay SHOULD filter by kind 31402 and post-filter by `pmi` tag client-side. Relays that support NIP-50 (Search) MAY allow full-text search over `name` and `about` tag values.
+Clients SHOULD filter by `#pmi` to discover only services whose payment method they support. Note: `pmi` is a multi-letter tag; relay support for `#pmi` filtering varies. Clients that cannot filter by `#pmi` at the relay SHOULD filter by kind 31402 and post-filter by `pmi` tag client-side. Relays that support NIP-50 (Search) MAY allow full-text search over `name` and `summary` tag values.
 
 ---
 
@@ -325,9 +342,11 @@ Implementations that sign events programmatically MUST zeroise secret key byte b
 
 ## Kind Allocation
 
-Kind 31402 is an addressable event in the 30000-39999 range. This NIP formalises an event kind that has been in production use across 8 implementations since before any public claim on the number.
+Kind 31402 is an addressable event in the 30000-39999 range. The number is the natural choice for HTTP 402-related service discovery (31000 range + 402).
 
-Two other proposals also use kind 31402: NIP-105 (nostr-protocol/nips PR #780, open since September 2023, not merged) proposes API service marketplace listings; SARA (NostrHub, February 2026) proposes a revenue share offering registry. Neither has known production deployments. The intent is compatible; the tag schemas differ. This NIP stores pricing and endpoints as tags for relay-side filterability, supports multi-transport URLs, and defines structured payment method identifiers.
+This NIP formalises a kind that has been in production use across 8 implementations (all from the same developer; see Reference Implementations). Independent implementations are encouraged.
+
+Two other proposals also use kind 31402: NIP-105 (nostr-protocol/nips PR #780, open since September 2023, not merged, no known implementations) proposes API service marketplace listings; SARA (NostrHub, February 2026) proposes a revenue share offering registry. The intent is compatible; the tag schemas differ. This NIP stores pricing and endpoints as tags for relay-side filterability, supports multi-transport URLs, and defines structured payment method identifiers. We welcome collaboration with the NIP-105 author on a merged specification.
 
 ---
 
@@ -345,9 +364,9 @@ Tags only (no content capabilities):
   "tags": [
     ["d", "test-service"],
     ["name", "Test Service"],
-    ["alt", "Paid API: Test Service via L402"],
+    ["alt", "Paid API: Test Service via Lightning"],
     ["url", "https://test.example.com"],
-    ["about", "A test service for validation."],
+    ["summary", "A test service for validation."],
     ["pmi", "l402", "lightning"],
     ["price", "ping", "1", "sats"]
   ],
