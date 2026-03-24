@@ -7,7 +7,7 @@ set -euo pipefail
 #   NOSTR_SECRET_KEY=nsec1... ./announce.sh summary       # tonight: summary of all 7+VA
 #   NOSTR_SECRET_KEY=nsec1... ./announce.sh location      # Mon: strongest standalone story
 #   NOSTR_SECRET_KEY=nsec1... ./announce.sh nip-va        # Tue: attestation foundation
-#   NOSTR_SECRET_KEY=nsec1... ./announce.sh approval      # Wed: PR reviews on Nostr
+#   NOSTR_SECRET_KEY=nsec1... ./announce.sh approval      # Wed: approval gates
 #   NOSTR_SECRET_KEY=nsec1... ./announce.sh matching      # Thu: reverse auctions
 #   NOSTR_SECRET_KEY=nsec1... ./announce.sh consensus     # Fri: threshold governance
 #   NOSTR_SECRET_KEY=nsec1... ./announce.sh custody       # Sat: chain-of-custody
@@ -141,7 +141,7 @@ kind 30571 (Approval Response): each named reviewer responds with approved, reje
 
 The key difference from reactions: the reviewer set is declared upfront. Only listed authorities can approve. Revision loops are built in; a reviewer requests changes, the proposer updates, the reviewer re-evaluates. Deadlines are enforced via NIP-40 expiration.
 
-Build with this: pull request reviews for Nostr-native Git tools where merging requires sign-off. Grant committee voting where every board member must approve before funds release. Editorial workflows where an editor must approve before publishing. Construction inspection sign-off where a qualified surveyor's approval unblocks the next phase.
+Build with this: a grant platform where every committee member must approve before funds release. An editorial workflow where a senior editor signs off before an article goes live. A construction project where a qualified surveyor's approval unblocks the next phase. A bounty board where the payer must approve deliverables before payment.
 
 https://github.com/forgesworn/nip-drafts/blob/main/NIP-APPROVAL.md
 ENDNOTE
