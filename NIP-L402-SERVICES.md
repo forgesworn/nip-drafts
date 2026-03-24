@@ -10,9 +10,11 @@ This NIP defines one addressable event kind for announcing paid API services on 
 
 ## Motivation
 
-HTTP 402 "Payment Required" has been in the HTTP specification since 1997 (RFC 9110 section 15.5.3), but the mechanism for advertising and discovering paid APIs was left unspecified. Paid APIs (inference, data, compute) are proliferating, yet discovery remains centralised. Operators list services on proprietary directories, and consumers discover them through word-of-mouth or platform lock-in.
+Paid HTTP APIs already work. Middleware like L402 and x402 gates any endpoint behind Lightning, Cashu, or stablecoin payments using standard HTTP 402 challenge-response (RFC 9110 section 15.5.3). The payment flow requires no Nostr involvement: a client hits an endpoint, gets a 402, pays, retries with proof, and receives the response. This works today with zero relay dependency.
 
-NIP-L402-SERVICES uses Nostr as a lightweight discovery layer for paid HTTP services. Any service operator publishes a kind 31402 event describing their API: what it does, how much it costs, and how to pay. Clients (including AI agents) subscribe to relays with standard filters and discover services automatically. The actual payment and consumption happen over standard HTTP using the 402 challenge-response pattern. Nostr handles discovery; HTTP handles everything else.
+What is missing is **discovery**. How does a client find paid APIs without a centralised directory? Operators currently list services on proprietary platforms or rely on word-of-mouth.
+
+NIP-L402-SERVICES adds a decentralised discovery layer. Service operators publish a kind 31402 event on Nostr describing what their API does, how much it costs, and which payment methods it accepts. Clients (including AI agents) subscribe to relays with standard filters and discover services automatically. Nostr handles discovery; HTTP handles payment and consumption. The two are cleanly separated.
 
 ## Relationship to Existing NIPs
 
