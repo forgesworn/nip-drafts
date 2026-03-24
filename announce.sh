@@ -18,7 +18,7 @@ set -euo pipefail
 RELAYS=(
   "wss://relay.damus.io"
   "wss://nos.lol"
-  "wss://relay.nostr.band"
+  "wss://relay.primal.net"
 )
 
 if [[ -z "${NOSTR_SECRET_KEY:-}" ]]; then
@@ -46,6 +46,22 @@ fi
 
 if [[ "$NOTE" == "all" ]]; then
   ALL_NOTES=(summary location nip-va approval matching consensus custody credentials evidence)
+  for n in "${ALL_NOTES[@]}"; do
+    echo "=== ${n} ==="
+    if $DRY_RUN; then
+      "$0" --dry-run "$n"
+    else
+      "$0" "$n"
+      echo "  Waiting 30s before next post..."
+      sleep 30
+    fi
+    echo ""
+  done
+  exit 0
+fi
+
+if [[ "$NOTE" == "all-batch2" ]]; then
+  ALL_NOTES=(batch2-summary batch2-payments batch2-trust batch2-profiles batch2-messaging batch2-crafts batch2-composition)
   for n in "${ALL_NOTES[@]}"; do
     echo "=== ${n} ==="
     if $DRY_RUN; then
@@ -254,9 +270,166 @@ https://github.com/forgesworn/nip-drafts/blob/main/NIP-EVIDENCE.md
 ENDNOTE
     ;;
 
+  # ── Batch 2 posts ─────────────────────────────────────────────────────────
+
+  batch2-summary)
+    TAGS=(-t "t=nostr" -t "t=nip" -t "t=protocol" -t "t=nostrdev" -t "r=${REPO_URL}")
+    read -r -d '' CONTENT << 'ENDNOTE' || true
+Published 20 more Nostr protocol extensions on NostrHub, plus updates to 2 from last week. The full portfolio is now 27 standalone NIPs covering payments, trust, scheduling, disputes, provenance, and more. 40 new event kinds total.
+
+Payments: NIP-QUOTE (structured pricing), NIP-ESCROW (conditional payments with settlement outcomes), NIP-INVOICING (machine-readable invoices)
+
+Trust: NIP-TRUST (portable trust networks with revocation), NIP-REPUTATION (structured ratings), NIP-DISPUTES (dispute resolution with mediator support)
+
+Scheduling: NIP-BOOKING (calendar availability and slot booking), NIP-PROVIDER-PROFILES (service provider discovery)
+
+Ecosystem: NIP-CRAFTS (technique documentation), NIP-PROVENANCE (supply chain tracking), NIP-SCARCITY (workforce shortage signals), NIP-MENTORSHIP (training progression)
+
+Paid APIs: NIP-L402-SERVICES (Lightning-gated API discovery, 8 production implementations)
+
+Three composition guides show how existing NIPs combine without new kinds: SLA monitoring, community governance, institutional referral routing.
+
+All standalone. No framework lock-in. Every NIP works independently.
+
+Authorship verified with NIP-VA (kind 31000) attestations.
+
+https://github.com/forgesworn/nip-drafts
+ENDNOTE
+    ;;
+
+  batch2-payments)
+    TAGS=(-t "t=nostr" -t "t=nip" -t "t=protocol" -t "t=payments" -t "t=escrow" -t "t=lightning" -t "t=cashu" -t "t=nostrdev" -t "r=${REPO_URL}/blob/main/NIP-QUOTE.md" -t "r=${REPO_URL}/blob/main/NIP-ESCROW.md")
+    read -r -d '' CONTENT << 'ENDNOTE' || true
+NIP-QUOTE (kinds 30530, 30531): structured pricing for Nostr.
+
+NIP-99 gives you classified listings with a price tag. NIP-QUOTE gives you the negotiation layer. A provider publishes a structured quote with line items, tax, validity window, and payment method options. Multiple providers can quote the same request. Once accepted, Payment Terms (kind 30531) lock in the deal: milestones, deposits, streaming rates, cancellation schedules.
+
+NIP-ESCROW (kinds 30532, 30533, 30535): conditional payment coordination.
+
+NIP-57 zaps are one-way. Cashu tokens are bearer instruments. Neither gives you "hold these funds until both sides are happy."
+
+Lock (30532) commits funds with proof. Settlement (30533) covers all outcomes via a single outcome tag: released, forfeited, partial_forfeit, or expired. Payment Receipt (30535) proves money moved; also handles streaming payments via tick_number and cumulative tags for time-based billing.
+
+Payment-rail-agnostic. Events record what happened; money moves on Lightning, Cashu, Strike, Stripe, or whatever rail the parties choose.
+
+Build with this: a freelance platform with milestone-based payments and per-deliverable quotes. A peer-to-peer marketplace with buyer protection. A ridesharing app with per-minute streaming receipts.
+
+https://github.com/forgesworn/nip-drafts/blob/main/NIP-QUOTE.md
+https://github.com/forgesworn/nip-drafts/blob/main/NIP-ESCROW.md
+ENDNOTE
+    ;;
+
+  batch2-trust)
+    TAGS=(-t "t=nostr" -t "t=nip" -t "t=protocol" -t "t=trust" -t "t=disputes" -t "t=reputation" -t "t=nostrdev" -t "r=${REPO_URL}/blob/main/NIP-TRUST.md" -t "r=${REPO_URL}/blob/main/NIP-DISPUTES.md" -t "r=${REPO_URL}/blob/main/NIP-REPUTATION.md")
+    read -r -d '' CONTENT << 'ENDNOTE' || true
+NIP-TRUST (kinds 30515, 30517): portable trust networks.
+
+NIP-02 tells you who someone follows. NIP-51 lets you organise pubkeys. Neither covers "I trusted this provider, now I don't, and here's why" or "I vouch for this person's plumbing work."
+
+Trust Revocation (30515): explicit trust removal with reason-tiered visibility. Public reasons vs NIP-44 encrypted private reasons. Append-only audit trail. Provider Endorsement (30517): provider-to-provider vouching with category, context, and competency assessment. Solves the cold-start problem.
+
+NIP-DISPUTES (kinds 7543, 30545): dispute resolution.
+
+Dispute Claim (7543) is a regular event (immutable; you cannot silently edit a claim after filing). Dispute Resolution (30545) is the mediator's ruling with outcome, reasoning, and financial remedy. Both parties submit NIP-EVIDENCE records; the mediator reviews and publishes the resolution.
+
+NIP-REPUTATION (kind 30520): structured ratings tied to real transactions. One rating per party per transaction, enforced by d-tag uniqueness. Each rating references a completion event as proof the rater actually participated. Weighted criteria with domain-specific weights. Review responses use NIP-22 Comments.
+
+Build with this: a tradesperson recommendation network with real professional endorsements. A marketplace with verifiable ratings and built-in dispute resolution. A community where revoking trust is a transparent, auditable action.
+
+https://github.com/forgesworn/nip-drafts/blob/main/NIP-TRUST.md
+https://github.com/forgesworn/nip-drafts/blob/main/NIP-DISPUTES.md
+https://github.com/forgesworn/nip-drafts/blob/main/NIP-REPUTATION.md
+ENDNOTE
+    ;;
+
+  batch2-profiles)
+    TAGS=(-t "t=nostr" -t "t=nip" -t "t=protocol" -t "t=booking" -t "t=scheduling" -t "t=discovery" -t "t=nostrdev" -t "r=${REPO_URL}/blob/main/NIP-PROVIDER-PROFILES.md" -t "r=${REPO_URL}/blob/main/NIP-BOOKING.md" -t "r=${REPO_URL}/blob/main/NIP-VARIATION.md")
+    read -r -d '' CONTENT << 'ENDNOTE' || true
+NIP-PROVIDER-PROFILES (kinds 30510, 30511): service provider discovery.
+
+Provider Profile (30510): an addressable event declaring capabilities, credentials, coverage areas, and service terms. Discoverable by geohash, capability, or category. Coordinator Bond (30511): declares a coordinator's financial commitment, fee structure, and SLA.
+
+NIP-BOOKING (kinds 30582, 30583, 30584): calendar availability and slot booking.
+
+Availability Calendar (30582): providers publish when they are free, with duration, capacity, pricing, and cancellation policies. Recurrence via RFC 5545 tags. Booking Slot (30583): requesters book a specific time. Booking Cancellation (30584): either party cancels with a reason. Confirmation uses NIP-APPROVAL; rescheduling uses NIP-VARIATION.
+
+NIP-VARIATION (kind 30579): scope and price change management. When agreed work needs to change mid-project, a variation request captures what changed, why, and the cost impact. Variation quotes use NIP-QUOTE; variation approvals use NIP-APPROVAL. One new kind, composed with existing primitives.
+
+Build with this: a tutoring platform with calendar-based booking. A local services directory where providers are discoverable by skill and location. A construction project tracker where scope changes carry formal cost impact documentation.
+
+https://github.com/forgesworn/nip-drafts/blob/main/NIP-PROVIDER-PROFILES.md
+https://github.com/forgesworn/nip-drafts/blob/main/NIP-BOOKING.md
+https://github.com/forgesworn/nip-drafts/blob/main/NIP-VARIATION.md
+ENDNOTE
+    ;;
+
+  batch2-messaging)
+    TAGS=(-t "t=nostr" -t "t=nip" -t "t=protocol" -t "t=messaging" -t "t=invoicing" -t "t=l402" -t "t=lightning" -t "t=nostrdev" -t "r=${REPO_URL}/blob/main/NIP-CHANNELS.md" -t "r=${REPO_URL}/blob/main/NIP-DATA-ACCESS.md" -t "r=${REPO_URL}/blob/main/NIP-INVOICING.md" -t "r=${REPO_URL}/blob/main/NIP-L402-SERVICES.md")
+    read -r -d '' CONTENT << 'ENDNOTE' || true
+NIP-CHANNELS (kinds 20502, 30565): context-scoped messaging. NIP-17 gives you DMs. NIP-28 gives you public channels. NIP-CHANNELS adds task-scoped messaging: typing indicator (20502, ephemeral) and message status (30565, read receipts). Task messages use NIP-17 with a context_id tag.
+
+NIP-DATA-ACCESS (kind 30556): scoped, revocable data access grants. "I grant you access to this data, for this purpose, until this date." Time-bounded, purpose-constrained, revocable.
+
+NIP-INVOICING (kind 30588): structured, machine-readable invoices. Line items, tax calculation, payment terms references, due dates. Different from a Lightning invoice: this is a commercial document with an audit trail, not a payment request.
+
+NIP-L402-SERVICES (kind 31402): paid API discovery on Nostr. If you run an API behind a Lightning paywall, how do people find it? Kind 31402 announces your service: endpoint, pricing, supported methods, authentication. Eight implementations already use this kind in production.
+
+Build with this: an AI inference marketplace discoverable and payable via Lightning. A task management app with private scoped chat. A medical system where patients grant doctors temporary record access. An accounting tool that generates tax-ready invoices from Nostr payment events.
+
+https://github.com/forgesworn/nip-drafts/blob/main/NIP-CHANNELS.md
+https://github.com/forgesworn/nip-drafts/blob/main/NIP-DATA-ACCESS.md
+https://github.com/forgesworn/nip-drafts/blob/main/NIP-INVOICING.md
+https://github.com/forgesworn/nip-drafts/blob/main/NIP-L402-SERVICES.md
+ENDNOTE
+    ;;
+
+  batch2-crafts)
+    TAGS=(-t "t=nostr" -t "t=nip" -t "t=protocol" -t "t=crafts" -t "t=provenance" -t "t=heritage" -t "t=mentorship" -t "t=nostrdev" -t "r=${REPO_URL}/blob/main/NIP-CRAFTS.md" -t "r=${REPO_URL}/blob/main/NIP-PROVENANCE.md" -t "r=${REPO_URL}/blob/main/NIP-SCARCITY.md" -t "r=${REPO_URL}/blob/main/NIP-MENTORSHIP.md")
+    read -r -d '' CONTENT << 'ENDNOTE' || true
+Four NIPs for the physical world.
+
+NIP-CRAFTS (kind 30401): living technique records for craft skills. Safety notes, materials, tools, difficulty rating, media. Wikipedia for hands-on skills, signed by practitioners and discoverable by trade, material, or difficulty.
+
+NIP-PROVENANCE (kind 30404): product and supply chain provenance. Where something came from, who handled it, what certifications apply. Composes with NIP-CUSTODY for multi-leg tracking and NIP-VA for certification attestations.
+
+NIP-SCARCITY (kind 30599): workforce shortage signals. When a region lacks qualified practitioners, anyone can publish a scarcity signal with severity, affected area, and required qualifications.
+
+NIP-MENTORSHIP: no new kinds. Extends NIP-TRUST's Provider Endorsement (30517) with mentorship tags: competency area, proficiency level, training duration, assessment method. "I trained this person in lime plastering for 6 months and assessed them as competent" carries more weight than "I vouch for this person."
+
+Build with this: a heritage conservation archive where traditional building techniques are documented by master craftspeople. A food provenance system where farm-to-fork is verifiable. A workforce intelligence dashboard showing where training investment is most needed.
+
+https://github.com/forgesworn/nip-drafts/blob/main/NIP-CRAFTS.md
+https://github.com/forgesworn/nip-drafts/blob/main/NIP-PROVENANCE.md
+https://github.com/forgesworn/nip-drafts/blob/main/NIP-SCARCITY.md
+https://github.com/forgesworn/nip-drafts/blob/main/NIP-MENTORSHIP.md
+ENDNOTE
+    ;;
+
+  batch2-composition)
+    TAGS=(-t "t=nostr" -t "t=nip" -t "t=protocol" -t "t=sla" -t "t=governance" -t "t=oracle" -t "t=nostrdev" -t "r=${REPO_URL}/blob/main/NIP-SLA.md" -t "r=${REPO_URL}/blob/main/NIP-COMMUNITY-GOVERNANCE.md" -t "r=${REPO_URL}/blob/main/NIP-REFERRAL-ROUTING.md" -t "r=${REPO_URL}/blob/main/NIP-ORACLE.md")
+    read -r -d '' CONTENT << 'ENDNOTE' || true
+Three composition guides that prove the NIP ecosystem composes without new kinds.
+
+NIP-SLA: service level agreements using NIP-EVIDENCE for breach evidence, NIP-APPROVAL for agreement sign-off, and NIP-DISPUTES for escalation.
+
+NIP-COMMUNITY-GOVERNANCE: community decision-making using NIP-51 lists for membership, NIP-CONSENSUS for voting, and NIP-EVIDENCE for proposal documentation.
+
+NIP-REFERRAL-ROUTING: institutional referral handoffs using NIP-51 for referral networks and NIP-APPROVAL for acceptance. Healthcare, legal aid, social services.
+
+NIP-ORACLE (incubating; kinds 30543, 30547, 30548, 30549): oracle-based dispute resolution. External data feeds for automated dispute adjudication. Incubating because cross-domain demand is still emerging.
+
+https://github.com/forgesworn/nip-drafts/blob/main/NIP-SLA.md
+https://github.com/forgesworn/nip-drafts/blob/main/NIP-COMMUNITY-GOVERNANCE.md
+https://github.com/forgesworn/nip-drafts/blob/main/NIP-REFERRAL-ROUTING.md
+https://github.com/forgesworn/nip-drafts/blob/main/NIP-ORACLE.md
+ENDNOTE
+    ;;
+
   *)
     echo "Unknown note: $NOTE"
-    echo "Options: summary location nip-va approval matching consensus custody credentials evidence"
+    echo "Batch 1: summary location nip-va approval matching consensus custody credentials evidence"
+    echo "Batch 2: batch2-summary batch2-payments batch2-trust batch2-profiles batch2-messaging batch2-crafts batch2-composition"
+    echo "All:     all all-batch2"
     exit 1
     ;;
 esac

@@ -1,6 +1,6 @@
 # NIP Drafts
 
-This repository contains **28 Nostr protocol extensions** for service coordination, trust, payments, dispute resolution, and paid API discovery. Each file is written in [nostr-protocol/nips](https://github.com/nostr-protocol/nips) format and defines patterns useful to any Nostr application.
+This repository contains **27 Nostr protocol extensions** for service coordination, trust, payments, dispute resolution, and paid API discovery. Each file is written in [nostr-protocol/nips](https://github.com/nostr-protocol/nips) format and defines patterns useful to any Nostr application.
 
 > **These NIPs are designed to work independently. They do not require adoption of any specific platform or framework.**
 
@@ -13,7 +13,6 @@ All drafts are `draft` `optional` unless noted otherwise.
 | NIP | Title | Classification | Status | Kinds | Key Dependencies |
 | --- | ----- | -------------- | ------ | ----- | ---------------- |
 | [NIP-LOCATION](NIP-LOCATION.md) | Privacy-Preserving Location Discovery | upstream | `draft` | 20500, 20501 | NIP-01, NIP-40, NIP-44 |
-| [NIP-SPATIAL-SIGNALS](NIP-SPATIAL-SIGNALS.md) | Spatial Signals & Corroboration | ecosystem | `draft` | 1315, 1316 | NIP-01, NIP-31, NIP-40, NIP-LOCATION |
 | [NIP-PROVIDER-PROFILES](NIP-PROVIDER-PROFILES.md) | Service Provider Profiles | upstream | `draft` | 30510, 30511 | NIP-01, NIP-40, NIP-58, NIP-99, NIP-EVIDENCE |
 | [NIP-TRUST](NIP-TRUST.md) | Portable Trust Networks | upstream | `draft` | 30515, 30517 | NIP-01, NIP-02, NIP-09, NIP-17, NIP-40, NIP-44, NIP-51 |
 | [NIP-CHANNELS](NIP-CHANNELS.md) | Message Status & Typing Indicators | upstream | `draft` | 20502, 30565 | NIP-01, NIP-17, NIP-40, NIP-44, NIP-59 |
@@ -76,7 +75,6 @@ Each NIP is classified by its maturity and genericness. See the Classification c
 The [TROTT protocol](https://github.com/TheCryptoDonkey/trott) (TROTT-00 through TROTT-14) extends these NIPs with domain-specific configuration, operator integration, and cross-spec wiring. For example:
 
 - **TROTT-03** extends NIP-CREDENTIALS with domain-specific credential requirements and reputation weighting.
-- **TROTT-07** composes with NIP-SPATIAL-SIGNALS for public route hazards, access conditions, and other external spatial feeds used in navigation decisions.
 - **TROTT-04 / TROTT-04b** extend NIP-QUOTE and NIP-ESCROW with payment commitment and settlement workflows.
 - **TROTT-05** extends NIP-DISPUTES with safety check-ins and emergency signals.
 - **TROTT-06** extends NIP-PROVIDER-PROFILES with compliance and operator participation.

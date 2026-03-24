@@ -49,7 +49,7 @@ NIPS=(
   "nip-provenance|NIP-PROVENANCE: Product & Supply Chain Provenance|NIP-PROVENANCE.md|30404|2"
   "nip-crafts|NIP-CRAFTS: Craft Technique Documentation|NIP-CRAFTS.md|30401|2"
   "nip-scarcity|NIP-SCARCITY: Workforce & Resource Scarcity Signals|NIP-SCARCITY.md|30599|2"
-  "nip-spatial-signals|NIP-SPATIAL-SIGNALS: Spatial Signals & Corroboration|NIP-SPATIAL-SIGNALS.md|1315,1316|2"
+  # nip-spatial-signals removed — kinds 1315/1316 originated from Roadstr; reach out before publishing
   "nip-data-access|NIP-DATA-ACCESS: Scoped, Revocable Data Access Grants|NIP-DATA-ACCESS.md|30556|2"
   "nip-mentorship|NIP-MENTORSHIP: Mentorship Pipelines & Training Progression|NIP-MENTORSHIP.md||2"
   "nip-sla|NIP-SLA: Service Level Agreements (Composition Guide)|NIP-SLA.md||2"
