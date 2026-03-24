@@ -114,6 +114,8 @@ The content JSON MUST NOT exceed 64 KiB when serialised. Implementations SHOULD 
 
 If the content has no capabilities or version, it SHOULD be an empty JSON object (`{}`).
 
+Tags are sufficient for discovery, filtering, and pricing. Content capabilities are an optimisation for programmatic consumers (AI agents, MCP clients) that need request/response schemas without fetching external documentation. Implementations that only need discovery MAY ignore content entirely.
+
 ---
 
 ## Canonical PMI Values
