@@ -28,9 +28,10 @@ PUBKEY=$(nak key public "$NOSTR_SECRET_KEY" 2>/dev/null)
 echo "Publisher: ${PUBKEY}"
 echo ""
 
-# The 7 published NIP drafts (kind 30817 custom NIPs)
+# All published NIP drafts (kind 30817 custom NIPs)
 # Format: slug|display_name
 NIPS=(
+  # Batch 1
   "nip-location|NIP-LOCATION: Privacy-Preserving Location Discovery"
   "nip-credentials|NIP-CREDENTIALS: Credential Verification & Gating"
   "nip-approval|NIP-APPROVAL: Multi-Party Approval Gates"
@@ -38,6 +39,28 @@ NIPS=(
   "nip-consensus|NIP-CONSENSUS: Multi-Party Consensus"
   "nip-matching|NIP-MATCHING: Competitive Matching & Selection"
   "nip-evidence|NIP-EVIDENCE: Timestamped Evidence Recording"
+  # Batch 2
+  "nip-quote|NIP-QUOTE: Structured Pricing & Payment Terms"
+  "nip-escrow|NIP-ESCROW: Conditional Payment Coordination"
+  "nip-trust|NIP-TRUST: Portable Trust Networks"
+  "nip-disputes|NIP-DISPUTES: Dispute Resolution Protocol"
+  "nip-reputation|NIP-REPUTATION: Structured Reputation & Reviews"
+  "nip-booking|NIP-BOOKING: Calendar Availability & Booking"
+  "nip-variation|NIP-VARIATION: Scope & Price Change Management"
+  "nip-channels|NIP-CHANNELS: Context-Scoped Messaging Primitives"
+  "nip-provider-profiles|NIP-PROVIDER-PROFILES: Service Provider Profiles"
+  "nip-invoicing|NIP-INVOICING: Structured Invoicing"
+  "nip-provenance|NIP-PROVENANCE: Product & Supply Chain Provenance"
+  "nip-crafts|NIP-CRAFTS: Craft Technique Documentation"
+  "nip-scarcity|NIP-SCARCITY: Workforce & Resource Scarcity Signals"
+  "nip-spatial-signals|NIP-SPATIAL-SIGNALS: Spatial Signals & Corroboration"
+  "nip-data-access|NIP-DATA-ACCESS: Scoped, Revocable Data Access Grants"
+  "nip-mentorship|NIP-MENTORSHIP: Mentorship Pipelines & Training Progression"
+  "nip-sla|NIP-SLA: Service Level Agreements (Composition Guide)"
+  "nip-community-governance|NIP-COMMUNITY-GOVERNANCE: Community Governance (Composition Guide)"
+  "nip-referral-routing|NIP-REFERRAL-ROUTING: Institutional Referral Routing (Composition Guide)"
+  "nip-oracle|NIP-ORACLE: Oracle Dispute Resolution"
+  "nip-l402-services|NIP-L402-SERVICES: Paid API Service Announcements"
 )
 
 published=0
