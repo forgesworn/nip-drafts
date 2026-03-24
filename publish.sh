@@ -53,6 +53,7 @@ NIPS=(
   "nip-sla|NIP-SLA: Service Level Agreements (Composition Guide)|NIP-SLA.md||2"
   "nip-community-governance|NIP-COMMUNITY-GOVERNANCE: Community Governance (Composition Guide)|NIP-COMMUNITY-GOVERNANCE.md||2"
   "nip-referral-routing|NIP-REFERRAL-ROUTING: Institutional Referral Routing (Composition Guide)|NIP-REFERRAL-ROUTING.md||2"
+  "nip-oracle|NIP-ORACLE: Oracle Dispute Resolution|NIP-ORACLE.md|30543,30547,30548,30549|2"
   "nip-l402-services|NIP-L402-SERVICES: Paid API Service Announcements|NIP-L402-SERVICES.md|31402|2"
 )
 
