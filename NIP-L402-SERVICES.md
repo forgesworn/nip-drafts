@@ -10,9 +10,9 @@ This NIP defines one addressable event kind for announcing paid API services on 
 
 ## Motivation
 
-HTTP 402 "Payment Required" has been reserved in the HTTP specification since 1997 (RFC 2068; now RFC 9110 section 15.5.3). The IETF defined the status code but never specified how services should advertise their payment requirements or how clients should discover paid APIs. Three decades later, paid APIs (inference, data, compute) are proliferating, yet discovery remains centralised. Operators list services on proprietary directories, and consumers discover them through word-of-mouth or platform lock-in.
+HTTP 402 "Payment Required" has been in the HTTP specification since 1997 (RFC 9110 section 15.5.3), but the mechanism for advertising and discovering paid APIs was left unspecified. Paid APIs (inference, data, compute) are proliferating, yet discovery remains centralised. Operators list services on proprietary directories, and consumers discover them through word-of-mouth or platform lock-in.
 
-NIP-L402-SERVICES provides the missing discovery layer. Any service operator publishes a kind 31402 event describing their API: what it does, how much it costs, and how to pay. Clients (including AI agents) subscribe to relays with standard filters and discover services automatically. The actual payment and consumption happen over standard HTTP using the 402 challenge-response pattern. The result is a permissionless, censorship-resistant service directory built on Nostr, completing the vision the IETF reserved a status code for.
+NIP-L402-SERVICES uses Nostr as a lightweight discovery layer for paid HTTP services. Any service operator publishes a kind 31402 event describing their API: what it does, how much it costs, and how to pay. Clients (including AI agents) subscribe to relays with standard filters and discover services automatically. The actual payment and consumption happen over standard HTTP using the 402 challenge-response pattern. Nostr handles discovery; HTTP handles everything else.
 
 ## Relationship to Existing NIPs
 
