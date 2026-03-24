@@ -95,14 +95,18 @@ fi
 
 # ── Signer setup ─────────────────────────────────────────────────────────────
 
-SEC_FLAG=""
-if [[ -n "${NOSTR_SECRET_KEY:-}" ]]; then
-  SEC_FLAG="--sec $NOSTR_SECRET_KEY"
-else
-  SEC_FLAG="--prompt-sec"
-  echo "No NOSTR_SECRET_KEY set; nak will prompt for your key."
+if [[ -z "${NOSTR_SECRET_KEY:-}" ]]; then
+  echo "Error: NOSTR_SECRET_KEY not set."
   echo ""
+  echo "Usage:"
+  echo "  export NOSTR_SECRET_KEY=nsec1..."
+  echo "  ./publish.sh"
+  echo ""
+  echo "Or inline:"
+  echo "  NOSTR_SECRET_KEY=nsec1... ./publish.sh"
+  exit 1
 fi
+SEC_FLAG="--sec $NOSTR_SECRET_KEY"
 
 # ── Insert diagram image before first mermaid block ──────────────────────────
 
@@ -180,7 +184,7 @@ for entry in "${NIPS[@]}"; do
     -c "@${tmpfile}" \
     $SEC_FLAG \
     --nevent \
-    "${RELAYS[@]}" 2>/dev/null; then
+    "${RELAYS[@]}"; then
     echo " ✓"
     ((published++))
   else
