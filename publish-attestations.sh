@@ -11,7 +11,7 @@ set -euo pipefail
 RELAYS=(
   "wss://relay.damus.io"
   "wss://nos.lol"
-  "wss://relay.nostr.band"
+  "wss://relay.primal.net"
 )
 
 if [[ -z "${NOSTR_SECRET_KEY:-}" ]]; then
@@ -87,7 +87,7 @@ for entry in "${NIPS[@]}"; do
     ((failed++))
   fi
 
-  sleep 2
+  sleep 10
 done
 
 echo ""

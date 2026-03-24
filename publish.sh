@@ -18,7 +18,7 @@ IMAGES_BASE="https://raw.githubusercontent.com/forgesworn/nip-drafts/main/images
 RELAYS=(
   "wss://relay.damus.io"
   "wss://nos.lol"
-  "wss://relay.nostr.band"
+  "wss://relay.primal.net"
 )
 
 # ── NIP definitions ──────────────────────────────────────────────────────────
@@ -236,8 +236,8 @@ for entry in "${NIPS[@]}"; do
 
   rm -f "$tmpfile"
 
-  # Small delay between publishes
-  sleep 2
+  # Delay between publishes to avoid relay rate limits
+  sleep 10
 done
 
 echo ""
