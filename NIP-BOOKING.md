@@ -68,7 +68,8 @@ A calendar with individually listed time slots for a specific period:
         ["slot", "1698908400", "1698919200", "available"],
         ["slot", "1698919200", "1698930000", "blocked"],
         ["slot_duration_minutes", "180"],
-        ["max_bookings_per_slot", "1"]
+        ["max_bookings_per_slot", "1"],
+        ["alt", "Availability calendar with 4 slots"]
     ],
     "content": "",
     "id": "<32-bytes lowercase hex>",
@@ -102,7 +103,8 @@ A calendar with recurrence tags declares a repeating availability pattern. Clien
         ["exclude_date", "2026-04-06"],
         ["cancellation_window_hours", "48"],
         ["cancellation_fee", "3750"],
-        ["cancellation_fee_currency", "GBP"]
+        ["cancellation_fee_currency", "GBP"],
+        ["alt", "Recurring availability: Mon/Thu, 60 min slots, 7500 GBP"]
     ],
     "content": "",
     "id": "<32-bytes lowercase hex>",
@@ -129,7 +131,8 @@ A calendar MAY combine explicit slots with recurrence tags. Explicit `slot` tags
         ["slot_duration_minutes", "60"],
         ["timezone", "Europe/London"],
         ["slot", "1699254000", "1699257600", "blocked"],
-        ["g", "gcpuuz"]
+        ["g", "gcpuuz"],
+        ["alt", "Recurring availability: Mon/Wed/Fri 09:00, 60 min slots"]
     ],
     "content": "",
     "id": "<32-bytes lowercase hex>",
@@ -160,10 +163,10 @@ Here the recurring pattern generates Monday/Wednesday/Friday 09:00 slots, but th
 * `cancellation_window_hours` (OPTIONAL): Minimum notice hours for penalty-free cancellation.
 * `cancellation_fee` (OPTIONAL): Fee in smallest currency unit when cancelled outside the window.
 * `cancellation_fee_currency` (OPTIONAL): Currency code for the cancellation fee.
-* `env_constraint` (OPTIONAL, multiple): Environmental or seasonal constraint. Values: `frost_sensitive`, `dry_weather_only`, `temperature_min:<celsius>`, `temperature_max:<celsius>`, `daylight_only`, `wind_max:<knots>`, `humidity_max:<percent>`, `seasonal_material`, `tidal_dependent`, `noise_restricted`. Multiple tags are cumulative; all constraints must be satisfied for a slot to be viable.
-* `seasonal_window` (OPTIONAL): ISO 8601 month range during which this pattern is active, e.g. `apr-oct`. Outside this window the pattern is suspended.
 * `p` (OPTIONAL, multiple): Additional parties to notify of availability changes.
 * `ref` (OPTIONAL): External reference (e.g. practice management system ID).
+
+Applications MAY define additional constraint tags (e.g. environmental, seasonal, or capacity constraints) beyond those listed here.
 
 **Content:** Empty string or NIP-44 encrypted JSON with additional scheduling metadata (booking policies, cancellation terms, pricing per slot, service descriptions, preparation instructions).
 
@@ -242,8 +245,6 @@ Clients resolve recurring calendars into concrete bookable slots by:
 | `cancellation_window_hours` | MAY               | No       | Penalty-free cancellation window                  |
 | `cancellation_fee`          | MAY               | No       | Fee for late cancellation                         |
 | `cancellation_fee_currency` | MAY               | No       | Currency of the cancellation fee                  |
-| `env_constraint`            | MAY               | Yes      | Environmental/seasonal constraint                 |
-| `seasonal_window`           | MAY               | No       | Active month range (e.g. `apr-oct`)               |
 | `p`                         | MAY               | Yes      | Additional notification targets                   |
 | `ref`                       | MAY               | No       | External reference                                |
 
@@ -266,7 +267,8 @@ Published by a requester to book a specific slot from a provider's calendar.
         ["slot_start", "1698822000"],
         ["slot_end", "1698832800"],
         ["amount", "5000"],
-        ["currency", "SAT"]
+        ["currency", "SAT"],
+        ["alt", "Booking slot for 5000 SAT"]
     ],
     "content": "<NIP-44 encrypted JSON: {\"address\":\"42 Oak Lane, London SE1 2AB\",\"notes\":\"Please arrive 10 minutes early.\"}>",
     "id": "<32-bytes lowercase hex>",
@@ -322,7 +324,8 @@ Published by either party to cancel a booking. The `d` tag format creates one ca
         ["cancel_reason", "requester_initiated"],
         ["p", "<provider-hex-pubkey>"],
         ["refund_amount", "5000"],
-        ["refund_currency", "SAT"]
+        ["refund_currency", "SAT"],
+        ["alt", "Booking cancellation: requester initiated, 5000 SAT refund"]
     ],
     "content": "Need to reschedule due to an unexpected commitment. Apologies for the short notice.",
     "id": "<32-bytes lowercase hex>",
@@ -385,7 +388,8 @@ In workflows where bookings are auto-confirmed, this composition step is optiona
         ["gate_status", "pending"],
         ["e", "<booking-event-id>", "wss://relay.example.com"],
         ["p", "<requester-hex-pubkey>"],
-        ["expiration", "1698868400"]
+        ["expiration", "1698868400"],
+        ["alt", "Approval gate for booking confirmation"]
     ],
     "content": "Booking confirmation required for Monday 09:00-12:00 session.",
     "id": "<32-bytes lowercase hex>",
@@ -409,7 +413,8 @@ In workflows where bookings are auto-confirmed, this composition step is optiona
         ["slot_start", "1698822000"],
         ["slot_end", "1698832800"],
         ["amount", "7500"],
-        ["currency", "GBP"]
+        ["currency", "GBP"],
+        ["alt", "Booking approved: 7500 GBP"]
     ],
     "content": "<NIP-44 encrypted JSON: {\"location\":\"Suite 4B, 12 Harley Street, London W1G 9PF\",\"preparation\":\"Please arrive 10 minutes early for your first session.\"}>",
     "id": "<32-bytes lowercase hex>",
@@ -432,7 +437,8 @@ The `slot_start`, `slot_end`, `amount`, and `currency` tags on the Approval Resp
         ["e", "<gate-event-id>", "wss://relay.example.com"],
         ["decision", "rejected"],
         ["p", "<requester-hex-pubkey>"],
-        ["decline_reason", "schedule_conflict"]
+        ["decline_reason", "schedule_conflict"],
+        ["alt", "Booking rejected: schedule conflict"]
     ],
     "content": "Unfortunately I have a scheduling conflict for this slot. Please check my availability for Wednesday afternoon instead.",
     "id": "<32-bytes lowercase hex>",
@@ -489,7 +495,8 @@ Rescheduling preserves the booking history and relationship between the original
         ["original_slot_end", "1699257600"],
         ["reschedule_reason", "requester_conflict"],
         ["cancellation_window_hours", "48"],
-        ["penalty_waived", "true"]
+        ["penalty_waived", "true"],
+        ["alt", "Reschedule request: requester conflict"]
     ],
     "content": "I have a work commitment that has come up on Monday. Could we move to Tuesday afternoon instead?",
     "id": "<32-bytes lowercase hex>",
@@ -513,7 +520,8 @@ The `variation_type: schedule_change` signals that this variation is a reschedul
         ["decision", "approved"],
         ["p", "<requester-hex-pubkey>"],
         ["slot_start", "1699340400"],
-        ["slot_end", "1699344000"]
+        ["slot_end", "1699344000"],
+        ["alt", "Reschedule approved"]
     ],
     "content": "Tuesday afternoon works well. See you then.",
     "id": "<32-bytes lowercase hex>",
@@ -542,7 +550,8 @@ This preserves the full event chain: booking (30583) -> variation request (30579
         ["original_slot_end", "1699257600"],
         ["reschedule_reason", "illness"],
         ["penalty_waived", "true"],
-        ["expiration", "1698868400"]
+        ["expiration", "1698868400"],
+        ["alt", "Reschedule request: provider illness"]
     ],
     "content": "I'm unwell today and need to reschedule our session. Tuesday same time would work if that suits you.",
     "id": "<32-bytes lowercase hex>",
@@ -745,7 +754,8 @@ sequenceDiagram
         ["slot", "1698822000", "1698832800", "available"],
         ["slot", "1698832800", "1698843600", "available"],
         ["slot_duration_minutes", "180"],
-        ["max_bookings_per_slot", "1"]
+        ["max_bookings_per_slot", "1"],
+        ["alt", "Availability calendar with 2 slots"]
     ],
     "content": "",
     "id": "<32-bytes lowercase hex>",
@@ -772,7 +782,8 @@ sequenceDiagram
         ["pricing", "7500"],
         ["currency", "GBP"],
         ["expiration", "1735689600"],
-        ["exclude_date", "2026-03-17"]
+        ["exclude_date", "2026-03-17"],
+        ["alt", "Recurring availability: Mon/Thu, 60 min slots, 7500 GBP"]
     ],
     "content": "",
     "id": "<32-bytes lowercase hex>",
@@ -795,7 +806,8 @@ sequenceDiagram
         ["slot_start", "1698822000"],
         ["slot_end", "1698832800"],
         ["amount", "7500"],
-        ["currency", "GBP"]
+        ["currency", "GBP"],
+        ["alt", "Booking slot for 7500 GBP"]
     ],
     "content": "",
     "id": "<32-bytes lowercase hex>",
@@ -817,7 +829,8 @@ sequenceDiagram
         ["cancel_reason", "requester_initiated"],
         ["p", "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"],
         ["refund_amount", "7500"],
-        ["refund_currency", "GBP"]
+        ["refund_currency", "GBP"],
+        ["alt", "Booking cancellation: requester initiated, 7500 GBP refund"]
     ],
     "content": "Unable to attend due to a scheduling conflict.",
     "id": "<32-bytes lowercase hex>",

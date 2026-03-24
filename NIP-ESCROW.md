@@ -63,7 +63,8 @@ Funds committed. Proof that money has been locked and is no longer spendable by 
     ["trust_model", "ecash-htlc"],
     ["lock_type", "ecash_htlc"],
     ["mint_url", "https://mint.example.com"],
-    ["expiration", "1699370800"]
+    ["expiration", "1699370800"],
+    ["alt", "Escrow lock for 50000 SAT"]
   ],
   "content": ""
 }
@@ -108,7 +109,8 @@ Resolves locked funds. The `outcome` tag declares what happened: funds released 
     ["outcome", "released"],
     ["amount", "50000"],
     ["currency", "SAT"],
-    ["release_reason", "completed"]
+    ["release_reason", "completed"],
+    ["alt", "Escrow settlement: 50000 SAT released"]
   ],
   "content": ""
 }
@@ -162,7 +164,8 @@ Tags:
     ["outcome", "released"],
     ["amount", "50000"],
     ["currency", "SAT"],
-    ["release_reason", "completed"]
+    ["release_reason", "completed"],
+    ["alt", "Escrow settlement: 50000 SAT released"]
   ],
   "content": ""
 }
@@ -183,7 +186,8 @@ Tags:
     ["amount", "0"],
     ["currency", "SAT"],
     ["forfeit_amount", "25000"],
-    ["forfeit_reason", "no_show"]
+    ["forfeit_reason", "no_show"],
+    ["alt", "Escrow settlement: 25000 SAT forfeited (no_show)"]
   ],
   "content": "Provider did not arrive within the agreed window."
 }
@@ -205,7 +209,8 @@ Tags:
     ["currency", "SAT"],
     ["forfeit_amount", "15000"],
     ["forfeit_reason", "late_cancellation"],
-    ["refund_amount", "35000"]
+    ["refund_amount", "35000"],
+    ["alt", "Escrow settlement: 15000 SAT forfeited, 35000 SAT refunded"]
   ],
   "content": "Requester cancelled after provider was en route."
 }
@@ -231,7 +236,8 @@ Settlement record with cryptographic confirmation that money changed hands. A re
     ["amount", "47500"],
     ["currency", "SAT"],
     ["trust_model", "ecash-htlc"],
-    ["settlement_proof", "<htlc-preimage-hex>"]
+    ["settlement_proof", "<htlc-preimage-hex>"],
+    ["alt", "Payment receipt for 47500 SAT"]
   ],
   "content": ""
 }
@@ -253,7 +259,8 @@ Settlement record with cryptographic confirmation that money changed hands. A re
     ["currency", "SAT"],
     ["tick_number", "1"],
     ["cumulative", "100"],
-    ["interval_seconds", "3600"]
+    ["interval_seconds", "3600"],
+    ["alt", "Streaming payment receipt: tick 1, 100 SAT (cumulative 100)"]
   ],
   "content": ""
 }
@@ -372,12 +379,12 @@ flowchart LR
 
 All three kinds are addressable events. For Lock (`kind:30532`), replaceability is useful: lock status can be updated as conditions change.
 
-For Settlement (`kind:30533`) and Receipt (`kind:30535`), these events represent real-world financial actions that have already occurred. **These kinds use append-only semantics:**
+For Settlement (`kind:30533`) and Receipt (`kind:30535`), these events represent real-world financial actions that have already occurred. In practice, however, they are addressable events and relays will follow standard NIP-01 replacement rules. Applications SHOULD treat them as effectively append-only:
 
-- Each settlement event MUST use a unique `d` tag value (the recommended `<tx-id>:<type>:<qualifier>` format guarantees this).
-- Clients MUST treat the first valid instance of each `d` tag as canonical and MUST reject replacements. A republished event with the same `d` tag and different amounts or proofs is invalid, not an update.
-- Relays SHOULD enforce write-once semantics for these kinds (reject replacements for an existing `d` tag from the same author).
-- If a client encounters two events with the same coordinate (`kind + pubkey + d`), it MUST reject both as potentially compromised and flag the conflict for manual review. Since `created_at` is publisher-controlled, tie-breaking by timestamp would allow a backdated replacement to win.
+- Each settlement or receipt event SHOULD use a unique `d` tag value (the recommended `<tx-id>:<type>:<qualifier>` format guarantees this).
+- Clients SHOULD treat the first valid Settlement or Receipt for a given `d` tag as canonical. Subsequent replacements by the same author update the record (e.g. corrections, additional streaming receipts).
+- If a client encounters a replacement with materially different amounts or proofs, it SHOULD flag the conflict for review rather than silently accepting the update.
+- The streaming receipt model (multiple receipts with distinct `tick_number` values and unique `d` tags) already assumes replaceability for correction purposes, so each tick naturally occupies its own coordinate.
 
 ### Event Chain (`e`-tag References)
 
@@ -398,7 +405,7 @@ flowchart LR
     style Rcpt fill:#1b3d2d,stroke:#16c79a
 ```
 
-Legend: <span style="color:#6f42c1">**purple**</span> = upstream (NIP-QUOTE); <span style="color:#ffc107">**yellow**</span> = mutable (updatable via addressable replacement); <span style="color:#28a745">**green**</span> = write-once (first valid instance is canonical)
+Legend: <span style="color:#6f42c1">**purple**</span> = upstream (NIP-QUOTE); <span style="color:#ffc107">**yellow**</span> = mutable (updatable via addressable replacement); <span style="color:#28a745">**green**</span> = append-only by convention (first valid instance is canonical; replacements are corrections)
 
 ## Security Considerations
 
@@ -481,11 +488,11 @@ Clients can subscribe to escrow events using standard NIP-01 filters:
 // Settlements by outcome (filter by escrow agent, post-filter by outcome tag)
 {"kinds": [30533], "authors": ["<escrow-agent-pubkey>"]}
 
-// Receipts for a specific payer
+// Receipts for a specific payer (client-side filter; multi-letter tags are not relay-indexed)
 {"kinds": [30535], "#payer": ["<payer-pubkey>"]}
 ```
 
-Note: `#payer` is a multi-letter tag filter. Not all relays support filtering on multi-letter tags. If your target relays do not support it, filter by kind and post-filter client-side.
+Note: `#payer` is a multi-letter tag filter. NIP-01 only defines relay-side indexing for single-letter tag names. Filter by `kinds` at the relay, then match `payer` client-side after retrieval.
 
 ## Test Vectors
 
@@ -507,7 +514,8 @@ All examples use timestamp `1709740800` (2024-03-06T12:00:00Z) and placeholder h
     ["trust_model", "ecash-htlc"],
     ["lock_type", "ecash_htlc"],
     ["mint_url", "https://mint.example.com"],
-    ["expiration", "1710345600"]
+    ["expiration", "1710345600"],
+    ["alt", "Escrow lock for 50000 SAT"]
   ],
   "content": "",
   "id": "<32-byte-hex>",
@@ -529,7 +537,8 @@ All examples use timestamp `1709740800` (2024-03-06T12:00:00Z) and placeholder h
     ["outcome", "released"],
     ["amount", "50000"],
     ["currency", "SAT"],
-    ["release_reason", "completed"]
+    ["release_reason", "completed"],
+    ["alt", "Escrow settlement: 50000 SAT released"]
   ],
   "content": "",
   "id": "<32-byte-hex>",
@@ -552,7 +561,8 @@ All examples use timestamp `1709740800` (2024-03-06T12:00:00Z) and placeholder h
     ["amount", "0"],
     ["currency", "SAT"],
     ["forfeit_amount", "25000"],
-    ["forfeit_reason", "no_show"]
+    ["forfeit_reason", "no_show"],
+    ["alt", "Escrow settlement: 25000 SAT forfeited (no_show)"]
   ],
   "content": "Provider did not arrive within the agreed window.",
   "id": "<32-byte-hex>",
@@ -575,7 +585,8 @@ All examples use timestamp `1709740800` (2024-03-06T12:00:00Z) and placeholder h
     ["amount", "47500"],
     ["currency", "SAT"],
     ["trust_model", "ecash-htlc"],
-    ["settlement_proof", "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"]
+    ["settlement_proof", "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"],
+    ["alt", "Payment receipt for 47500 SAT"]
   ],
   "content": "",
   "id": "<32-byte-hex>",
@@ -600,7 +611,8 @@ All examples use timestamp `1709740800` (2024-03-06T12:00:00Z) and placeholder h
     ["trust_model", "ecash-htlc"],
     ["tick_number", "1"],
     ["cumulative", "100"],
-    ["interval_seconds", "3600"]
+    ["interval_seconds", "3600"],
+    ["alt", "Streaming payment receipt: tick 1, 100 SAT (cumulative 100)"]
   ],
   "content": "",
   "id": "<32-byte-hex>",
@@ -611,7 +623,7 @@ All examples use timestamp `1709740800` (2024-03-06T12:00:00Z) and placeholder h
 ## Dependencies
 
 * [NIP-01](https://github.com/nostr-protocol/nips/blob/master/01.md): Basic protocol flow, addressable events
-* [NIP-40](https://github.com/nostr-protocol/nips/blob/master/40.md): Expiration timestamps (lock expiry)
+* [NIP-40](https://github.com/nostr-protocol/nips/blob/master/40.md): Expiration timestamps (lock expiration)
 * [NIP-44](https://github.com/nostr-protocol/nips/blob/master/44.md): Versioned encrypted payloads (private payment details)
 * [NIP-59](https://github.com/nostr-protocol/nips/blob/master/59.md): Gift wrap (private delivery of financial events)
 * [NIP-17](https://github.com/nostr-protocol/nips/blob/master/17.md): Private direct messages (gift-wrapped payment details)

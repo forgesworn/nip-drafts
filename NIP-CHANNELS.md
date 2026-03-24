@@ -1,8 +1,8 @@
 NIP-CHANNELS
 ============
 
-Context-Scoped Messaging Primitives
-------------------------------------
+Message Status & Typing Indicators
+-------------------------------------
 
 `draft` `optional`
 
@@ -57,7 +57,8 @@ Read receipts and delivery confirmation. Addressable; the latest status for a gi
         ["context_id", "order_abc123"],
         ["last_read", "<event-id-of-last-read-message>"],
         ["p", "<counterparty-pubkey>"],
-        ["expiration", "1701358100"]
+        ["expiration", "1701358100"],
+        ["alt", "Message read status for context order_abc123"]
     ],
     "content": "<NIP-44 encrypted: {\"unread_count\": 0, \"last_read_at\": 1698766095}>",
     "id": "<32-byte-hex>",
@@ -111,7 +112,8 @@ Ephemeral real-time typing signal. Relays MUST NOT persist these events.
     "tags": [
         ["context_id", "order_abc123"],
         ["p", "<recipient-pubkey>"],
-        ["expiration", "1698766205"]
+        ["expiration", "1698766205"],
+        ["alt", "Typing indicator"]
     ],
     "content": "",
     "id": "<32-byte-hex>",
@@ -169,7 +171,9 @@ The `context_id` tag is placed inside the **sealed rumour** (the kind 14 event t
 
 This rumour is then sealed (kind 13) and gift-wrapped (kind 1059) per the NIP-17 specification. The `context_id` and `message_type` tags are only visible after decryption.
 
-### Message Types
+### Message Types (Application-Level Convention)
+
+> **Note:** The `message_type` and `template` tags extend NIP-17 rumours at the application layer. They are not part of the NIP-17 specification. Applications that do not need message classification MAY omit them entirely.
 
 The `message_type` tag classifies the message content. Clients SHOULD support the following types:
 
@@ -183,7 +187,7 @@ The `message_type` tag classifies the message content. Clients SHOULD support th
 
 Clients that do not recognise a `message_type` SHOULD fall back to rendering the content as plain text.
 
-### Structured Message Templates
+### Structured Message Templates (Application-Level Convention)
 
 When `message_type` is `system`, the `content` field MAY use structured JSON for machine-parseable notifications:
 
@@ -291,7 +295,7 @@ sequenceDiagram
 
 * **End-to-end encryption.** Message content is delivered via NIP-17 gift wrap, providing NIP-44 encryption and sender metadata protection. Relays cannot read message content or determine the true sender.
 * **Scoped channels.** Messages are bound to a `context_id` inside the encrypted rumour. There is no cross-context message leakage. The `context_id` is not visible to relays.
-* **Automatic expiry.** NIP-40 `expiration` tags ensure messages and status events do not persist indefinitely. Implementations SHOULD set expiration to context completion plus 30 days for GDPR right-to-erasure compliance.
+* **Automatic expiration.** NIP-40 `expiration` tags ensure messages and status events do not persist indefinitely. Implementations SHOULD set expiration to context completion plus 30 days for GDPR right-to-erasure compliance.
 * **No retroactive access.** Adding a new participant to `p` tags on future messages does not grant access to historical messages. Each gift-wrapped message is independently encrypted.
 * **Ephemeral indicators.** Typing indicators are ephemeral events; relays MUST NOT persist them.
 * **Status metadata leakage.** Message Status events (kind 30565) are addressable and visible to relays. The `context_id` and `p` tags reveal that two pubkeys are communicating within a context. For maximum privacy, implementations MAY gift-wrap status events as well.
@@ -321,7 +325,8 @@ Typing indicators expose `context_id` and participant pubkeys but are ephemeral 
         ["context_id", "order_abc123"],
         ["last_read", "aabbccdd11223344aabbccdd11223344aabbccdd11223344aabbccdd11223344"],
         ["p", "f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5"],
-        ["expiration", "1701358100"]
+        ["expiration", "1701358100"],
+        ["alt", "Message read status for context order_abc123"]
     ],
     "content": "",
     "id": "...",
@@ -347,7 +352,8 @@ Typing indicators expose `context_id` and participant pubkeys but are ephemeral 
     "tags": [
         ["context_id", "order_abc123"],
         ["p", "f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5"],
-        ["expiration", "1698766205"]
+        ["expiration", "1698766205"],
+        ["alt", "Typing indicator"]
     ],
     "content": "",
     "id": "...",
