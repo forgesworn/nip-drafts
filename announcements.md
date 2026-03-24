@@ -221,7 +221,7 @@ Scheduling: NIP-BOOKING (calendar availability and slot booking), NIP-PROVIDER-P
 
 Ecosystem: NIP-CRAFTS (technique documentation), NIP-PROVENANCE (supply chain tracking), NIP-SCARCITY (workforce shortage signals), NIP-MENTORSHIP (training progression)
 
-Paid APIs: NIP-L402-SERVICES (Lightning-gated API discovery, 8 production implementations)
+Paid APIs: NIP-PAID-SERVICES (paid API discovery, 8 production implementations)
 
 Three composition guides show how existing NIPs combine without new kinds: SLA monitoring, community governance, institutional referral routing.
 
@@ -304,7 +304,7 @@ Tags: #nostr #nip #protocol #booking #scheduling #discovery #nostrdev
 
 ---
 
-## Post 4: Messaging, Invoicing & Paid APIs (NIP-CHANNELS + NIP-DATA-ACCESS + NIP-INVOICING + NIP-L402-SERVICES)
+## Post 4: Messaging, Invoicing & Paid APIs (NIP-CHANNELS + NIP-DATA-ACCESS + NIP-INVOICING + NIP-PAID-SERVICES)
 
 NIP-CHANNELS (kinds 20502, 30565): context-scoped messaging. NIP-17 gives you DMs. NIP-28 gives you public channels. NIP-CHANNELS adds task-scoped messaging: typing indicator (20502, ephemeral) and message status (30565, read receipts). Task messages use NIP-17 with a context_id tag.
 
@@ -312,14 +312,14 @@ NIP-DATA-ACCESS (kind 30556): scoped, revocable data access grants. "I grant you
 
 NIP-INVOICING (kind 30588): structured, machine-readable invoices. Line items, tax calculation, payment terms references, due dates. Different from a Lightning invoice: this is a commercial document with an audit trail, not a payment request.
 
-NIP-L402-SERVICES (kind 31402): paid API discovery on Nostr. If you run an API behind a Lightning paywall, how do people find it? Kind 31402 announces your service: endpoint, pricing, supported methods, authentication. Eight implementations already use this kind in production.
+NIP-PAID-SERVICES (kind 31402): paid API discovery on Nostr. If you run an API behind a Lightning paywall, how do people find it? Kind 31402 announces your service: endpoint, pricing, supported methods, authentication. Eight implementations already use this kind in production.
 
 Build with this: an AI inference marketplace discoverable and payable via Lightning. A task management app with private scoped chat. A medical system where patients grant doctors temporary record access. An accounting tool that generates tax-ready invoices from Nostr payment events.
 
 https://github.com/forgesworn/nip-drafts/blob/main/NIP-CHANNELS.md
 https://github.com/forgesworn/nip-drafts/blob/main/NIP-DATA-ACCESS.md
 https://github.com/forgesworn/nip-drafts/blob/main/NIP-INVOICING.md
-https://github.com/forgesworn/nip-drafts/blob/main/NIP-L402-SERVICES.md
+https://github.com/forgesworn/nip-drafts/blob/main/NIP-PAID-SERVICES.md
 
 Tags: #nostr #nip #protocol #messaging #invoicing #l402 #lightning #nostrdev
 
