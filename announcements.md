@@ -29,7 +29,7 @@ Tags: #nostr #nip #protocol #nostrdev
 
 ## Day 1 (Mon): NIP-LOCATION
 
-Every Nostr app that touches location reinvents the same thing: how do you share where you are without broadcasting your coordinates to the world?
+Nostr has the g tag for geohash indexing (NIP-52, NIP-99) but no standard for privacy-preserving location discovery, consent-based sharing, or real-time tracking. Every app that needs more than a static geohash tag reinvents the same thing.
 
 NIP-LOCATION defines two ephemeral kinds:
 
@@ -49,7 +49,7 @@ Tags: #nostr #nip #protocol #location #privacy #geohash #nostrdev
 
 ## Day 2 (Tue): NIP-VA
 
-Nostr has badges (NIP-58) for "you earned this." Labels (NIP-32) for tagging. But no standard way to say "I, as a licensed authority, attest that this person holds qualification X, valid until date Y, revocable if Z."
+NIP-58 Badges let you award someone a named badge. NIP-32 Labels let you tag things. But badges have no expiration, no revocation, no trust hierarchy, and no structured claims. There is no standard way to say "I, as a licensed authority, attest that this person holds qualification X, valid until date Y, revocable if Z."
 
 NIP-VA defines one kind (31000) for all of it. One event structure; many types. Credentials, endorsements, vouches, provenance claims, fact-checks. The type tag determines semantics; the kind stays the same. New attestation types require zero protocol changes.
 
@@ -67,7 +67,7 @@ Tags: #nostr #nip #protocol #attestations #credentials #identity #nostrdev
 
 ## Day 3 (Wed): NIP-APPROVAL
 
-Nostr has reactions for "I like this" but nothing for "I, as the designated reviewer, officially approve this to proceed."
+NIP-72 defines moderator approval for community posts, and NIP-25 reactions express sentiment. But there is no general-purpose approval gate where designated reviewers must sign off before a workflow proceeds.
 
 NIP-APPROVAL defines two kinds:
 
@@ -87,7 +87,7 @@ Tags: #nostr #nip #protocol #governance #workflow #review #nostrdev
 
 ## Day 4 (Thu): NIP-MATCHING
 
-NIP-15 and NIP-99 are great for "here's what I'm selling." But what about "here's what I need; who wants to compete for it?"
+NIP-15 and NIP-99 handle seller-initiated listings. NIP-90 DVMs handle reverse auctions for computational jobs. But for physical goods and real-world services, there is no standard "I need X done" request event that providers can bid on.
 
 NIP-MATCHING defines two kinds for the reverse pattern:
 
@@ -107,7 +107,7 @@ Tags: #nostr #nip #protocol #marketplace #matching #freelance #nostrdev
 
 ## Day 5 (Fri): NIP-CONSENSUS
 
-Nostr has no standard way to ask "do 3 out of 5 board members agree?" and get a verifiable answer.
+NIP-88 defines open polls, but polls have no threshold requirements, no voter eligibility constraints, and no binding outcome semantics. There is no standard way to ask "do 3 out of 5 board members agree?" and get a verifiable, enforceable answer.
 
 NIP-CONSENSUS defines two kinds:
 

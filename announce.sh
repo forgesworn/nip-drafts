@@ -91,7 +91,7 @@ ENDNOTE
   location)
     TAGS=(-t "t=nostr" -t "t=nip" -t "t=protocol" -t "t=location" -t "t=privacy" -t "t=geohash" -t "t=nostrdev" -t "r=${REPO_URL}/blob/main/NIP-LOCATION.md")
     read -r -d '' CONTENT << 'ENDNOTE' || true
-Every Nostr app that touches location reinvents the same thing: how do you share where you are without broadcasting your coordinates to the world?
+Nostr has the g tag for geohash indexing (NIP-52, NIP-99) but no standard for privacy-preserving location discovery, consent-based sharing, or real-time tracking. Every app that needs more than a static geohash tag reinvents the same thing.
 
 NIP-LOCATION defines two ephemeral kinds:
 
@@ -110,7 +110,7 @@ ENDNOTE
   nip-va)
     TAGS=(-t "t=nostr" -t "t=nip" -t "t=protocol" -t "t=attestations" -t "t=credentials" -t "t=identity" -t "t=nostrdev" -t "r=https://github.com/forgesworn/nostr-attestations/blob/main/NIP-VA.md")
     read -r -d '' CONTENT << 'ENDNOTE' || true
-Nostr has badges (NIP-58) for "you earned this." Labels (NIP-32) for tagging. But no standard way to say "I, as a licensed authority, attest that this person holds qualification X, valid until date Y, revocable if Z."
+NIP-58 Badges let you award someone a named badge. NIP-32 Labels let you tag things. But badges have no expiration, no revocation, no trust hierarchy, and no structured claims. There is no standard way to say "I, as a licensed authority, attest that this person holds qualification X, valid until date Y, revocable if Z."
 
 NIP-VA defines one kind (31000) for all of it. One event structure; many types. Credentials, endorsements, vouches, provenance claims, fact-checks. The type tag determines semantics; the kind stays the same. New attestation types require zero protocol changes.
 
@@ -127,7 +127,7 @@ ENDNOTE
   approval)
     TAGS=(-t "t=nostr" -t "t=nip" -t "t=protocol" -t "t=governance" -t "t=workflow" -t "t=review" -t "t=nostrdev" -t "r=${REPO_URL}/blob/main/NIP-APPROVAL.md")
     read -r -d '' CONTENT << 'ENDNOTE' || true
-Nostr has reactions for "I like this" but nothing for "I, as the designated reviewer, officially approve this to proceed."
+NIP-72 defines moderator approval for community posts, and NIP-25 reactions express sentiment. But there is no general-purpose approval gate where designated reviewers must sign off before a workflow proceeds.
 
 NIP-APPROVAL defines two kinds:
 
@@ -146,7 +146,7 @@ ENDNOTE
   matching)
     TAGS=(-t "t=nostr" -t "t=nip" -t "t=protocol" -t "t=marketplace" -t "t=matching" -t "t=freelance" -t "t=nostrdev" -t "r=${REPO_URL}/blob/main/NIP-MATCHING.md")
     read -r -d '' CONTENT << 'ENDNOTE' || true
-NIP-15 and NIP-99 are great for "here's what I'm selling." But what about "here's what I need; who wants to compete for it?"
+NIP-15 and NIP-99 handle seller-initiated listings. NIP-90 DVMs handle reverse auctions for computational jobs. But for physical goods and real-world services, there is no standard "I need X done" request event that providers can bid on.
 
 NIP-MATCHING defines two kinds for the reverse pattern:
 
@@ -165,7 +165,7 @@ ENDNOTE
   consensus)
     TAGS=(-t "t=nostr" -t "t=nip" -t "t=protocol" -t "t=governance" -t "t=dao" -t "t=voting" -t "t=nostrdev" -t "r=${REPO_URL}/blob/main/NIP-CONSENSUS.md")
     read -r -d '' CONTENT << 'ENDNOTE' || true
-Nostr has no standard way to ask "do 3 out of 5 board members agree?" and get a verifiable answer.
+NIP-88 defines open polls, but polls have no threshold requirements, no voter eligibility constraints, and no binding outcome semantics. There is no standard way to ask "do 3 out of 5 board members agree?" and get a verifiable, enforceable answer.
 
 NIP-CONSENSUS defines two kinds:
 
