@@ -103,7 +103,7 @@ The progressive reveal model means precision increases only when trust does. Pub
 
 Useful for delivery tracking, field service dispatch, event coordination, fleet management, or any Nostr app that needs "who is near me?" without a centralised location server.
 
-Build with this: a Nostr-native delivery tracker where the customer sees the driver's live location after accepting the order. A "who's nearby" feature for Nostr meetup apps. A fleet dashboard for field service dispatch. A privacy-first find-my-friends that works without Google or Apple.
+Build with this: a Nostr meetup app that shows who's nearby without exposing exact locations. A privacy-first find-my-friends that works without Google or Apple. A protest coordination tool where organisers share location only with verified participants. A wildlife tracking network where researchers share animal sighting coordinates with collaborators.
 
 https://github.com/forgesworn/nip-drafts/blob/main/NIP-LOCATION.md
 ENDNOTE
@@ -162,7 +162,7 @@ This is the reverse auction pattern. One request, many providers competing. Diff
 
 Useful for freelance marketplaces, procurement, RFPs, service dispatch, or any Nostr app where providers compete for work rather than buyers competing for goods.
 
-Build with this: a freelance marketplace where clients post jobs and contractors bid competitively. A procurement system for small businesses. A ride-request board where drivers compete on price and rating. An RFP platform where proposals are structured, revisable, and publicly verifiable.
+Build with this: a freelance marketplace where clients post jobs and contractors bid competitively. A community noticeboard where neighbours request help and local tradespeople offer quotes. A music venue booking system where bands bid for gig slots. An open-source bounty platform where developers compete on timeline and approach.
 
 https://github.com/forgesworn/nip-drafts/blob/main/NIP-MATCHING.md
 ENDNOTE
@@ -206,7 +206,7 @@ A three-leg delivery (sender to courier to hub to recipient) produces three tran
 
 Useful for delivery tracking, art provenance, equipment handoff, legal evidence chains, or any workflow where "who had this, when, and in what state" matters.
 
-Build with this: a parcel tracking system where every handoff is signed and photographed. Art provenance tracking from studio to gallery to collector. Equipment checkout systems for shared workshops. Legal evidence chains that hold up because every transfer is cryptographically linked.
+Build with this: art provenance tracking from studio to gallery to collector. A tool library where every borrow and return is signed with condition photos. A vintage marketplace where the ownership history is verifiable. A community fridge network where food donations are tracked from donor through volunteers to recipients.
 
 https://github.com/forgesworn/nip-drafts/blob/main/NIP-CUSTODY.md
 ENDNOTE
@@ -227,7 +227,7 @@ The verification algorithm is six steps: discover requirements, discover credent
 
 Different from NIP-58 badges: badges celebrate ("you earned this"). Credentials gate ("you need this to participate").
 
-Build with this: a marketplace that verifies Gas Safe registration before matching plumbers to jobs. An events platform that checks DBS clearance for anyone working with children. A professional network where qualifications are verifiable, not just claimed. A hiring platform where credential checks happen at the protocol level, not in a walled garden.
+Build with this: a professional network where qualifications are verifiable, not just claimed in a bio. A tutoring platform that checks teaching credentials before connecting tutors with students. A conference speaker directory where organisers can verify claimed expertise. A co-working space that gates access to specialist equipment based on certified training.
 
 https://github.com/forgesworn/nip-drafts/blob/main/NIP-CREDENTIALS.md
 ENDNOTE
