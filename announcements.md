@@ -41,7 +41,7 @@ The progressive reveal model means precision increases only when trust does. Pub
 
 Useful for delivery tracking, field service dispatch, event coordination, fleet management, or any Nostr app that needs "who is near me?" without a centralised location server.
 
-Build with this: a Nostr meetup app that shows who's nearby without exposing exact locations. A privacy-first find-my-friends that works without Google or Apple. A wildlife tracking network where researchers share animal sighting coordinates with collaborators. A food truck finder that shows live locations without a centralised app.
+Build with this: a Nostr meetup app that shows who's nearby without exposing exact locations. A wildlife tracking network where researchers share sighting coordinates with collaborators. A food truck finder that shows live locations without a centralised app. A geocaching game where clue proximity is revealed progressively.
 
 https://github.com/forgesworn/nip-drafts/blob/main/NIP-LOCATION.md
 
