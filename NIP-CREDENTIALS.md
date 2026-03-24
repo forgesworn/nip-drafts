@@ -6,7 +6,7 @@ Credential Verification Gating
 
 `draft` `optional`
 
-Two addressable event kinds for declaring credential requirements and revoking credentials on Nostr. NIP-CREDENTIALS completes the credential lifecycle by composing with [NIP-VA](https://github.com/forgesworn/nostr-attestations/blob/main/NIP-VA.md) kind 31000 (Verifiable Attestation, `type: credential`) — which records credentials — adding the missing primitives for *requiring* credentials (gating) and *revoking* them.
+Two addressable event kinds for declaring credential requirements and revoking credentials on Nostr. NIP-CREDENTIALS completes the credential lifecycle by composing with any kind 31000 event that carries `credential_type` and `issuer_type` tags, adding the missing primitives for *requiring* credentials (gating) and *revoking* them.
 
 > **Design principle:** Credential requirements are declarations, not enforcement. A requirement event communicates that a credential is expected for participation — enforcement is the responsibility of the consuming application (marketplace, relay, operator).
 
@@ -14,22 +14,22 @@ Two addressable event kinds for declaring credential requirements and revoking c
 
 ## Motivation
 
-Nostr has NIP-58 for badges and NIP-VA kind 31000 for credential attestations, but neither provides a standard for **requiring** credentials before participation or **revoking** them after issuance. This creates a gap in the credential lifecycle:
+Nostr has NIP-58 for badges and kind 31000 for credential attestations, but neither provides a standard for **requiring** credentials before participation or **revoking** them after issuance. This creates a gap in the credential lifecycle:
 
 - **No gating standard** — a marketplace that requires Gas Safe registration, a DBS check, or professional indemnity insurance has no machine-readable way to declare those requirements. Each application invents its own scheme.
-- **No revocation standard** — NIP-VA suggests re-publishing with `["status", "revoked"]`, but there is no formal revocation event with a reason, effective date, or audit trail. Revocations are indistinguishable from expired credentials.
+- **No revocation standard** — re-publishing a kind 31000 event with `["status", "revoked"]` is an ad hoc workaround, but there is no formal revocation event with a reason, effective date, or audit trail. Revocations are indistinguishable from expired credentials.
 - **No trust hierarchy** — a self-declared credential and an authority-issued credential are treated identically. Applications need a standard way to specify the minimum issuer trustworthiness they accept.
 
 The credential lifecycle is universal across service domains:
 
 | Phase | Existing standard | Gap |
 | ----- | ----------------- | --- |
-| **Issue / Attest** | NIP-VA kind 31000 (`type: credential`) | — |
-| **Present / Discover** | NIP-VA kind 31000 (`type: credential`) | — |
+| **Issue / Attest** | Kind 31000 (`type: credential`) | — |
+| **Present / Discover** | Kind 31000 (`type: credential`) | — |
 | **Require / Gate** | *None* | **Kind 30527** |
 | **Verify** | Application-level | — |
-| **Expire** | `expiration` tag on NIP-VA kind 31000 (NIP-40) | — |
-| **Renew** | Republish NIP-VA kind 31000 | — |
+| **Expire** | `expiration` tag on kind 31000 (NIP-40) | — |
+| **Renew** | Republish kind 31000 | — |
 | **Revoke** | *None (ad hoc workarounds)* | **Kind 30528** |
 
 Evidence from domain analysis shows that 97% of service domains need credential verification — DBS checks, trade licences (Gas Safe, NICEIC), professional registration (SRA, GMC), insurance certificates, vehicle licences, food hygiene ratings, and more. NIP-CREDENTIALS provides the two missing primitives to complete the lifecycle.
@@ -66,6 +66,7 @@ Published by a context owner (marketplace, domain operator, community) to declar
     "created_at": 1698765000,
     "tags": [
         ["d", "gas_plumbing_marketplace:requirement:gas_safe"],
+        ["alt", "Credential requirement: Gas Safe Registration (professional_licence, mandatory)"],
         ["t", "credential-requirement"],
         ["credential_type", "professional_licence"],
         ["credential_name", "Gas Safe Registration"],
@@ -85,7 +86,7 @@ Tags:
 
 * `d` (REQUIRED): Format `<context_id>:requirement:<credential_type_slug>`. Addressable event identifier.
 * `t` (REQUIRED): Protocol family marker. MUST be `"credential-requirement"`.
-* `credential_type` (REQUIRED): Machine-readable credential type that must be held. Uses the same vocabulary as NIP-VA kind 31000: `professional_licence`, `background_check`, `insurance`, `certification`, `training`, `peer_endorsement`, `self_declared`.
+* `credential_type` (REQUIRED): Machine-readable credential type that must be held. Values: `professional_licence`, `background_check`, `insurance`, `certification`, `training`, `peer_endorsement`, `self_declared`.
 * `mandatory` (REQUIRED): Boolean string (`"true"` or `"false"`). Whether the credential is mandatory for participation or merely recommended.
 * `min_issuer_type` (REQUIRED): Minimum acceptable issuer trustworthiness. One of `authority`, `industry_body`, `operator`, `peer`, `self_declared`. See [Trust Hierarchy](#trust-hierarchy) below.
 * `credential_name` (RECOMMENDED): Human-readable name of the required credential (e.g. "Gas Safe Registration", "DBS Enhanced Check", "Professional Indemnity Insurance").
@@ -123,7 +124,7 @@ Applications SHOULD evaluate all requirements for a context and display the prov
 
 ## Credential Revocation (`kind:30528`)
 
-Published by an issuer, operator, or regulatory authority to explicitly revoke a previously valid credential. Each revocation is an immutable record with a unique `d` tag value (append-only). Revocations cannot be undone — if a credential is later reinstated, a new NIP-VA kind 31000 attestation MUST be published.
+Published by an issuer, operator, or regulatory authority to explicitly revoke a previously valid credential. Each revocation is an immutable record with a unique `d` tag value (append-only). Revocations cannot be undone; if a credential is later reinstated, a new kind 31000 attestation MUST be published.
 
 ```json
 {
@@ -132,6 +133,7 @@ Published by an issuer, operator, or regulatory authority to explicitly revoke a
     "created_at": 1698800000,
     "tags": [
         ["d", "<subject-pubkey>:revocation:gas_safe:1698800000"],
+        ["alt", "Credential revocation: Gas Safe Registration (disciplinary)"],
         ["t", "credential-revocation"],
         ["e", "<credential-attestation-event-id>", "<relay-hint>", "31000"],
         ["p", "<credential-holder-pubkey>"],
@@ -151,9 +153,9 @@ Tags:
 
 * `d` (REQUIRED): Format `<subject_pubkey>:revocation:<credential_type_slug>:<timestamp>`. Unique per revocation (append-only). The timestamp component ensures multiple revocations for the same credential type are preserved.
 * `t` (REQUIRED): Protocol family marker. MUST be `"credential-revocation"`.
-* `e` (REQUIRED): Event reference to the NIP-VA kind 31000 Credential Attestation being revoked. Format: `["e", "<event-id>", "<relay-hint>", "31000"]`.
+* `e` (REQUIRED): Event reference to the kind 31000 credential attestation being revoked. Format: `["e", "<event-id>", "<relay-hint>", "31000"]`.
 * `p` (REQUIRED): Pubkey of the credential holder whose credential is being revoked.
-* `credential_type` (REQUIRED): Machine-readable type of the credential being revoked. MUST match the `credential_type` on the referenced NIP-VA kind 31000 event.
+* `credential_type` (REQUIRED): Machine-readable type of the credential being revoked. MUST match the `credential_type` on the referenced kind 31000 event.
 * `revocation_reason` (REQUIRED): Reason for revocation. One of `expired` (natural expiry, explicitly recorded), `disciplinary` (conduct-related suspension or removal), `superseded` (replaced by an updated credential), `voluntary` (holder voluntarily surrendered), `fraud` (credential obtained fraudulently), `regulatory` (regulatory or legal requirement), `error` (issued in error).
 * `effective_date` (REQUIRED): ISO 8601 date when the revocation takes effect (e.g. `2024-10-31`). MAY be in the future for advance notice of revocation.
 * `credential_name` (RECOMMENDED): Human-readable name of the revoked credential.
@@ -169,7 +171,7 @@ Tags:
 
 Only the original issuer or a recognised authority SHOULD publish revocation events. Applications MUST verify that the `pubkey` on a Kind 30528 event is authorised to revoke the referenced credential. Verification strategies include:
 
-1. **Issuer match** — the revoker's pubkey matches the `pubkey` on the referenced NIP-VA kind 31000 attestation.
+1. **Issuer match** — the revoker's pubkey matches the `pubkey` on the referenced kind 31000 attestation.
 2. **Trusted authority list** — the application maintains a list of pubkeys authorised to revoke credentials for a given `credential_type`.
 
 Applications SHOULD reject revocations from unrecognised pubkeys.
@@ -178,7 +180,7 @@ Applications SHOULD reject revocations from unrecognised pubkeys.
 
 ## Trust Hierarchy
 
-The `min_issuer_type` tag on Kind 30527 and the `issuer_type` tag on NIP-VA kind 31000 together define a trust hierarchy for credential verification. Applications use this hierarchy to determine whether a presented credential meets the requirements:
+The `min_issuer_type` tag on Kind 30527 and the `issuer_type` tag on kind 31000 together define a trust hierarchy for credential verification. Applications use this hierarchy to determine whether a presented credential meets the requirements:
 
 | Level | `issuer_type` | Description | Example |
 | ----- | ------------- | ----------- | ------- |
@@ -291,15 +293,17 @@ flowchart TD
 {"kinds": [30528], "#e": ["<credential-attestation-event-id>"]}
 ```
 
+> **Note:** Filters using multi-letter tag names (e.g. `#credential_type`, `#revocation_reason`) are not supported by relay-side `REQ` filtering. Clients MUST apply these filters locally after fetching events via the single-letter tag filters shown above.
+
 ## Use Cases Beyond Task Coordination
 
 ### Marketplace Access Control
 
-Any Nostr marketplace can use Kind 30527 to declare entry requirements. A freelance platform might require professional indemnity insurance; a food delivery marketplace might require food hygiene certification. Providers present their NIP-VA kind 31000 attestations, and the marketplace verifies compliance before listing them.
+Any Nostr marketplace can use Kind 30527 to declare entry requirements. A freelance platform might require professional indemnity insurance; a food delivery marketplace might require food hygiene certification. Providers present their kind 31000 attestations, and the marketplace verifies compliance before listing them.
 
 ### Community Gating
 
-Nostr communities (NIP-72) can gate membership on credentials. A medical professionals' community might require GMC registration. A legal community might require SRA authorisation. The community moderator publishes Kind 30527 requirements, and applicants present their NIP-VA kind 31000 attestations.
+Nostr communities (NIP-72) can gate membership on credentials. A medical professionals' community might require GMC registration. A legal community might require SRA authorisation. The community moderator publishes Kind 30527 requirements, and applicants present their kind 31000 attestations.
 
 ### Relay Access Policies
 
@@ -307,7 +311,7 @@ Relay operators can use Kind 30527 to declare that certain event kinds require c
 
 ### Insurance Verification
 
-Event organisers, venue owners, or project managers can require public liability insurance. The requirement specifies `credential_type = "insurance"` and `min_issuer_type = "operator"` (the operator has verified the policy). The insured party presents their NIP-VA kind 31000 attestation with the policy number and expiry date.
+Event organisers, venue owners, or project managers can require public liability insurance. The requirement specifies `credential_type = "insurance"` and `min_issuer_type = "operator"` (the operator has verified the policy). The insured party presents their kind 31000 attestation with the policy number and expiry date.
 
 ### Regulatory Compliance Registries
 
@@ -315,11 +319,11 @@ Industry bodies can publish Kind 30527 events as a machine-readable registry of 
 
 ## Security Considerations
 
-* **Revocation immutability.** Kind 30528 events use the append-only pattern — each revocation MUST have a unique `d` tag. Clients MUST treat revocations as permanent. If a credential is reinstated, a new NIP-VA kind 31000 attestation MUST be issued rather than deleting the revocation.
+* **Revocation immutability.** Kind 30528 events use the append-only pattern — each revocation MUST have a unique `d` tag. Clients MUST treat revocations as permanent. If a credential is reinstated, a new kind 31000 attestation MUST be issued rather than deleting the revocation.
 * **Revocation authority verification.** Applications MUST verify that the publisher of a Kind 30528 event is authorised to revoke the referenced credential. Unverified revocations could be used to deny service to legitimate providers. See [Revocation Authority](#revocation-authority) for verification strategies.
 * **Requirement spoofing.** Any pubkey can publish a Kind 30527 event. Applications MUST verify that the requirement publisher is a recognised context owner (marketplace operator, regulatory body, community moderator) before enforcing its requirements. Unauthenticated requirements could be used to exclude providers unfairly.
-* **Credential freshness.** Applications SHOULD check both the `expiration` tag on NIP-VA kind 31000 and the `created_at` timestamp. A credential with a valid `expires` date but a very old `created_at` may indicate a stale attestation that has not been re-verified.
-* **Replay attacks.** A revoked credential holder might present the original NIP-VA kind 31000 attestation to an application that has not yet received the Kind 30528 revocation. Applications SHOULD subscribe to revocation events in real time and SHOULD NOT rely solely on point-in-time queries.
+* **Credential freshness.** Applications SHOULD check both the `expiration` tag on kind 31000 and the `created_at` timestamp. A credential with a valid `expires` date but a very old `created_at` may indicate a stale attestation that has not been re-verified.
+* **Replay attacks.** A revoked credential holder might present the original kind 31000 attestation to an application that has not yet received the Kind 30528 revocation. Applications SHOULD subscribe to revocation events in real time and SHOULD NOT rely solely on point-in-time queries.
 * **Privacy of revocation reasons.** Revocation reasons (especially `disciplinary` and `fraud`) may involve sensitive personal information. Publishers SHOULD use the encrypted `content` field for detailed revocation circumstances and keep the `revocation_reason` tag to the high-level category only.
 * **Self-declared credential inflation.** Requirements with `min_issuer_type = "self_declared"` provide minimal assurance. Applications SHOULD clearly display the issuer type alongside credentials so that users can assess trustworthiness. A self-declared credential is better than no credential, but applications MUST NOT present it as equivalent to an authority-issued one.
 * **Cross-relay consistency.** Revocation events may not propagate to all relays immediately. Applications verifying credentials SHOULD query multiple relays and SHOULD treat any valid revocation found on any relay as authoritative.
@@ -335,6 +339,7 @@ Industry bodies can publish Kind 30527 events as a machine-readable registry of 
   "created_at": 1709740800,
   "tags": [
     ["d", "gas_plumbing_marketplace:requirement:gas_safe"],
+    ["alt", "Credential requirement: Gas Safe Registration (professional_licence, mandatory)"],
     ["t", "credential-requirement"],
     ["credential_type", "professional_licence"],
     ["credential_name", "Gas Safe Registration"],
@@ -360,6 +365,7 @@ Industry bodies can publish Kind 30527 events as a machine-readable registry of 
   "created_at": 1709740800,
   "tags": [
     ["d", "gas_plumbing_marketplace:requirement:public_liability"],
+    ["alt", "Credential requirement: Public Liability Insurance (insurance, mandatory)"],
     ["t", "credential-requirement"],
     ["credential_type", "insurance"],
     ["credential_name", "Public Liability Insurance"],
@@ -384,6 +390,7 @@ Industry bodies can publish Kind 30527 events as a machine-readable registry of 
   "created_at": 1709740800,
   "tags": [
     ["d", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3:revocation:professional_licence:1709740800"],
+    ["alt", "Credential revocation: Gas Safe Registration (disciplinary)"],
     ["t", "credential-revocation"],
     ["e", "dddd4444eeee5555ffff6666aaaa1111bbbb2222cccc3333dddd4444eeee5555", "wss://relay.example.com", "31000"],
     ["p", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3"],
@@ -411,6 +418,7 @@ Industry bodies can publish Kind 30527 events as a machine-readable registry of 
   "created_at": 1709740800,
   "tags": [
     ["d", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3:revocation:certification:1709740800"],
+    ["alt", "Credential revocation: NICEIC Approved Contractor (superseded)"],
     ["t", "credential-revocation"],
     ["e", "eeee5555ffff6666aaaa1111bbbb2222cccc3333dddd4444eeee5555ffff6666", "wss://relay.example.com", "31000"],
     ["p", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3"],
@@ -428,14 +436,14 @@ Industry bodies can publish Kind 30527 events as a machine-readable registry of 
 
 ## Relationship to Existing NIPs
 
-### NIP-VA (Kind 31000 — Verifiable Attestation)
+### Kind 31000 Credential Attestations
 
-NIP-CREDENTIALS **composes with** NIP-VA rather than replacing it. NIP-VA kind 31000 (with `type: credential`) is the canonical event for recording a credential — who holds it, what it is, who issued it, and when it expires. NIP-CREDENTIALS adds the two missing lifecycle phases:
+NIP-CREDENTIALS **composes with** kind 31000 credential attestation events rather than replacing them. A kind 31000 event with `credential_type` and `issuer_type` tags is the canonical event for recording a credential: who holds it, what it is, who issued it, and when it expires. NIP-CREDENTIALS adds the two missing lifecycle phases:
 
 - **Kind 30527** (Credential Requirement) — declares *what credentials are needed* in a given context
 - **Kind 30528** (Credential Revocation) — records *when a credential is no longer valid*
 
-Together, the three kinds complete the credential lifecycle: require (30527) → attest (NIP-VA 31000) → revoke (30528).
+Together, the three kinds complete the credential lifecycle: require (30527) -> attest (31000) -> revoke (30528).
 
 ### NIP-58 (Badges)
 
@@ -447,14 +455,15 @@ NIP-TRUST defines trust delegation and network membership. Credential requiremen
 
 ### NIP-APPROVAL (Multi-Party Approval Gates)
 
-NIP-APPROVAL provides workflow gating on human decisions. NIP-CREDENTIALS provides gating on verifiable qualifications. The two compose naturally: an approval gate (Kind 30570) might require that the approver holds a specific credential (verified via NIP-VA kind 31000 against a Kind 30527 requirement).
+NIP-APPROVAL provides workflow gating on human decisions. NIP-CREDENTIALS provides gating on verifiable qualifications. The two compose naturally: an approval gate (Kind 30570) might require that the approver holds a specific credential (verified via kind 31000 against a Kind 30527 requirement).
 
 ## Dependencies
 
 * [NIP-01](https://github.com/nostr-protocol/nips/blob/master/01.md): Basic protocol flow, addressable events
 * [NIP-40](https://github.com/nostr-protocol/nips/blob/master/40.md): Expiration timestamps (time-limited requirements)
 * [NIP-44](https://github.com/nostr-protocol/nips/blob/master/44.md): Versioned encrypted payloads (sensitive revocation details)
-* [NIP-VA](https://github.com/forgesworn/nostr-attestations/blob/main/NIP-VA.md): Verifiable Attestation (kind 31000 with `type: credential`) — the credential event that requirements gate on and revocations reference
+
+[NIP-VA](https://github.com/forgesworn/nostr-attestations/blob/main/NIP-VA.md) (kind 31000 Verifiable Attestations) is a recommended companion for credential issuance. NIP-CREDENTIALS works with any kind 31000 event that includes the required credential tags (`credential_type`, `issuer_type`).
 
 ## Relationship to TROTT-00 Patterns
 
@@ -473,6 +482,6 @@ The [`@trott/sdk`](https://github.com/TheCryptoDonkey/trott-sdk) TypeScript libr
 A minimal implementation requires:
 
 1. A Nostr client that supports addressable event publishing and subscription filtering by `#p` and `#e` tags.
-2. Credential matching logic that compares NIP-VA kind 31000 attestations against Kind 30527 requirements using the trust hierarchy.
+2. Credential matching logic that compares kind 31000 attestations against Kind 30527 requirements using the trust hierarchy.
 3. Revocation checking that subscribes to Kind 30528 events and invalidates credentials with effective revocation dates in the past.
-4. Expiry monitoring that tracks the `expiration` tag on NIP-VA kind 31000 events and warns holders before credentials lapse.
+4. Expiry monitoring that tracks the `expiration` tag on kind 31000 events and warns holders before credentials lapse.

@@ -33,6 +33,10 @@ NIP-01 events provide signatures and timestamps, but applications need a dedicat
 - **NIP-CUSTODY (kind 30572):** Custody evidence is recorded as kind 30578 events with custody-specific tags (`evidence_type: custody_inspection`, `custody_handoff_ref`, `condition_grade`, `asset_id`). The `e` tag references the custody transfer event, and `custody_handoff_ref` links evidence to a specific leg in a multi-leg chain. See the [NIP-CUSTODY](./NIP-CUSTODY.md) composing section for full details and examples.
 - **NIP-94 (File Metadata):** NIP-94 covers file hashing and media metadata but not evidence context: capture conditions, geolocation at time of capture, evidence type classification, or chain linkage to related events.
 
+### Relationship to NIP-94
+
+NIP-94 (File Metadata) describes file properties (hash, dimensions, MIME type). NIP-EVIDENCE records the context in which evidence was captured: who observed what, when, where, under what conditions. A photo evidence record MAY reference a NIP-94 file metadata event for the image file itself. The two NIPs are complementary: NIP-94 answers "what is this file?", while NIP-EVIDENCE answers "why was this file captured, by whom, and what does it prove?"
+
 ## Kinds
 
 | kind  | description      |
@@ -54,6 +58,7 @@ Published by any participant to record a signed, timestamped fact. Each record g
     "created_at": 1698770000,
     "tags": [
         ["d", "property_inspection_42:evidence:finding_01"],
+        ["alt", "Evidence record: inspection finding for property_inspection_42"],
         ["t", "evidence-record"],
         ["evidence_type", "inspection"],
         ["captured_at", "1698769800"],
@@ -72,7 +77,7 @@ Tags:
 
 * `d` (REQUIRED): Format `<context_id>:evidence:<sequence>`. Unique per record (append-only).
 * `t` (REQUIRED): Protocol family marker. MUST be `"evidence-record"`.
-* `evidence_type` (REQUIRED): Category of evidence. Suggested values: `inspection`, `measurement`, `observation`, `certification`, `photo`, `document`, `video`, `reading`, `accomplishment`, `portfolio`.
+* `evidence_type` (REQUIRED): Category of evidence. Core values: `inspection`, `measurement`, `observation`, `certification`, `photo`, `document`, `video`. Applications MAY define additional evidence types for domain-specific needs (e.g. `accomplishment`, `portfolio`, `reading`). The core values above are RECOMMENDED for interoperability.
 * `captured_at` (RECOMMENDED): Unix timestamp when the evidence was captured. May differ from `created_at` if the record is published later.
 * `g` (RECOMMENDED): Geohash of the location where the evidence was captured.
 * `file_hash` (RECOMMENDED): `sha256:<hex>` hash of any attached file. Consumers MUST verify the hash before trusting the evidence content.
@@ -113,7 +118,25 @@ Tags:
 
 ## Append-Only Semantics
 
-Evidence records are semantically append-only. Although Kind 30578 is an addressable event (and relays MAY accept replacements if the `d` tag were reused), each record MUST use a unique `d` tag value. Clients MUST treat each evidence record as immutable — once published, it represents a claimed fact at a specific point in time.
+Evidence records are semantically append-only. Although Kind 30578 is an addressable event (and relays MAY accept replacements if the `d` tag were reused), each record MUST use a unique `d` tag value. Clients MUST treat each evidence record as immutable; once published, it represents a claimed fact at a specific point in time.
+
+### REQ Filters
+
+```json
+// All evidence records by a specific author
+{"kinds": [30578], "authors": ["<author_pubkey>"]}
+
+// All evidence linked to a specific event (e.g. a task or custody transfer)
+{"kinds": [30578], "#e": ["<related_event_id>"]}
+
+// All evidence records with a specific protocol family tag
+{"kinds": [30578], "#t": ["evidence-record"]}
+
+// All evidence in a geographic area (geohash prefix)
+{"kinds": [30578], "#g": ["gcpu"]}
+```
+
+> **Note:** Filters on multi-letter tags (e.g. `#evidence_type`, `#condition_grade`) are not supported by relay-side `REQ` filtering. Clients MUST apply these filters locally after fetching events via the single-letter tag filters shown above.
 
 ## Use Cases Beyond TROTT
 
@@ -148,6 +171,7 @@ NIP-CUSTODY uses kind 30578 to record asset condition at each handoff point. Cus
     "created_at": 1698767100,
     "tags": [
         ["d", "parcel_042:custody:handoff_01:evidence:01"],
+        ["alt", "Custody evidence: inspection for parcel_042 (good condition)"],
         ["t", "evidence-record"],
         ["e", "<custody-transfer-30572-event-id>", "wss://relay.example.com"],
         ["evidence_type", "custody_inspection"],

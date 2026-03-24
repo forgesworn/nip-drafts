@@ -52,9 +52,10 @@ Published by the outgoing custodian to record a handoff. Each transfer gets a un
     "created_at": 1698767000,
     "tags": [
         ["d", "item_sale_001:custody:handoff_01"],
+        ["alt", "Custody transfer: item_sale_001 handoff (good condition)"],
         ["t", "custody-transfer"],
-        ["custody_from", "<outgoing-custodian-hex-pubkey>"],
-        ["custody_to", "<incoming-receiver-hex-pubkey>"],
+        ["p", "<outgoing-custodian-hex-pubkey>", "", "custody_from"],
+        ["p", "<incoming-receiver-hex-pubkey>", "", "custody_to"],
         ["asset_id", "item_sale_001"],
         ["condition_grade", "good"],
         ["condition_evidence", "<kind-30578-event-id>"],
@@ -71,12 +72,12 @@ Tags:
 
 * `d` (REQUIRED): Format `<context_id>:custody:<sequence>`. Unique per transfer (append-only).
 * `t` (REQUIRED): Protocol family marker. MUST be `"custody-transfer"`.
-* `custody_from` (REQUIRED): Hex pubkey of the outgoing custodian.
-* `custody_to` (REQUIRED): Hex pubkey of the incoming receiver.
+* `p` with role `"custody_from"` (REQUIRED): Hex pubkey of the outgoing custodian. Format: `["p", "<pubkey>", "", "custody_from"]`.
+* `p` with role `"custody_to"` (REQUIRED): Hex pubkey of the incoming receiver. Format: `["p", "<pubkey>", "", "custody_to"]`.
 * `asset_id` (REQUIRED): Identifier for the asset being transferred.
 * `condition_grade` (RECOMMENDED): Condition at time of handoff. One of `"excellent"`, `"good"`, `"fair"`, or `"damaged"`.
 * `condition_evidence` (RECOMMENDED): Event ID of a Kind 30578 (NIP-EVIDENCE) documenting condition.
-* `p` (RECOMMENDED): Other parties to notify.
+* `p` (RECOMMENDED): Additional parties to notify (without a role marker).
 * `g` (RECOMMENDED): Geohash of the handoff location.
 * `custody_handoff_ref` (OPTIONAL): Event ID of the previous custody transfer in the chain.
 * `asset_type` (OPTIONAL): Category: `vehicle`, `tool`, `parcel`, `material`, `equipment`, `ticket`, `document`.
@@ -112,6 +113,7 @@ All standard NIP-EVIDENCE tags (`d`, `t`, `file_hash`, `captured_at`, `g`, `mime
     "created_at": 1698767100,
     "tags": [
         ["d", "item_sale_001:custody:handoff_01:evidence:01"],
+        ["alt", "Custody evidence: departure inspection for item_sale_001 (good condition)"],
         ["t", "evidence-record"],
         ["e", "<custody-transfer-30572-event-id>", "wss://relay.example.com"],
         ["evidence_type", "custody_inspection"],
@@ -138,6 +140,7 @@ All standard NIP-EVIDENCE tags (`d`, `t`, `file_hash`, `captured_at`, `g`, `mime
     "created_at": 1698768000,
     "tags": [
         ["d", "item_sale_001:custody:handoff_01:evidence:02"],
+        ["alt", "Custody evidence: receipt inspection for item_sale_001 (good condition)"],
         ["t", "evidence-record"],
         ["e", "<custody-transfer-30572-event-id>", "wss://relay.example.com"],
         ["evidence_type", "custody_receipt"],
@@ -167,8 +170,8 @@ All standard NIP-EVIDENCE tags (`d`, `t`, `file_hash`, `captured_at`, `g`, `mime
       |-- kind:30578 Evidence ---->|  (departure condition)     |
       |                            |                            |
       |-- kind:30572 Transfer ---->|                            |
-      |  (custody_from: A,         |                            |
-      |   custody_to: B)           |------- notification ------>|
+      |  (p: A/custody_from,       |                            |
+      |   p: B/custody_to)         |------- notification ------>|
       |                            |                            |
       |                            |<-- kind:30578 Evidence ----|
       |                            |    (receipt condition)      |
@@ -212,7 +215,7 @@ sequenceDiagram
     rect rgb(27, 45, 61)
         Note over A,D: Leg 1 — Sender to Courier
         A->>R: kind:30578 Evidence<br/>departure condition photo
-        A->>R: kind:30572 Transfer<br/>custody_from: A, custody_to: B<br/>condition_grade: excellent
+        A->>R: kind:30572 Transfer<br/>p: A/custody_from, p: B/custody_to<br/>condition_grade: excellent
         R-->>B: Notification
         B->>R: kind:30578 Evidence<br/>receipt condition confirmed
     end
@@ -220,7 +223,7 @@ sequenceDiagram
     rect rgb(45, 45, 27)
         Note over A,D: Leg 2 — Courier to Hub
         B->>R: kind:30578 Evidence<br/>departure scan
-        B->>R: kind:30572 Transfer<br/>custody_from: B, custody_to: C<br/>custody_handoff_ref: Leg 1 event ID
+        B->>R: kind:30572 Transfer<br/>p: B/custody_from, p: C/custody_to<br/>custody_handoff_ref: Leg 1 event ID
         R-->>C: Notification
         C->>R: kind:30578 Evidence<br/>receipt condition: good
     end
@@ -228,13 +231,31 @@ sequenceDiagram
     rect rgb(27, 61, 45)
         Note over A,D: Leg 3 — Hub to Recipient
         C->>R: kind:30578 Evidence<br/>departure condition
-        C->>R: kind:30572 Transfer<br/>custody_from: C, custody_to: D<br/>custody_handoff_ref: Leg 2 event ID
+        C->>R: kind:30572 Transfer<br/>p: C/custody_from, p: D/custody_to<br/>custody_handoff_ref: Leg 2 event ID
         R-->>D: Notification
         D->>R: kind:30578 Evidence<br/>delivery confirmed, photo
     end
 
     Note over A,D: Full chain verifiable:<br/>Transfer 1 ← Transfer 2 ← Transfer 3<br/>Each linked by custody_handoff_ref
 ```
+
+### REQ Filters
+
+```json
+// All custody transfers for a specific asset (client-side filter on multi-letter tag)
+{"kinds": [30572], "#d": ["<asset_id>:custody:*"]}
+
+// All transfers involving a specific party (relay-side #p filter)
+{"kinds": [30572], "#p": ["<party_pubkey>"]}
+
+// All custody evidence for a specific transfer event
+{"kinds": [30578], "#e": ["<custody-transfer-event-id>"]}
+
+// All custody evidence by a specific author
+{"kinds": [30578], "authors": ["<custodian_pubkey>"], "#t": ["evidence-record"]}
+```
+
+> **Note:** Because custody roles are encoded in standard `p` tags, relays can filter custody events by participant pubkey using `#p`. Filters on multi-letter tags (e.g. `#asset_id`, `#condition_grade`) are not supported by relay-side `REQ` filtering; clients MUST apply these filters locally.
 
 ## Use Cases Beyond TROTT
 
@@ -263,11 +284,11 @@ Chain-of-custody tracking maps naturally to package delivery:
 3. At each relay point, a new custody transfer + evidence pair records the handoff
 4. **Recipient** signs final custody evidence confirming delivery
 
-Each handoff can reference NIP-LOCATION for GPS verification of the transfer location, providing cryptographic proof that the handoff occurred at the expected coordinates.
+Each handoff MAY compose with NIP-LOCATION for GPS verification of the transfer location, providing cryptographic proof that the handoff occurred at the expected coordinates.
 
 ## Security Considerations
 
-* **Chain integrity.** Implementations SHOULD verify that each Kind 30572 in a custody chain is signed by the pubkey listed as `custody_to` in the previous transfer (or the original custodian for the first transfer). Breaks in the chain SHOULD be flagged to all participants.
+* **Chain integrity.** Implementations SHOULD verify that each Kind 30572 in a custody chain is signed by the pubkey listed in the `p` tag with role `"custody_to"` in the previous transfer (or the original custodian for the first transfer). Breaks in the chain SHOULD be flagged to all participants.
 * **Evidence integrity.** All custody evidence events (Kind 30578) SHOULD include a `file_hash` tag with the SHA-256 hash of any attached file. Consumers MUST verify the hash before trusting the evidence content.
 * **Append-only semantics.** Custody transfer and evidence events are semantically append-only. Although they are addressable events (and relays MAY accept replacements), clients MUST treat the first valid instance as canonical. A custody transfer, once published, represents a real-world physical handoff that cannot be undone by republishing.
 * **Content encryption.** When events contain sensitive information (addresses, personal details, condition reports), the content SHOULD be encrypted using NIP-44 to relevant parties.
@@ -284,9 +305,10 @@ Each handoff can reference NIP-LOCATION for GPS verification of the transfer loc
   "created_at": 1709740800,
   "tags": [
     ["d", "item_sale_001:custody:handoff_01"],
+    ["alt", "Custody transfer: item_sale_001 handoff (good condition)"],
     ["t", "custody-transfer"],
-    ["custody_from", "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"],
-    ["custody_to", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3"],
+    ["p", "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2", "", "custody_from"],
+    ["p", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3", "", "custody_to"],
     ["asset_id", "item_sale_001"],
     ["condition_grade", "good"],
     ["condition_evidence", "aaaa1111bbbb2222cccc3333dddd4444eeee5555ffff6666aaaa1111bbbb2222"],
@@ -308,6 +330,7 @@ Each handoff can reference NIP-LOCATION for GPS verification of the transfer loc
   "created_at": 1709740800,
   "tags": [
     ["d", "item_sale_001:custody:handoff_01:evidence:01"],
+    ["alt", "Custody evidence: inspection for item_sale_001 (good condition)"],
     ["t", "evidence-record"],
     ["e", "aaaa1111bbbb2222cccc3333dddd4444eeee5555ffff6666aaaa1111bbbb2222", "wss://relay.example.com"],
     ["evidence_type", "custody_inspection"],
@@ -330,7 +353,8 @@ Each handoff can reference NIP-LOCATION for GPS verification of the transfer loc
 * [NIP-01](https://github.com/nostr-protocol/nips/blob/master/01.md): Basic protocol flow, addressable events
 * [NIP-44](https://github.com/nostr-protocol/nips/blob/master/44.md): Versioned encrypted payloads (sensitive custody details, evidence URLs)
 * [NIP-EVIDENCE](./NIP-EVIDENCE.md): Custody evidence is recorded as Kind 30578 events with custody-specific tags
-* [NIP-LOCATION](./NIP-LOCATION.md): Handoff location verification via progressive location reveal
+
+Custody transfers MAY compose with [NIP-LOCATION](./NIP-LOCATION.md) for handoff location verification via progressive location reveal.
 
 ## Reference Implementation
 
