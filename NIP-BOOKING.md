@@ -10,6 +10,8 @@ Three addressable event kinds for calendar-based scheduling on Nostr; a provider
 
 > **Design principle:** Booking events coordinate scheduling. They communicate availability and record reservations. They do not enforce exclusivity at the relay level; the consuming application is responsible for preventing double-bookings and handling cancellation policies.
 
+> **Standalone usability:** This NIP works independently on any Nostr application. Within the TROTT protocol (v0.9), TROTT-11: Scheduling & Availability extends NIP-BOOKING with domain-specific configuration (default slot durations, cancellation windows per domain) and composition with the TROTT task lifecycle. Adoption of TROTT is not required.
+
 ## Motivation
 
 Nostr has NIP-52 for calendar events and NIP-53 for live activities, but no standard mechanism for **advertising availability and accepting bookings**. Many workflows require structured scheduling:
@@ -857,7 +859,7 @@ Any service provider who works by appointment (plumbers, electricians, dog walke
 
 ## Reference Implementation
 
-Implementors SHOULD refer to the kind definitions and JSON examples above.
+The [`@trott/sdk`](https://github.com/TheCryptoDonkey/trott-sdk) TypeScript library provides builders and parsers for all three kinds defined in this NIP, plus composition helpers for NIP-APPROVAL and NIP-VARIATION flows. For standalone use without TROTT, implementors SHOULD refer to the kind definitions above.
 
 A minimal implementation requires:
 

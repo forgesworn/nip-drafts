@@ -8,6 +8,8 @@ Service Provider Profiles
 
 Two addressable event kinds for declaring service provider capabilities and coordinator commitments on Nostr. Service catalogues compose with NIP-99 (Classified Listings); portfolio items compose with NIP-EVIDENCE.
 
+> **Standalone usability:** This NIP works independently on any Nostr application. Within the TROTT protocol (v0.9), provider profiles (`kind:30510`) are defined in TROTT-02: Discovery, and coordinator bonds (`kind:30511`) are defined in TROTT-06: Operator Participation. TROTT extends these with domain variants (59 domain-specific profile configurations), expanded profile manifests, and operator override mechanics. Adoption of TROTT is not required.
+
 ## Motivation
 
 Nostr has NIP-24 for basic user metadata (name, about, picture) and NIP-89 for application handler announcements. Neither supports structured declarations of what a service provider can do, where they operate, what credentials they hold, or what terms they offer. As Nostr expands beyond social media into marketplaces, DVMs, freelance platforms, and local services, providers need a machine-readable way to advertise their capabilities so clients can filter and match programmatically.
@@ -488,9 +490,19 @@ Communities maintain directories of vetted experts. NIP-99 service listings (kin
 * [NIP-99](https://github.com/nostr-protocol/nips/blob/master/99.md): Classified Listings (service catalogues)
 * [NIP-EVIDENCE](NIP-EVIDENCE.md): Timestamped Evidence Recording (portfolio items)
 
+## Relationship to TROTT Domain Variants
+
+NIP-PROVIDER-PROFILES is a standalone NIP. Within the TROTT protocol, provider profiles are extended by domain variants:
+
+- **TROTT-02: Discovery** - The canonical specification for the two kinds defined in this NIP, with full tag tables, validation rules, and relay discovery patterns. Service catalogue composition (via NIP-99) and portfolio composition (via NIP-EVIDENCE) patterns are documented there alongside the storefront summary tags on `kind:30510`.
+- **TROTT-01: Lifecycle (Profile Manifest)** - Defines an expanded profile manifest convention for Kind 7500 events, adding structured sections for reputation, payments, safety, verification, navigation, discovery, messaging, and P2P defaults. Each of TROTT's 59 domain profiles declares which profile fields are required or recommended for that domain.
+- **TROTT-06: Operator Participation** - Extends `kind:30511` coordinator bonds with fee models, liveness heartbeats, and three-layer architecture integration.
+
+These extensions are optional. NIP-PROVIDER-PROFILES works without any TROTT adoption.
+
 ## Reference Implementation
 
-Implementors SHOULD refer to the kind definitions and JSON examples above.
+The [`@trott/sdk`](https://github.com/TheCryptoDonkey/trott-sdk) TypeScript library provides builders and parsers for the kinds defined in this NIP. For standalone use without TROTT, implementors SHOULD refer to the kind definitions above.
 
 A minimal implementation requires:
 

@@ -10,6 +10,8 @@ One event kind for recording verified handoffs of physical or digital assets on 
 
 > **Design principle:** Custody events create an append-only chain of signed records. Each transfer is independently verifiable — any party can reconstruct the full chain by following event references from the most recent transfer back to the origin.
 
+> **Standalone usability:** This NIP works independently on any Nostr application. Within the TROTT protocol (v0.9), it is pattern P2 in TROTT-00: Core Patterns. TROTT composes custody transfers with task lifecycle states, domain-specific handoff requirements (freight, delivery, asset rental), and compliance records — but adoption of TROTT is not required.
+
 ## Motivation
 
 Nostr excels at publishing and discovering content, but has no standard for tracking the **physical custody of assets** as they move between parties. Many real-world workflows need an auditable chain of custody:
@@ -332,7 +334,7 @@ Each handoff can reference NIP-LOCATION for GPS verification of the transfer loc
 
 ## Reference Implementation
 
-Implementors SHOULD refer to the kind definitions and JSON examples above.
+The [`@trott/sdk`](https://github.com/TheCryptoDonkey/trott-sdk) TypeScript library provides builders and parsers for the custody transfer kind defined in this NIP, as well as custody evidence composition with NIP-EVIDENCE. For standalone use without TROTT, implementors SHOULD refer to the kind definitions above.
 
 A minimal implementation requires:
 

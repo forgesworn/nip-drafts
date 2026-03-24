@@ -10,6 +10,8 @@ One addressable event kind for granting a third party scoped, time-bounded, revo
 
 > **Design principle:** Data Access Grants authorise *reading and writing encrypted data*. They do not authorise *acting on behalf of* another party. This is distinct from NIP-26 delegation, which authorises signing events as if you were the delegator.
 
+> **Standalone usability:** This NIP works independently on any Nostr application. Data access grants compose naturally with compliance records, PII envelopes, and dispute resolution systems, but adoption of any specific external project is not required.
+
 ## Motivation
 
 Many Nostr applications need to share encrypted data with third parties without granting full identity delegation. Consider:

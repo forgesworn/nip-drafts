@@ -8,6 +8,8 @@ Portable Trust Networks
 
 Two addressable event kinds for trust revocation and provider endorsements on Nostr. List-based trust data (trusted providers, recommendations, collectives, block lists) is handled by NIP-51.
 
+> **Standalone usability:** This NIP works independently on any Nostr application. Within the TROTT protocol (v0.9), these kinds are defined in TROTT-10: Trusted Networks. TROTT extends them with trusted follower location sharing (`kind:20503`), operator-managed trust configuration, and domain-specific trust weighting. Adoption of TROTT is not required.
+
 ## Motivation
 
 Trust relationships form organically through repeated interactions, yet no Nostr protocol standardises how these relationships are expressed, shared, or discovered across applications. NIP-02 contact lists are binary (follow/don't follow) with no category scoping, ratings, or reasons. NIP-51 lists provide flexible, categorised grouping of pubkeys, but two critical trust primitives cannot be modelled as list membership:
@@ -617,9 +619,18 @@ Researchers form collectives (NIP-51 lists) for peer review groups. Trust lists 
 * [NIP-44](https://github.com/nostr-protocol/nips/blob/master/44.md): Versioned encrypted payloads
 * [NIP-51](https://github.com/nostr-protocol/nips/blob/master/51.md): Lists (trusted providers, recommendations, collectives, block lists)
 
+## Relationship to TROTT-10 Trusted Networks
+
+NIP-TRUST is a standalone NIP. Within the TROTT protocol, trust networks are extended with additional capabilities:
+
+- **TROTT-10: Trusted Networks** adds `kind:20503` (Trusted Follower Location) for sharing approximate location with trusted followers outside a task context, and defines operator-managed trust configuration including safety floors and auto-revocation policies. TROTT-10 also defines `kind:30514` (Trusted Network Configuration) for self-encrypted follower lists and shared-key management, and `kind:30516` (Personal Provider Presence) for NIP-44 encrypted availability and service terms visible only to approved followers. These private bilateral trust kinds are intentionally excluded from this standalone NIP as they depend on TROTT-specific infrastructure.
+- **P3 (Multi-party Consensus)** allows provider collectives to use consensus proposals (`kind:30574`) for group governance decisions (accepting new members, setting shared policies).
+
+These extensions are optional. NIP-TRUST works without any TROTT adoption.
+
 ## Reference Implementation
 
-Implementors SHOULD refer to the kind definitions and NIP-51 composition examples above.
+The [`@trott/sdk`](https://github.com/TheCryptoDonkey/trott-sdk) TypeScript library provides builders and parsers for both kinds defined in this NIP, along with helpers for composing NIP-51 trust lists. For standalone use without TROTT, implementors SHOULD refer to the kind definitions and NIP-51 composition examples above.
 
 A minimal implementation requires:
 

@@ -8,6 +8,8 @@ Craft Technique Documentation
 
 One addressable event kind for craft technique documentation on Nostr. Practitioner skill identity composes with NIP-PROVIDER-PROFILES.
 
+> **Standalone usability:** This NIP works independently on any Nostr application. Craft technique documentation and practitioner skill identity compose with NIP-PROVIDER-PROFILES, NIP-MENTORSHIP, NIP-SCARCITY, and NIP-REPUTATION but do not require any of them.
+
 ## Motivation
 
 Nostr has no standard for structured craft technique documentation. A heritage craft technique practised by three remaining practitioners has no structured format for preservation. Practitioner skill identity is handled by [NIP-PROVIDER-PROFILES](./NIP-PROVIDER-PROFILES.md) (kind 30510), which already supports `skill`, `credential`, and `domain` tags. This NIP extends that foundation with craft-specific tags and adds a dedicated Technique Record kind for living documentation.
@@ -381,7 +383,7 @@ NIP-REPUTATION defines Credential Attestations for third-party verification of q
 
 ## Reference Implementation
 
-A reference implementation is available in the `@trott/sdk` TypeScript library, which provides builders and parsers for the kinds defined in this NIP. For standalone use, implementors SHOULD refer to the kind definitions above.
+A reference implementation is available in the [`@trott/sdk`](https://github.com/forgesworn/trott-sdk) TypeScript library, which provides builders and parsers for the kinds defined in this NIP. For standalone use, implementors SHOULD refer to the kind definitions above.
 
 A minimal implementation requires:
 

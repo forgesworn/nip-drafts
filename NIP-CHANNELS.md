@@ -8,6 +8,8 @@ Context-Scoped Messaging Primitives
 
 Two event kinds for message status tracking and real-time typing indicators on Nostr, designed to complement NIP-17 private direct messages with context-scoping and delivery state.
 
+> **Standalone usability:** This NIP works independently on any Nostr application. Within the TROTT protocol (v0.9), these kinds are defined in TROTT-08: Messaging. TROTT extends them with task archive events (`kind:30566`), user messaging preferences (`kind:30567`), and operator-scoped message routing. Adoption of TROTT is not required.
+
 ## Motivation
 
 NIP-17 handles encrypted message delivery between participants via gift wrap. It solves the hard problem of private, metadata-protected messaging. However, two coordination primitives are missing from the messaging stack:
@@ -371,9 +373,13 @@ Typing indicators expose `context_id` and participant pubkeys but are ephemeral 
 * [NIP-44](https://github.com/nostr-protocol/nips/blob/master/44.md): Versioned encrypted payloads
 * [NIP-59](https://github.com/nostr-protocol/nips/blob/master/59.md): Gift wrap (used by NIP-17 for sender metadata protection)
 
+## Relationship to TROTT-08 Messaging
+
+NIP-CHANNELS is a standalone NIP. Within the TROTT protocol, TROTT-08 extends these primitives with task archive events, user messaging preferences, and operator-scoped message routing. Adoption of TROTT is not required.
+
 ## Reference Implementation
 
-Implementors SHOULD refer to the kind definitions and JSON examples above.
+The [`@trott/sdk`](https://github.com/TheCryptoDonkey/trott-sdk) TypeScript library provides builders and parsers for the kinds defined in this NIP. For standalone use without TROTT, implementers SHOULD refer to the kind definitions above.
 
 A minimal implementation requires:
 

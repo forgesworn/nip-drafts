@@ -10,7 +10,7 @@ Two addressable event kinds for competitive offer-and-selection workflows on Nos
 
 > **Design principle:** Matching events coordinate selection — they do not enforce exclusivity or payment. The consuming application decides what happens after selection (task creation, payment initiation, contract signing).
 
-> **Standalone usability:** This NIP works independently on any Nostr application. Within the [TROTT protocol](https://github.com/forgesworn/nip-drafts) (v0.9), it is pattern P4 in TROTT-00: Core Patterns. TROTT composes matching with task lifecycle states, provider discovery, and payment commitment — but adoption of TROTT is not required.
+> **Standalone usability:** This NIP works independently on any Nostr application. Within the TROTT protocol (v0.9), it is pattern P4 in TROTT-00: Core Patterns. TROTT composes matching with task lifecycle states, provider discovery, and payment commitment — but adoption of TROTT is not required.
 
 ## Motivation
 
@@ -26,7 +26,6 @@ Without a standard, each application invents its own offer/selection scheme. NIP
 ## Relationship to Existing NIPs
 
 - **NIP-15 (Marketplace) and NIP-99 (Classified Listings):** These NIPs model buyer-seeks-seller: one merchant publishes a listing, many buyers browse. NIP-MATCHING models the reverse: one requester publishes a need, many providers compete with offers. The offer author is the provider (not the requester), offers are addressable for revision, and the selection event records which provider was chosen. This reverse-auction pattern has distinct relay filter requirements (discover all offers for a given context) that listings do not serve.
-- **NIP-90 (Data Vending Machines):** DVMs follow a similar request/response pattern (kind 5xxx job request, kind 6xxx job result). The key distinction: DVMs are designed for computational jobs with machine-verifiable outputs (translations, image generation, data processing). NIP-MATCHING covers human service selection with subjective criteria (qualifications, reputation, price, timeline). DVM results are delivered inline; matching offers lead to an off-protocol service engagement. Additionally, DVM job results are published by the provider, while matching selections are published by the requester, reflecting different trust models.
 - **"Why not kind 1 replies?":** Kind 1 replies are not addressable (a provider cannot revise their offer by republishing with the same `d` tag), not relay-filterable by originating context, and carry no structured pricing, timeline, or qualification tags. Competitive bidding requires structured, revisable, filterable offers.
 
 ## Relationship to State Machine Protocols
@@ -129,6 +128,32 @@ Tags:
 ---
 
 ## Protocol Flow
+
+```
+  Requester                      Relay                     Providers
+      |                            |                            |
+      |  (Request or announcement  |                            |
+      |   published via NIP-99,    |                            |
+      |   NIP-15, or any event)    |                            |
+      |                            |                            |
+      |                            |<-- kind:30576 Offer -------| Provider 1
+      |                            |    (amount: 50000 SAT)     |
+      |                            |                            |
+      |                            |<-- kind:30576 Offer -------| Provider 2
+      |                            |    (amount: 45000 SAT)     |
+      |                            |                            |
+      |                            |<-- kind:30576 Offer -------| Provider 3
+      |                            |    (amount: 60000 SAT)     |
+      |                            |                            |
+      |<---- offers received ------|                            |
+      |                            |                            |
+      |-- kind:30577 Selection --->|                            |
+      |  (selected: Provider 2)    |------- notification ------>| Provider 2
+      |                            |                            |
+      |                            |  (Provider 1, 3: not       |
+      |                            |   selected — implicit)     |
+      |                            |                            |
+```
 
 1. **Request:** The requester publishes a request via any mechanism (NIP-99 classified listing, NIP-15 marketplace request, or any other event). The request event is referenced by offers via `e` tags.
 2. **Offers:** Providers discover the request and publish `kind:30576` offers. Each provider can update their offer by republishing (addressable event).
@@ -245,18 +270,6 @@ The requester selects the winning offer from the above provider.
 }
 ```
 
-### REQ Filters
-
-```json
-[
-    {"kinds": [30576], "#e": ["<request-event-id>"]},
-    {"kinds": [30577], "#p": ["<my-pubkey>"]},
-    {"kinds": [30576], "authors": ["<provider-pubkey>"], "limit": 20}
-]
-```
-
-The first filter discovers all offers for a given request. The second discovers selections where a provider was chosen. The third retrieves recent offers from a specific provider.
-
 ## Security Considerations
 
 * **Offer authenticity.** Each `kind:30576` offer is signed by the provider's keypair, ensuring offers cannot be forged. Clients SHOULD verify that the `pubkey` on the offer matches the provider's known identity.
@@ -275,7 +288,7 @@ The first filter discovers all offers for a given request. The second discovers 
 
 ## Reference Implementation
 
-Implementors SHOULD refer to the kind definitions and JSON examples above.
+The [`@trott/sdk`](https://github.com/TheCryptoDonkey/trott-sdk) TypeScript library provides builders and parsers for both kinds defined in this NIP. For standalone use without TROTT, implementors SHOULD refer to the kind definitions above.
 
 A minimal implementation requires:
 

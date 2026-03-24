@@ -10,7 +10,7 @@ Two addressable event kinds for gathering agreement from multiple parties on Nos
 
 > **Design principle:** Consensus proposals are a coordination primitive for group decisions. They record who agreed and who did not — they do not enforce outcomes. The consuming application decides what happens when consensus is reached or fails.
 
-> **Standalone usability:** This NIP works independently on any Nostr application. Within the [TROTT protocol](https://github.com/forgesworn/nip-drafts) (v0.9), it is pattern P3 in TROTT-00: Core Patterns. TROTT composes consensus proposals with multi-party task coordination, dispute resolution panels, and provider collective governance — but adoption of TROTT is not required.
+> **Standalone usability:** This NIP works independently on any Nostr application. Within the TROTT protocol (v0.9), it is pattern P3 in TROTT-00: Core Patterns. TROTT composes consensus proposals with multi-party task coordination, dispute resolution panels, and provider collective governance — but adoption of TROTT is not required.
 
 ## Motivation
 
@@ -29,7 +29,6 @@ NIP-57 zaps express support with money, and NIP-25 reactions express sentiment, 
 - **NIP-25 (Reactions):** Reactions express sentiment (`+`/`-`) but lack the structure needed for threshold-based governance. A reaction-based approach would require each client to independently maintain the voter set, implement threshold arithmetic, track abstentions, enforce deadlines, and handle reaction updates, all without relay-side filtering support. Kind 30574 (Proposal) encodes the voter set, threshold, quorum type, and deadline in a single event. Kind 30575 (Vote) is relay-filterable by the proposal's `a` tag, so clients fetch only votes for a specific proposal rather than scanning all reactions.
 - **Concrete example:** A DAO with 5 board members needs 3/5 approval within 48 hours. With NIP-25 reactions, any pubkey can react to the proposal note; the client must cross-reference a separately maintained board list, ignore non-member reactions, track abstentions against the deadline, and determine when the threshold is unreachable. With NIP-CONSENSUS, the proposal event declares `voters: 5`, `threshold: 3`, and `expiration: <timestamp>`. The relay returns only kind 30575 events matching the proposal, each from a pubkey in the declared voter set.
 - **NIP-57 (Zaps):** Zaps express economic support but not structured agree/disagree/abstain decisions with quorum semantics.
-- **NIP-69 (Polls, closed/unmerged):** NIP-69 proposed generic polling (kind 1068/1069) but was never merged. NIP-CONSENSUS differs in three ways: (a) the voter set is explicitly declared in the proposal event, preventing open-participation Sybil attacks; (b) threshold and quorum semantics are protocol-level, not client-side conventions; (c) votes are addressable per voter per proposal, enabling vote updates and preventing duplicates. NIP-69 was a lightweight sentiment poll; NIP-CONSENSUS is a structured governance primitive with enforceable quorum rules.
 
 ## Kinds
 
@@ -119,6 +118,27 @@ Tags:
 ---
 
 ## Protocol Flow
+
+```
+  Proposer                       Relay                     Voters
+      |                            |                            |
+      |-- kind:30574 Proposal ---->|                            |
+      |  (threshold: 3,            |                            |
+      |   voters: V1, V2, V3, V4) |                            |
+      |                            |------- notification ------>| V1
+      |                            |------- notification ------>| V2
+      |                            |------- notification ------>| V3
+      |                            |------- notification ------>| V4
+      |                            |                            |
+      |                            |<-- kind:30575 Vote --------| V1 (agree)
+      |                            |<-- kind:30575 Vote --------| V2 (agree)
+      |                            |<-- kind:30575 Vote --------| V3 (agree)
+      |<------ notification -------|                            |
+      |                            |                            |
+      |  Threshold (3) reached     |                            |
+      |  Consensus passed          |                            |
+      |                            |                            |
+```
 
 1. **Proposal:** Proposer publishes `kind:30574` listing all required voters via `p` tags and the `threshold` for passage.
 2. **Voting:** Each voter evaluates the proposal and publishes `kind:30575` with their `vote`.
@@ -232,18 +252,6 @@ An "agree" vote from one of the listed voters on the above proposal.
 }
 ```
 
-### REQ Filters
-
-```json
-[
-    {"kinds": [30574], "#p": ["<my-pubkey>"]},
-    {"kinds": [30575], "#e": ["<proposal-event-id>"]},
-    {"kinds": [30574], "authors": ["<proposer-pubkey>"], "limit": 10}
-]
-```
-
-The first filter discovers proposals where a pubkey is an invited voter. The second fetches all votes for a specific proposal. The third retrieves recent proposals from a specific proposer.
-
 ## Security Considerations
 
 * **Voter verification.** Implementations MUST verify that Kind 30575 votes are signed by a pubkey listed in the corresponding Kind 30574's `p` tags. Votes from unlisted pubkeys MUST be ignored.
@@ -261,7 +269,7 @@ The first filter discovers proposals where a pubkey is an invited voter. The sec
 
 ## Reference Implementation
 
-Implementors SHOULD refer to the kind definitions and JSON examples above.
+The [`@trott/sdk`](https://github.com/TheCryptoDonkey/trott-sdk) TypeScript library provides builders and parsers for both kinds defined in this NIP. For standalone use without TROTT, implementors SHOULD refer to the kind definitions above.
 
 A minimal implementation requires:
 

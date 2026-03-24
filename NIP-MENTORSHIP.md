@@ -10,6 +10,8 @@ An extension to [NIP-TRUST](./NIP-TRUST.md) Kind 30517 (Provider Endorsement) th
 
 > **Design principle:** Mentorship is a specialised form of endorsement. Rather than creating a separate kind, this NIP enriches the existing endorsement primitive with optional tags that mentors use to record training relationships. This keeps the protocol minimal whilst enabling rich mentorship networks.
 
+> **Standalone usability:** This NIP works independently on any Nostr application that supports NIP-TRUST. Mentorship endorsements compose naturally with reputation systems for credential weighting, discovery protocols for supervised-work bidding, and trust networks for mentorship chain discovery.
+
 ## Motivation
 
 Many service domains face a **cold-start problem**: new entrants have no reputation, no completed tasks, and no reviews. Existing providers are reluctant to recommend unknown quantities. The result is a barrier to entry that concentrates work among established providers and discourages new talent.
@@ -304,7 +306,7 @@ The relationship:
 
 ## Reference Implementation
 
-The `@trott/sdk` TypeScript library provides builders and parsers for mentorship endorsements as an extension of the NIP-TRUST endorsement kind. For standalone use, implementors SHOULD refer to the tag definitions above.
+The [`@trott/sdk`](https://github.com/forgesworn/trott-sdk) TypeScript library provides builders and parsers for mentorship endorsements as an extension of the NIP-TRUST endorsement kind. For standalone use, implementors SHOULD refer to the tag definitions above.
 
 A minimal implementation requires:
 

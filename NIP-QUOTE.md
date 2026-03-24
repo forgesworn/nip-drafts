@@ -332,9 +332,12 @@ All examples use timestamp `1709740800` (2024-03-06T12:00:00Z) and placeholder h
 * [NIP-40](https://github.com/nostr-protocol/nips/blob/master/40.md): Expiration timestamps (quote validity)
 * [NIP-44](https://github.com/nostr-protocol/nips/blob/master/44.md): Versioned encrypted payloads (private pricing details)
 
-## Reference Implementation
+## Reference Implementations
 
-Reference implementations are in development. See the NIP text above for a complete specification.
+* [@trott/sdk](https://github.com/TheCryptoDonkey/trott-sdk) -- TypeScript builders and parsers for Quote and Payment Terms
+* [trotters](https://github.com/TheCryptoDonkey/trotters) / [trotters-driver](https://github.com/TheCryptoDonkey/trotters-driver) -- Expo/React Native apps with quote and terms flows
+* [trott-mcp](https://github.com/TheCryptoDonkey/trott-mcp) -- MCP server exposing quote and terms tools to AI agents
+* [TROTT Protocol](https://github.com/TheCryptoDonkey/trott) -- Full specification suite that composes NIP-QUOTE with lifecycle, discovery, and escrow
 
 ## Appendix: Operator Fee Collection Models
 
@@ -369,4 +372,4 @@ The coordinator charges a flat periodic fee, not per-transaction.
 
 NIP-QUOTE is designed for standalone use. Any Nostr application where one party quotes a price to another can use these kinds without adopting NIP-ESCROW or any other downstream NIP. Freelance marketplaces, repair services, event catering, tutoring platforms, and similar applications benefit from structured quotes and formalised payment terms.
 
-The [TROTT protocol](https://github.com/forgesworn/nip-drafts) composes NIP-QUOTE with lifecycle management, reputation, and escrow for full-stack service coordination, but NIP-QUOTE stands alone for simpler use cases.
+The [TROTT Protocol](https://github.com/TheCryptoDonkey/trott) composes NIP-QUOTE with lifecycle management, reputation, and escrow for full-stack service coordination, but NIP-QUOTE stands alone for simpler use cases.

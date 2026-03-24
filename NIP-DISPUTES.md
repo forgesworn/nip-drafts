@@ -8,6 +8,8 @@ Dispute Resolution Protocol
 
 Two event kinds for structured dispute resolution on Nostr; claim filing and mediator resolution.
 
+> **Standalone usability:** This NIP works independently on any Nostr application. Within the TROTT protocol (v0.9), these kinds are extended with operator-managed dispute workflows, safety check-ins, and emergency signals, but adoption of TROTT is not required.
+
 ## Motivation
 
 NIP-56 provides content reporting (flagging notes for moderation), but Nostr has no protocol for resolving disputes between transacting parties. When a marketplace purchase goes wrong, a freelance job is abandoned, or a service is not delivered, there is no standardised way to:
@@ -498,7 +500,7 @@ Expected validation:
 
 ## Reference Implementation
 
-Implementors SHOULD refer to the kind definitions and JSON examples above.
+The [`@trott/sdk`](https://github.com/TheCryptoDonkey/trott-sdk) TypeScript library provides builders and parsers for the two kinds defined in this NIP, plus composition helpers for submitting dispute evidence as NIP-EVIDENCE records.
 
 A minimal implementation requires:
 

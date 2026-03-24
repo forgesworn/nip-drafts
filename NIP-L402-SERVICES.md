@@ -324,7 +324,7 @@ Implementations that sign events programmatically MUST zeroise secret key byte b
 
 Kind 31402 is an addressable event in the 30000-39999 range. This NIP formalises an event kind that has been in production use across 8 implementations since before any public claim on the number.
 
-Two other proposals also use kind 31402: NIP-105 (nostr-protocol/nips PR #780, open since September 2023, not merged) proposes API service marketplace listings; SARA (NostrHub, February 2027) proposes a revenue share offering registry. Neither has known production deployments. The intent is compatible; the tag schemas differ. This NIP stores pricing and endpoints as tags for relay-side filterability, supports multi-transport URLs, and defines structured payment method identifiers.
+Two other proposals also use kind 31402: NIP-105 (nostr-protocol/nips PR #780, open since September 2023, not merged) proposes API service marketplace listings; SARA (NostrHub, February 2026) proposes a revenue share offering registry. Neither has known production deployments. The intent is compatible; the tag schemas differ. This NIP stores pricing and endpoints as tags for relay-side filterability, supports multi-transport URLs, and defines structured payment method identifiers.
 
 ---
 
@@ -403,4 +403,4 @@ Validation rules for this event:
 | [402-mcp](https://github.com/forgesworn/402-mcp) | TypeScript | MCP server: AI agents discover, pay, and consume 402 APIs |
 | [402-indexer](https://github.com/forgesworn/402-indexer) | TypeScript | Nostr-native crawler for L402/x402 service discovery |
 | [toll-booth-dvm](https://github.com/forgesworn/toll-booth-dvm) | TypeScript | Bridge: expose toll-booth L402 APIs as NIP-90 DVMs (proves L402/DVM interop) |
-| [satgate](https://github.com/TheCryptoDonkey/satgate) | TypeScript | Production L402 gateway with Lightning and Cashu support |
+| [satgate](https://github.com/forgesworn/satgate) | TypeScript | Production L402 gateway with Lightning and Cashu support |

@@ -10,6 +10,8 @@ One addressable event kind for product certificates on Nostr. Authenticity attes
 
 > **Design principle:** A product certificate is the maker's signed declaration of what they made and how. It is the product's persistent identity. Verification, custody, and material sourcing are handled by purpose-built NIPs that already solve those problems well.
 
+> **Standalone usability:** This NIP works independently on any Nostr application. Product certificates, authenticity attestations, ownership chains, and material provenance records each compose with existing NIPs (NIP-VA, NIP-CUSTODY, NIP-EVIDENCE). No additional protocol adoption is required.
+
 ## Motivation
 
 Many real-world workflows involve physical products whose origin, composition, and identity matter, yet Nostr has no standard for recording **product provenance**:
@@ -567,7 +569,7 @@ High-value products combine all three composition patterns. The maker publishes 
 
 ## Reference Implementation
 
-A reference implementation is available in the `@trott/sdk` TypeScript library, which provides builders and parsers for kind 30404 (Product Certificate). For authenticity attestation, use the NIP-VA builders from `nostr-attestations`. For standalone use, implementors SHOULD refer to the kind definitions above.
+A reference implementation is available in the [`@trott/sdk`](https://github.com/forgesworn/trott-sdk) TypeScript library, which provides builders and parsers for kind 30404 (Product Certificate). For authenticity attestation, use the NIP-VA builders from [`nostr-attestations`](https://github.com/forgesworn/nostr-attestations). For standalone use, implementors SHOULD refer to the kind definitions above.
 
 A minimal implementation requires:
 

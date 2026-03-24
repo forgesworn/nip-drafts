@@ -8,11 +8,11 @@ Privacy-Preserving Location Discovery
 
 Two ephemeral event kinds for privacy-preserving geospatial presence and location sharing on Nostr. Publishers broadcast coarse-grained presence beacons for public discovery, then share precise coordinates only with specific recipients via NIP-44 encryption after consent is established. The same primitives support both real-time mobile tracking and static venue privacy for addressable events.
 
-> **Standalone usability:** This NIP works independently on any Nostr application. Within the [TROTT protocol](https://github.com/forgesworn/nip-drafts) (v0.9), presence beacons (`kind:20500`) are defined in TROTT-02: Discovery and location updates (`kind:20501`) are defined in TROTT-07: Navigation. TROTT extends these with route planning, ETA estimation, route deviation alerts, and trusted follower location (`kind:20503` in TROTT-10) — but adoption of TROTT is not required.
+> **Standalone usability:** This NIP works independently on any Nostr application. Within the TROTT protocol (v0.9), presence beacons (`kind:20500`) are defined in TROTT-02: Discovery and location updates (`kind:20501`) are defined in TROTT-07: Navigation. TROTT extends these with route planning, ETA estimation, route deviation alerts, and trusted follower location (`kind:20503` in TROTT-10) — but adoption of TROTT is not required.
 
 ## Motivation
 
-Location-aware applications on Nostr — delivery, field services, event coordination, fleet tracking, calendar events, marketplace listings — need a standard way to publish presence and share precise coordinates without leaking location data to the network at large. Existing approaches either expose exact coordinates publicly or require centralised location servers.
+Location-aware applications on Nostr — delivery, field services, event coordination, fleet tracking, calendar events, marketplace listings — need a standard way to publish presence and share precise coordinates without leaking location data to the network at large. Existing approaches either expose exact coordinates publicly or require centralized location servers.
 
 This NIP defines a two-tier model: coarse public discovery via geohash-indexed beacons, and precise private sharing via NIP-44 encrypted updates. The progressive reveal pattern ensures that location precision never increases without the publisher's consent.
 
@@ -244,7 +244,7 @@ Addressable events with a physical location (e.g. NIP-52 calendar events, NIP-99
     "tags": [
         ["d", "jazz-night-march"],
         ["g", "gcpuu"],
-        ["location", "Bristol Community Centre"]
+        ["location", "Bristol Community Center"]
     ],
     "content": "...",
     "id": "<32-byte-hex>",
@@ -348,7 +348,7 @@ Vehicles broadcast coarse location to a fleet relay. Dispatchers receive fine lo
 * **Precision never increases without consent.** Public beacons (precision 4-5) reveal only a ~5-40 km area. Exact coordinates are only shared via NIP-44 encrypted `kind:20501` events after explicit consent.
 * **Ephemeral events.** Both kinds are in the ephemeral range (20000-29999). Relays MUST NOT persist them. This prevents location history accumulation on relays.
 * **Expiration tags.** The `expiration` tag ensures stale beacons do not persist if a publisher goes offline without sending an `offline` status.
-* **Encrypted content.** `kind:20501` content is NIP-44 encrypted. Relays see that a location update exists but cannot read coordinates. Kind 20501 uses direct NIP-44 encryption rather than NIP-59 gift wrapping. Gift wrapping each update would add significant overhead for high-frequency ephemeral streams (updates every few seconds); the privacy benefit is marginal since the `p` tag already reveals the recipient and ephemeral events expire quickly via NIP-40.
+* **Encrypted content.** `kind:20501` content is NIP-44 encrypted. Relays see that a location update exists but cannot read coordinates.
 * **Consent declaration.** The `consent` tag makes the basis for location sharing explicit and auditable.
 * **No location history.** Ephemeral events are not persisted. Implementations SHOULD NOT build location history from ephemeral events beyond what is needed for the active context.
 * **Geohash leakage.** Even coarse geohashes reveal approximate location. Publishers who require anonymity SHOULD NOT publish `kind:20500` beacons at all.
@@ -427,7 +427,7 @@ These extensions are optional. NIP-LOCATION works without any TROTT adoption.
 
 ## Reference Implementation
 
-Implementors SHOULD refer to the kind definitions and JSON examples above, and the [geohash algorithm](https://en.wikipedia.org/wiki/Geohash) for computing cell neighbours.
+The [`@trott/sdk`](https://github.com/TheCryptoDonkey/trott-sdk) TypeScript library provides builders and parsers for both kinds defined in this NIP. For standalone use without TROTT, implementors SHOULD refer to the kind definitions above and the [geohash algorithm](https://en.wikipedia.org/wiki/Geohash) for computing cell neighbours.
 
 A minimal implementation requires:
 

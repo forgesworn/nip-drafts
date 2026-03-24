@@ -10,6 +10,8 @@ One addressable event kind for proposing changes to agreed work on Nostr. Pricin
 
 > **Design principle:** The Variation Request records that a change was proposed and describes its scope. It does not price the change or approve it. Pricing composes with NIP-QUOTE (kind 30530); approval composes with NIP-APPROVAL (kinds 30570-30571). The consuming application updates its internal state based on the approved variation.
 
+> **Standalone usability:** This NIP works independently on any Nostr application. Within the TROTT protocol (v0.9), it is pattern P6 in TROTT-00: Core Patterns. TROTT composes variation management with payment commitment (amended stakes), task lifecycle states, and domain-specific scope change rules, but adoption of TROTT is not required.
+
 ## Motivation
 
 Nostr has events for creating agreements (NIP-99 listings, NIP-15 marketplace orders, NIP-ESCROW payment terms) but no standard mechanism for **changing the terms of an existing agreement**. In practice, scope changes are inevitable:
@@ -330,7 +332,7 @@ All examples use timestamp `1709740800` (2024-03-06T12:00:00Z) and placeholder h
 
 ## Reference Implementations
 
-Implementors SHOULD refer to the kind definitions and JSON examples above.
+The [`@trott/sdk`](https://github.com/TheCryptoDonkey/trott-sdk) TypeScript library provides builders and parsers for the Variation Request kind defined in this NIP, along with composition helpers for the NIP-QUOTE and NIP-APPROVAL flows. For standalone use without TROTT, implementors SHOULD refer to the kind definitions above.
 
 A minimal implementation requires:
 

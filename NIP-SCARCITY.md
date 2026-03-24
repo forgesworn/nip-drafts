@@ -10,6 +10,8 @@ One event kind for broadcasting workforce, skill, or resource scarcity signals o
 
 > **Design principle:** Scarcity signals are discoverable market intelligence. They do not restrict access; they inform discovery, pricing, and workforce development decisions. Signals are time-bounded and geographically scoped.
 
+> **Standalone usability:** This NIP works independently on any Nostr application. Scarcity signals compose naturally with discovery and reputation systems to surface warnings when tasks require scarce skills and to prioritise training investment in at-risk areas.
+
 ## Motivation
 
 Labour markets, skilled trades, and specialist resources face scarcity challenges that are invisible to individual participants. A property owner seeking a thatcher, a hospital seeking a specialist nurse, or a factory seeking a calibration engineer has no protocol-level way to know that their required skill is critically short. Existing solutions are centralised (government labour statistics, industry body reports) and lag by months or years.

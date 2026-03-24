@@ -8,6 +8,8 @@ Spatial Signals & Corroboration
 
 Two regular event kinds for reporting location-bound real-world conditions and publishing follow-up corroboration on Nostr. A report declares that a spatial condition exists at a place; corroborations extend or curtail its effective lifetime. The same pair supports road hazards, pickup and access issues, temporary closures, security perimeters, weather alerts, and similar public geospatial signals.
 
+> **Standalone usability:** This NIP works independently on any Nostr application. Within the TROTT protocol, it composes with TROTT-07: Navigation as an external signal feed for rerouting, pickup warnings, and operational alerts. Adoption of any specific external project is not required.
+
 ## Motivation
 
 Many physical-world applications need to publish conditions that are tied to a place but not owned by any single task lifecycle:

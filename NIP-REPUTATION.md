@@ -8,6 +8,8 @@ Structured Reputation & Reviews
 
 One addressable event kind for completion-verified ratings on Nostr. Credential attestations use [NIP-VA](https://github.com/forgesworn/nostr-attestations/blob/main/NIP-VA.md) kind 31000 (Verifiable Attestation) with `type: credential`.
 
+> **Standalone usability:** This NIP works independently on any Nostr application. Within the TROTT protocol (v0.9), these kinds are defined in TROTT-03: Reputation. TROTT extends them with cross-domain reputation portability, levelled credentials, and domain-specific rating criteria, but adoption of TROTT is not required.
+
 ## Motivation
 
 Nostr has NIP-32 for generic labels and NIP-58 for badges, but neither provides structured reviews tied to verified completions. A freelancer with 500 five-star jobs on one platform starts at zero on another. Current Nostr reputation approaches lack:
@@ -350,7 +352,7 @@ Developers rate code reviewers. The `completion_event` references a merged PR or
 
 ## Reference Implementation
 
-Implementors SHOULD refer to the kind definitions and JSON examples above.
+The [`@trott/sdk`](https://github.com/TheCryptoDonkey/trott-sdk) TypeScript library provides builders and parsers for the kinds defined in this NIP. For standalone use without TROTT, implementors SHOULD refer to the kind definitions above.
 
 A minimal implementation requires:
 

@@ -10,7 +10,7 @@ Two addressable event kinds for gating workflow progression on Nostr — a propo
 
 > **Design principle:** Approval gates are a coordination primitive. They communicate that sign-off is required and record decisions — they do not enforce access control. Enforcement is the responsibility of the consuming application.
 
-> **Standalone usability:** This NIP works independently on any Nostr application. Within the [TROTT protocol](https://github.com/forgesworn/nip-drafts) (v0.9), it is pattern P1 in TROTT-00: Core Patterns. TROTT composes approval gates with task lifecycle states, domain-specific inspection requirements, and operator integration — but adoption of TROTT is not required.
+> **Standalone usability:** This NIP works independently on any Nostr application. Within the TROTT protocol (v0.9), it is pattern P1 in TROTT-00: Core Patterns. TROTT composes approval gates with task lifecycle states, domain-specific inspection requirements, and operator integration — but adoption of TROTT is not required.
 
 ## Motivation
 
@@ -26,7 +26,7 @@ Without a standard, every application invents its own approval scheme with incom
 
 ## Relationship to Existing NIPs
 
-- **NIP-25 (Reactions):** Reactions express lightweight sentiment (`+`/`-`) with no named reviewer set, no quorum or threshold semantics, no revision loop, and no deadline enforcement. A reaction does not encode who is required to approve; approval gates name the required reviewers upfront and track structured decisions (approved, rejected, revision requested) with mandatory reasoning. A `+` reaction from a designated pubkey could approximate approval, but reactions lack: (a) structured decision values (approved/rejected/revise), (b) mandatory reasoning for rejections, (c) one-response-per-reviewer addressable semantics preventing duplicate votes, and (d) deadline enforcement via the gate's expiration tag. Approval gates provide accountability that lightweight reactions cannot.
+- **NIP-25 (Reactions):** Reactions express lightweight sentiment (`+`/`-`) with no named reviewer set, no quorum or threshold semantics, no revision loop, and no deadline enforcement. A reaction does not encode who is required to approve; approval gates name the required reviewers upfront and track structured decisions (approved, rejected, revision requested) with mandatory reasoning.
 - **NIP-22 (Comments):** Comments carry unstructured text with no decision semantics, no gate status tracking, and no distinction between "I have thoughts" and "I formally approve." Approval responses are structured decisions, not discussion.
 
 ## Kinds
@@ -69,7 +69,7 @@ Tags:
 * `t` (REQUIRED): Protocol family marker. MUST be `"approval-gate"`.
 * `gate_type` (REQUIRED): Type of gate. One of `regulatory`, `inspection`, `approval`, `review`. These are RECOMMENDED values; applications MAY define additional gate types as needed.
 * `gate_authority` (REQUIRED, one or more): Hex pubkey of a required reviewer. Multiple `gate_authority` tags indicate that all listed reviewers must respond (see Multi-Reviewer Gates below).
-* `gate_status` (REQUIRED): MUST be `"pending"` on creation. The `gate_status` tag reflects the proposer's view of the gate state. Clients SHOULD derive the authoritative status from the set of kind 30571 responses rather than trusting the proposer's self-reported status. The proposer MAY update the gate event to reflect `approved` or `rejected` after responses are received, but this is informational; the responses are the source of truth.
+* `gate_status` (REQUIRED): MUST be `"pending"` on creation.
 * `expiration` (RECOMMENDED): Unix timestamp — deadline for the review. Clients SHOULD use NIP-40 `expiration` for relay-level enforcement.
 * `p` (RECOMMENDED): Additional parties to notify.
 * `gate_reference` (OPTIONAL): External reference (certificate number, permit ID, PR URL).
@@ -118,6 +118,27 @@ Tags:
 ---
 
 ## Protocol Flow
+
+```
+  Proposer                       Relay                     Reviewer(s)
+      |                            |                            |
+      |-- kind:30570 Gate -------->|                            |
+      |  (gate_status: pending)    |                            |
+      |                            |------- notification ------>|
+      |                            |                            |
+      |                            |<-- kind:30571 Response ----|
+      |                            |    (decision: revise)      |
+      |<------ notification -------|                            |
+      |                            |                            |
+      |-- kind:30570 Gate -------->|  (updated proposal)        |
+      |                            |------- notification ------>|
+      |                            |                            |
+      |                            |<-- kind:30571 Response ----|
+      |                            |    (decision: approved)    |
+      |<------ notification -------|                            |
+      |                            |                            |
+      |  Proceed to next phase     |                            |
+```
 
 1. **Gate:** Proposer publishes `kind:30570` with `gate_status: pending` and one or more `gate_authority` tags identifying the required reviewers.
 2. **Review:** Each reviewer evaluates the proposal and publishes `kind:30571` with their `decision`.
@@ -170,7 +191,7 @@ A Nostr publishing platform can gate article publication behind editorial approv
 
 ### Grant & Funding Applications
 
-A decentralised grant program can use approval gates for application review. Applicants publish `kind:30570` with the grant committee members as `gate_authority` tags. Committee members independently review and vote. The multi-reviewer gate model ensures all required approvals are recorded before funds are released.
+A decentralized grant program can use approval gates for application review. Applicants publish `kind:30570` with the grant committee members as `gate_authority` tags. Committee members independently review and vote. The multi-reviewer gate model ensures all required approvals are recorded before funds are released.
 
 ### Regulatory & Compliance Sign-offs
 
@@ -228,19 +249,6 @@ An "approved" response from one of the gate authorities.
 }
 ```
 
-### REQ Filters
-
-```json
-[
-    {"kinds": [30570], "authors": ["<proposer-pubkey>"]},
-    {"kinds": [30570], "#gate_authority": ["<my-pubkey>"]},
-    {"kinds": [30571], "#e": ["<gate-event-id>"]},
-    {"kinds": [30571], "authors": ["<reviewer-pubkey>"]}
-]
-```
-
-The second filter discovers all gates where a specific pubkey is a required reviewer. The third filter fetches all responses to a specific gate.
-
 ## Security Considerations
 
 * **Authority verification.** Implementations MUST verify that Kind 30571 responses are signed by a pubkey listed in the corresponding Kind 30570's `gate_authority` tags. Responses from unauthorised pubkeys MUST be ignored.
@@ -257,7 +265,7 @@ The second filter discovers all gates where a specific pubkey is a required revi
 
 ## Reference Implementation
 
-Implementors SHOULD refer to the kind definitions and JSON examples above.
+The [`@trott/sdk`](https://github.com/TheCryptoDonkey/trott-sdk) TypeScript library provides builders and parsers for both kinds defined in this NIP. For standalone use without TROTT, implementors SHOULD refer to the kind definitions above.
 
 A minimal implementation requires:
 

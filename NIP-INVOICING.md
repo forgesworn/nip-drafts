@@ -8,6 +8,8 @@ Structured Invoicing
 
 One addressable event kind for formal invoicing on Nostr. Payment recording composes with NIP-ESCROW Receipt; expense reimbursement composes with NIP-APPROVAL.
 
+> **Standalone usability:** This NIP works independently on any Nostr application. Invoice publishing and payment tracking require only NIP-01 and NIP-ESCROW Receipt (kind 30535). Expense reimbursement optionally composes with NIP-APPROVAL and NIP-EVIDENCE.
+
 > **Design principle:** This event records billing state; it does not execute payments. The invoice says "you owe me X". Actual money moves on whatever rail the parties choose. Payment confirmation uses NIP-ESCROW Receipt (kind 30535). Expense reimbursement uses NIP-APPROVAL Gate (kind 30570).
 
 ## Motivation
@@ -684,7 +686,7 @@ A freelance photographer travelling for a commissioned shoot publishes NIP-EVIDE
 
 ## Reference Implementation
 
-A reference implementation is available in the `@trott/sdk` TypeScript library, which provides builders and parsers for the Invoice kind defined in this NIP, as well as the composed NIP-ESCROW, NIP-APPROVAL, and NIP-EVIDENCE kinds. For standalone use, implementors SHOULD refer to the kind definitions above.
+A reference implementation is available in the [`@trott/sdk`](https://github.com/forgesworn/trott-sdk) TypeScript library, which provides builders and parsers for the Invoice kind defined in this NIP, as well as the composed NIP-ESCROW, NIP-APPROVAL, and NIP-EVIDENCE kinds. For standalone use, implementors SHOULD refer to the kind definitions above.
 
 A minimal implementation requires:
 

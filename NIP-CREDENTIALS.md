@@ -10,7 +10,7 @@ Two addressable event kinds for declaring credential requirements and revoking c
 
 > **Design principle:** Credential requirements are declarations, not enforcement. A requirement event communicates that a credential is expected for participation — enforcement is the responsibility of the consuming application (marketplace, relay, operator).
 
-> **Standalone usability:** This NIP works independently on any Nostr application. Within the [TROTT protocol](https://github.com/forgesworn/nip-drafts) (v0.9), credential gating composes with TROTT-03 (Reputation), TROTT-06 (Coordination), and domain profiles that declare mandatory credentials — but adoption of TROTT is not required.
+> **Standalone usability:** This NIP works independently on any Nostr application. Within the TROTT protocol (v0.9), credential gating composes with TROTT-03 (Reputation), TROTT-06 (Coordination), and domain profiles that declare mandatory credentials — but adoption of TROTT is not required.
 
 ## Motivation
 
@@ -77,8 +77,7 @@ Published by a context owner (marketplace, domain operator, community) to declar
         ["expiration", "1735689600"]
     ],
     "content": "Gas Safe registration is a legal requirement for anyone working on gas appliances in the United Kingdom. Providers without a current registration MUST NOT be matched to gas-related tasks.",
-    "id": "<32-bytes lowercase hex>",
-    "sig": "<64-bytes lowercase hex>"
+    // other fields...
 }
 ```
 
@@ -106,17 +105,13 @@ Tags:
 
 A context owner MAY publish multiple Kind 30527 events with different `d` tags to declare multiple credential requirements. For example, a gas plumbing marketplace might require both Gas Safe registration and public liability insurance:
 
-Requirement 1 (Gas Safe):
-
 ```json
+// Requirement 1: Gas Safe
 ["d", "gas_plumbing:requirement:gas_safe"]
 ["credential_type", "professional_licence"]
 ["mandatory", "true"]
-```
 
-Requirement 2 (Insurance):
-
-```json
+// Requirement 2: Insurance
 ["d", "gas_plumbing:requirement:public_liability"]
 ["credential_type", "insurance"]
 ["mandatory", "true"]
@@ -148,8 +143,7 @@ Published by an issuer, operator, or regulatory authority to explicitly revoke a
         ["revocation_details", "Registration suspended following investigation into unsafe installation practices"]
     ],
     "content": "",
-    "id": "<32-bytes lowercase hex>",
-    "sig": "<64-bytes lowercase hex>"
+    // other fields...
 }
 ```
 
@@ -157,7 +151,7 @@ Tags:
 
 * `d` (REQUIRED): Format `<subject_pubkey>:revocation:<credential_type_slug>:<timestamp>`. Unique per revocation (append-only). The timestamp component ensures multiple revocations for the same credential type are preserved.
 * `t` (REQUIRED): Protocol family marker. MUST be `"credential-revocation"`.
-* `e` (REQUIRED): Event reference to the credential attestation being revoked. Format: `["e", "<event-id>", "<relay-hint>", "31000"]`. Kind 30528 references credential attestation events. While NIP-VA (kind 31000) is the recommended attestation format, the revocation mechanism works with any addressable credential event that follows the `d` tag convention described above.
+* `e` (REQUIRED): Event reference to the NIP-VA kind 31000 Credential Attestation being revoked. Format: `["e", "<event-id>", "<relay-hint>", "31000"]`.
 * `p` (REQUIRED): Pubkey of the credential holder whose credential is being revoked.
 * `credential_type` (REQUIRED): Machine-readable type of the credential being revoked. MUST match the `credential_type` on the referenced NIP-VA kind 31000 event.
 * `revocation_reason` (REQUIRED): Reason for revocation. One of `expired` (natural expiry, explicitly recorded), `disciplinary` (conduct-related suspension or removal), `superseded` (replaced by an updated credential), `voluntary` (holder voluntarily surrendered), `fraud` (credential obtained fraudulently), `regulatory` (regulatory or legal requirement), `error` (issued in error).
@@ -202,6 +196,37 @@ A credential meets a requirement when its `issuer_type` level is **equal to or h
 - Credential with `issuer_type = "operator"` (level 3) — **rejected** (lower trust)
 
 ## Protocol Flow
+
+```
+  Context Owner             Relay              Provider             Issuer
+      |                       |                    |                   |
+      |-- kind:30527 -------->|                    |                   |
+      |  (requirement:        |                    |                   |
+      |   gas_safe,           |                    |                   |
+      |   min: industry_body) |                    |                   |
+      |                       |                    |                   |
+      |                       |<-- kind:31000 -----|                   |
+      |                       |  (attestation:     |                   |
+      |                       |   gas_safe,        |<-- kind:31000 ---|
+      |                       |   issuer_type:     |  (issued by      |
+      |                       |   authority)       |   Gas Safe       |
+      |                       |                    |   Register)      |
+      |                       |                    |                   |
+      |   Application checks: |                    |                   |
+      |   authority >= industry_body ✓              |                   |
+      |   credential not expired ✓                  |                   |
+      |   no kind:30528 revocation ✓                |                   |
+      |   → Provider eligible  |                    |                   |
+      |                       |                    |                   |
+      |                       |                    |   (later...)      |
+      |                       |<--------------------------------- kind:30528
+      |                       |                    |  (revocation:     |
+      |                       |                    |   disciplinary)   |
+      |                       |                    |                   |
+      |   Application checks: |                    |                   |
+      |   revocation exists ✗  |                    |                   |
+      |   → Provider ineligible|                    |                   |
+```
 
 ### Verification Algorithm
 
@@ -253,15 +278,18 @@ flowchart TD
 ### REQ Filters
 
 ```json
-[
-    {"kinds": [30527], "authors": ["<context-owner-pubkey>"]},
-    {"kinds": [31000], "#p": ["<provider-pubkey>"]},
-    {"kinds": [30528], "#p": ["<provider-pubkey>"]},
-    {"kinds": [30528], "#e": ["<credential-attestation-event-id>"]}
-]
-```
+// All credential requirements for a context owner
+{"kinds": [30527], "authors": ["<context-owner-pubkey>"]}
 
-The first filter fetches all credential requirements published by a context owner. The second discovers all credentials held by a provider. The third finds all revocations targeting a provider. The fourth checks revocations for a specific credential attestation.
+// All credentials held by a provider
+{"kinds": [31000], "#p": ["<provider-pubkey>"]}
+
+// All revocations for a provider
+{"kinds": [30528], "#p": ["<provider-pubkey>"]}
+
+// Revocations for a specific credential attestation
+{"kinds": [30528], "#e": ["<credential-attestation-event-id>"]}
+```
 
 ## Use Cases Beyond Task Coordination
 
@@ -290,7 +318,7 @@ Industry bodies can publish Kind 30527 events as a machine-readable registry of 
 * **Revocation immutability.** Kind 30528 events use the append-only pattern — each revocation MUST have a unique `d` tag. Clients MUST treat revocations as permanent. If a credential is reinstated, a new NIP-VA kind 31000 attestation MUST be issued rather than deleting the revocation.
 * **Revocation authority verification.** Applications MUST verify that the publisher of a Kind 30528 event is authorised to revoke the referenced credential. Unverified revocations could be used to deny service to legitimate providers. See [Revocation Authority](#revocation-authority) for verification strategies.
 * **Requirement spoofing.** Any pubkey can publish a Kind 30527 event. Applications MUST verify that the requirement publisher is a recognised context owner (marketplace operator, regulatory body, community moderator) before enforcing its requirements. Unauthenticated requirements could be used to exclude providers unfairly.
-* **Credential freshness.** Applications SHOULD check both the `expiration` tag on NIP-VA kind 31000 and the `created_at` timestamp. A credential with a valid `expiration` date but a very old `created_at` may indicate a stale attestation that has not been re-verified.
+* **Credential freshness.** Applications SHOULD check both the `expiration` tag on NIP-VA kind 31000 and the `created_at` timestamp. A credential with a valid `expires` date but a very old `created_at` may indicate a stale attestation that has not been re-verified.
 * **Replay attacks.** A revoked credential holder might present the original NIP-VA kind 31000 attestation to an application that has not yet received the Kind 30528 revocation. Applications SHOULD subscribe to revocation events in real time and SHOULD NOT rely solely on point-in-time queries.
 * **Privacy of revocation reasons.** Revocation reasons (especially `disciplinary` and `fraud`) may involve sensitive personal information. Publishers SHOULD use the encrypted `content` field for detailed revocation circumstances and keep the `revocation_reason` tag to the high-level category only.
 * **Self-declared credential inflation.** Requirements with `min_issuer_type = "self_declared"` provide minimal assurance. Applications SHOULD clearly display the issuer type alongside credentials so that users can assess trustworthiness. A self-declared credential is better than no credential, but applications MUST NOT present it as equivalent to an authority-issued one.
@@ -440,7 +468,7 @@ These compositions are optional. NIP-CREDENTIALS works without any TROTT-00 patt
 
 ## Reference Implementation
 
-Implementors SHOULD refer to the kind definitions and JSON examples above.
+The [`@trott/sdk`](https://github.com/TheCryptoDonkey/trott-sdk) TypeScript library provides builders and parsers for the credential kinds defined in this NIP. For standalone use without TROTT, implementors SHOULD refer to the kind definitions above.
 
 A minimal implementation requires:
 

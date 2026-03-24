@@ -10,6 +10,8 @@ This document shows how to model Service Level Agreements on Nostr using existin
 
 > **Design principle:** SLA functionality is a composition of existing primitives: evidence records capture templates and breach reports, approval gates formalise multi-party agreement, and dispute claims handle contested breaches. This avoids allocating dedicated kinds for a pattern that maps cleanly onto general-purpose building blocks.
 
+> **Standalone usability:** This guide works independently on any Nostr application that supports NIP-EVIDENCE, NIP-APPROVAL, and NIP-DISPUTES. No additional protocol adoption is required.
+
 ## Motivation
 
 Nostr has NIP-ESCROW for conditional payment coordination and NIP-INVOICING for structured billing, but no standard mechanism for **declaring and enforcing performance commitments**. Many service relationships require measurable quality guarantees:
@@ -686,7 +688,7 @@ Implementations MAY deploy automated monitoring systems that:
 
 ## Reference Implementation
 
-The `@trott/sdk` TypeScript library provides builders and parsers for the composed SLA workflow. For standalone use, implementers SHOULD refer to the kind definitions and tag conventions above.
+The [`@trott/sdk`](https://github.com/forgesworn/trott-sdk) TypeScript library provides builders and parsers for the composed SLA workflow. For standalone use, implementers SHOULD refer to the kind definitions and tag conventions above.
 
 A minimal implementation requires:
 

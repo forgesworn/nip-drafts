@@ -10,6 +10,8 @@ One event kind for recording signed, timestamped facts on Nostr — any particip
 
 > **Design principle:** Evidence records are append-only facts. Each record is independently verifiable via its cryptographic signature and optional file hash. They do not enforce truth — they record claims with provable authorship and timing.
 
+> **Standalone usability:** This NIP works independently on any Nostr application. Within the TROTT protocol (v0.9), it is pattern P5 in TROTT-00: Core Patterns. TROTT composes evidence recording with inspection sign-offs, dispute evidence, credential verification, and compliance records — but adoption of TROTT is not required.
+
 ## Motivation
 
 Nostr events are inherently signed and timestamped, but there is no standard kind dedicated to **recording facts for later verification**. Many workflows need an immutable audit trail:
@@ -182,7 +184,7 @@ See [NIP-CUSTODY](./NIP-CUSTODY.md) for full custody transfer details and multi-
 
 ## Reference Implementation
 
-Implementors SHOULD refer to the kind definitions and JSON examples above.
+The [`@trott/sdk`](https://github.com/TheCryptoDonkey/trott-sdk) TypeScript library provides builders and parsers for the evidence record kind defined in this NIP. For standalone use without TROTT, implementors SHOULD refer to the kind definitions above.
 
 A minimal implementation requires:
 
