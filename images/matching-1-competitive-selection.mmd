@@ -6,12 +6,12 @@ sequenceDiagram
     participant P2 as Provider 2
     participant P3 as Provider 3
 
-    rect rgb(27, 45, 61)
+    rect rgb(30, 58, 95)
         Note over RQ,P3: Request Published (NIP-99 or any event)
         RQ->>RL: Request / announcement event
     end
 
-    rect rgb(45, 45, 27)
+    rect rgb(80, 50, 20)
         Note over RQ,P3: Offers — providers compete
         P1->>RL: kind:30576 Offer<br/>50,000 SAT, 3 days
         P2->>RL: kind:30576 Offer<br/>45,000 SAT, 5 days
@@ -21,13 +21,13 @@ sequenceDiagram
         P2->>RL: kind:30576 Offer (updated)<br/>42,000 SAT, 4 days
     end
 
-    rect rgb(27, 45, 61)
+    rect rgb(30, 58, 95)
         Note over RQ,P3: Review — requester evaluates
         RL-->>RQ: All current offers
         Note over RQ: Compares: price, timeline,<br/>reputation, qualifications
     end
 
-    rect rgb(27, 61, 45)
+    rect rgb(6, 95, 70)
         Note over RQ,P3: Selection
         RQ->>RL: kind:30577 Selection<br/>selected: Provider 2
         RL-->>P2: Notification: selected

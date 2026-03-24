@@ -7,7 +7,7 @@ sequenceDiagram
     O->>O: Outcome Report (public)
     Note right of O: Outcome assumed correct
 
-    rect rgb(27, 45, 61)
+    rect rgb(30, 58, 95)
         Note over O,C: Level 1 — Evidence Window
         C-->>O: Outcome Challenge (gift-wrapped)
         Note left of C: Challenger stakes + provides evidence
@@ -21,7 +21,7 @@ sequenceDiagram
         end
     end
 
-    rect rgb(45, 45, 27)
+    rect rgb(80, 50, 20)
         Note over C,V: Level 2 — Community Vote
         V-->>V: Outcome Vote (gift-wrapped)
         V-->>V: Outcome Vote (gift-wrapped)
@@ -36,7 +36,7 @@ sequenceDiagram
         end
     end
 
-    rect rgb(61, 27, 27)
+    rect rgb(127, 29, 29)
         Note over C,A: Level 3 — Designated Arbiter
         A->>A: Outcome Ruling level=3 (public)
         Note right of A: Final, non-appealable

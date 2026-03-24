@@ -6,7 +6,7 @@ sequenceDiagram
     participant C as Hub
     participant D as Recipient
 
-    rect rgb(27, 45, 61)
+    rect rgb(30, 58, 95)
         Note over A,D: Leg 1 — Sender to Courier
         A->>R: kind:30573 Evidence<br/>departure condition photo
         A->>R: kind:30572 Transfer<br/>custody_from: A, custody_to: B<br/>condition_grade: excellent
@@ -14,7 +14,7 @@ sequenceDiagram
         B->>R: kind:30573 Evidence<br/>receipt condition confirmed
     end
 
-    rect rgb(45, 45, 27)
+    rect rgb(80, 50, 20)
         Note over A,D: Leg 2 — Courier to Hub
         B->>R: kind:30573 Evidence<br/>departure scan
         B->>R: kind:30572 Transfer<br/>custody_from: B, custody_to: C<br/>custody_handoff_ref: Leg 1 event ID
@@ -22,7 +22,7 @@ sequenceDiagram
         C->>R: kind:30573 Evidence<br/>receipt condition: good
     end
 
-    rect rgb(27, 61, 45)
+    rect rgb(6, 95, 70)
         Note over A,D: Leg 3 — Hub to Recipient
         C->>R: kind:30573 Evidence<br/>departure condition
         C->>R: kind:30572 Transfer<br/>custody_from: C, custody_to: D<br/>custody_handoff_ref: Leg 2 event ID
