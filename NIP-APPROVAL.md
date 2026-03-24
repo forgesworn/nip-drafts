@@ -119,27 +119,6 @@ Tags:
 
 ## Protocol Flow
 
-```
-  Proposer                       Relay                     Reviewer(s)
-      |                            |                            |
-      |-- kind:30570 Gate -------->|                            |
-      |  (gate_status: pending)    |                            |
-      |                            |------- notification ------>|
-      |                            |                            |
-      |                            |<-- kind:30571 Response ----|
-      |                            |    (decision: revise)      |
-      |<------ notification -------|                            |
-      |                            |                            |
-      |-- kind:30570 Gate -------->|  (updated proposal)        |
-      |                            |------- notification ------>|
-      |                            |                            |
-      |                            |<-- kind:30571 Response ----|
-      |                            |    (decision: approved)    |
-      |<------ notification -------|                            |
-      |                            |                            |
-      |  Proceed to next phase     |                            |
-```
-
 1. **Gate:** Proposer publishes `kind:30570` with `gate_status: pending` and one or more `gate_authority` tags identifying the required reviewers.
 2. **Review:** Each reviewer evaluates the proposal and publishes `kind:30571` with their `decision`.
 3. **Revision (optional):** If a reviewer requests revision (`decision: revise`), the proposer updates their `kind:30570` event with revisions, and the reviewer evaluates again.

@@ -119,27 +119,6 @@ Tags:
 
 ## Protocol Flow
 
-```
-  Proposer                       Relay                     Voters
-      |                            |                            |
-      |-- kind:30574 Proposal ---->|                            |
-      |  (threshold: 3,            |                            |
-      |   voters: V1, V2, V3, V4) |                            |
-      |                            |------- notification ------>| V1
-      |                            |------- notification ------>| V2
-      |                            |------- notification ------>| V3
-      |                            |------- notification ------>| V4
-      |                            |                            |
-      |                            |<-- kind:30575 Vote --------| V1 (agree)
-      |                            |<-- kind:30575 Vote --------| V2 (agree)
-      |                            |<-- kind:30575 Vote --------| V3 (agree)
-      |<------ notification -------|                            |
-      |                            |                            |
-      |  Threshold (3) reached     |                            |
-      |  Consensus passed          |                            |
-      |                            |                            |
-```
-
 1. **Proposal:** Proposer publishes `kind:30574` listing all required voters via `p` tags and the `threshold` for passage.
 2. **Voting:** Each voter evaluates the proposal and publishes `kind:30575` with their `vote`.
 3. **Vote changes:** Voters MAY update their vote by republishing `kind:30575` (addressable event replacement) before the deadline.

@@ -132,23 +132,6 @@ Tags:
 
 ## Protocol Flow
 
-```
-  Custodian A                    Relay                     Receiver B
-      |                            |                            |
-      |-- kind:30573 Evidence ---->|  (departure condition)     |
-      |                            |                            |
-      |-- kind:30572 Transfer ---->|                            |
-      |  (custody_from: A,         |                            |
-      |   custody_to: B)           |------- notification ------>|
-      |                            |                            |
-      |                            |<-- kind:30573 Evidence ----|
-      |                            |    (receipt condition)      |
-      |<------ notification -------|                            |
-      |                            |                            |
-      |  B is now the custodian    |                            |
-      |                            |                            |
-```
-
 1. **Evidence (optional):** Outgoing custodian publishes `kind:30573` documenting the asset's condition before handoff.
 2. **Transfer:** Outgoing custodian publishes `kind:30572` recording that custody has passed to the receiver.
 3. **Receipt evidence (optional):** Incoming receiver publishes `kind:30573` documenting the asset's condition upon receipt.
@@ -157,17 +140,6 @@ Tags:
 ## Chain of Custody
 
 Multiple custody transfers form a verifiable chain. Each subsequent Kind 30572 SHOULD include a `custody_handoff_ref` tag pointing to the previous transfer event ID. Clients can reconstruct the full chain by following these references from the most recent transfer back to the origin.
-
-```
-  Origin          Leg 1           Leg 2           Leg 3
-    |               |               |               |
-    +-- 30572 ---->-+-- 30572 ---->-+-- 30572 ---->-+
-    |  (A -> B)     |  (B -> C)     |  (C -> D)     |
-    |               |               |               |
-    +-- 30573       +-- 30573       +-- 30573       +-- 30573
-    (departure)     (receipt/       (receipt/        (receipt)
-                     departure)      departure)
-```
 
 The following diagram illustrates a three-leg delivery chain with evidence at each handoff:
 

@@ -87,24 +87,6 @@ Tags:
 
 ## Protocol Flow
 
-```
-  Author                         Relay                     Interested Parties
-      |                            |                            |
-      |-- kind:30578 Evidence ---->|                            |
-      |  (evidence_type: inspection|                            |
-      |   file_hash: sha256:...)   |------- notification ------>|
-      |                            |                            |
-      |-- kind:30578 Evidence ---->|  (additional finding)      |
-      |  (evidence_type: photo)    |------- notification ------>|
-      |                            |                            |
-      |-- kind:30578 Evidence ---->|  (another finding)         |
-      |  (evidence_type: measurement)                           |
-      |                            |------- notification ------>|
-      |                            |                            |
-      |  Immutable audit trail     |                            |
-      |  recorded on relays        |                            |
-```
-
 1. **Recording:** Any participant publishes `kind:30578` events to record facts. Each record gets a unique `d` tag value (append-only).
 2. **Verification:** Interested parties verify the author's signature, check `file_hash` integrity for any attached files, and cross-reference `captured_at` with `created_at` for timing consistency.
 3. **Accumulation:** Additional evidence is published as new `kind:30578` events — never by overwriting existing records.

@@ -129,32 +129,6 @@ Tags:
 
 ## Protocol Flow
 
-```
-  Requester                      Relay                     Providers
-      |                            |                            |
-      |  (Request or announcement  |                            |
-      |   published via NIP-99,    |                            |
-      |   NIP-15, or any event)    |                            |
-      |                            |                            |
-      |                            |<-- kind:30576 Offer -------| Provider 1
-      |                            |    (amount: 50000 SAT)     |
-      |                            |                            |
-      |                            |<-- kind:30576 Offer -------| Provider 2
-      |                            |    (amount: 45000 SAT)     |
-      |                            |                            |
-      |                            |<-- kind:30576 Offer -------| Provider 3
-      |                            |    (amount: 60000 SAT)     |
-      |                            |                            |
-      |<---- offers received ------|                            |
-      |                            |                            |
-      |-- kind:30577 Selection --->|                            |
-      |  (selected: Provider 2)    |------- notification ------>| Provider 2
-      |                            |                            |
-      |                            |  (Provider 1, 3: not       |
-      |                            |   selected — implicit)     |
-      |                            |                            |
-```
-
 1. **Request:** The requester publishes a request via any mechanism (NIP-99 classified listing, NIP-15 marketplace request, or any other event). The request event is referenced by offers via `e` tags.
 2. **Offers:** Providers discover the request and publish `kind:30576` offers. Each provider can update their offer by republishing (addressable event).
 3. **Review:** The requester reviews received offers — comparing price, qualifications, timeline, and reputation.

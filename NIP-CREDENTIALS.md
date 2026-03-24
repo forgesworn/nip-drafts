@@ -197,37 +197,6 @@ A credential meets a requirement when its `issuer_type` level is **equal to or h
 
 ## Protocol Flow
 
-```
-  Context Owner             Relay              Provider             Issuer
-      |                       |                    |                   |
-      |-- kind:30527 -------->|                    |                   |
-      |  (requirement:        |                    |                   |
-      |   gas_safe,           |                    |                   |
-      |   min: industry_body) |                    |                   |
-      |                       |                    |                   |
-      |                       |<-- kind:31000 -----|                   |
-      |                       |  (attestation:     |                   |
-      |                       |   gas_safe,        |<-- kind:31000 ---|
-      |                       |   issuer_type:     |  (issued by      |
-      |                       |   authority)       |   Gas Safe       |
-      |                       |                    |   Register)      |
-      |                       |                    |                   |
-      |   Application checks: |                    |                   |
-      |   authority >= industry_body ✓              |                   |
-      |   credential not expired ✓                  |                   |
-      |   no kind:30528 revocation ✓                |                   |
-      |   → Provider eligible  |                    |                   |
-      |                       |                    |                   |
-      |                       |                    |   (later...)      |
-      |                       |<--------------------------------- kind:30528
-      |                       |                    |  (revocation:     |
-      |                       |                    |   disciplinary)   |
-      |                       |                    |                   |
-      |   Application checks: |                    |                   |
-      |   revocation exists ✗  |                    |                   |
-      |   → Provider ineligible|                    |                   |
-```
-
 ### Verification Algorithm
 
 Applications verifying a provider's eligibility against credential requirements SHOULD follow this algorithm:
