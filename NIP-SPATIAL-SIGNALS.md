@@ -20,14 +20,14 @@ Many physical-world applications need to publish conditions that are tied to a p
 
 Existing implementations tend to invent their own kinds, tag names, and expiry rules. That makes interoperability weak even when the underlying pattern is the same: "there is a condition at this place" followed by "it is still there" or "it is no longer there."
 
-This NIP standardizes that core pattern:
+This NIP standardises that core pattern:
 
 - one kind for the initial spatial report
 - one kind for corroboration
 - geohash-indexed querying
 - client-side effective lifetime derived from confirmations
 
-It does **not** attempt to standardize trust scores, dispatch policy, UI treatment, or a universal category taxonomy.
+It does **not** attempt to standardise trust scores, dispatch policy, UI treatment, or a universal category taxonomy.
 
 ## Prior Art
 
@@ -50,14 +50,14 @@ This NIP stands on its own. Implementers MAY adopt it without waiting for cross-
 
 ## Design Boundary
 
-This NIP standardizes:
+This NIP standardises:
 
 - report/corroboration event structure
 - geospatial indexing via `g` tags
 - relay-side expiration versus client-side effective lifetime
 - minimal semantics for "still applies" and "cleared"
 
-This NIP does **not** standardize:
+This NIP does **not** standardise:
 
 - reputation or anti-spam weighting
 - mandatory global category values for `t`
@@ -289,6 +289,63 @@ Typical TROTT extensions include:
 - coarse-public publication, with exact coordinates shared separately via NIP-LOCATION `kind:20501`
 
 Trust weighting, operator policy, and domain-specific UI treatment remain outside this NIP.
+
+## Multi-Letter Tag Filtering
+
+This NIP uses the multi-letter tag `status` on corroboration events. Standard Nostr relays index only single-letter tags for `#` filter queries. The `status` tag is stored in events and readable by clients, but cannot be used in relay-side `REQ` filters. Clients SHOULD filter by `kind` and use single-letter tags (`e`, `g`, `t`) for relay queries, then apply `status` filtering client-side.
+
+Extension tags that profiles MAY define (such as `severity`, `domain`, `context`, `task_id`) are also multi-letter and subject to the same limitation.
+
+## Test Vectors
+
+### Kind 1315 - Spatial Signal Report
+
+```json
+{
+  "kind": 1315,
+  "pubkey": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
+  "created_at": 1700000000,
+  "tags": [
+    ["t", "road_closure"],
+    ["t", "road"],
+    ["g", "u2ed"],
+    ["g", "u2edc"],
+    ["g", "u2edcg"],
+    ["lat", "48.8566140"],
+    ["lon", "2.3522219"],
+    ["severity", "high"],
+    ["expiration", "1701209600"],
+    ["alt", "Road closure reported"]
+  ],
+  "content": "Left lane closed near the junction.",
+  "id": "<32-byte-hex>",
+  "sig": "<64-byte-hex>"
+}
+```
+
+### Kind 1316 - Spatial Signal Corroboration
+
+```json
+{
+  "kind": 1316,
+  "pubkey": "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b200",
+  "created_at": 1700003600,
+  "tags": [
+    ["e", "f1e2d3c4b5a6f1e2d3c4b5a6f1e2d3c4b5a6f1e2d3c4b5a6f1e2d3c4b5a6f1e2"],
+    ["g", "u2ed"],
+    ["g", "u2edc"],
+    ["g", "u2edcg"],
+    ["status", "still_there"],
+    ["lat", "48.8566140"],
+    ["lon", "2.3522219"],
+    ["expiration", "1701213200"],
+    ["alt", "Condition confirmed"]
+  ],
+  "content": "",
+  "id": "<32-byte-hex>",
+  "sig": "<64-byte-hex>"
+}
+```
 
 ## Security and Privacy Considerations
 

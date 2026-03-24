@@ -8,7 +8,7 @@ Scoped, Revocable Data Access Grants
 
 One addressable event kind for granting a third party scoped, time-bounded, revocable access to encrypted data on Nostr. The grantor specifies which event kinds the grantee may read or write, which entities the data pertains to, when access expires, and provides decryption key material encrypted to the grantee's pubkey using NIP-44.
 
-> **Design principle:** Data Access Grants authorise *reading and writing encrypted data* — they do not authorise *acting on behalf of* another party. This is distinct from NIP-26 delegation, which authorises signing events as if you were the delegator.
+> **Design principle:** Data Access Grants authorise *reading and writing encrypted data*. They do not authorise *acting on behalf of* another party. This is distinct from NIP-26 delegation, which authorises signing events as if you were the delegator.
 
 ## Motivation
 
@@ -124,10 +124,10 @@ When encrypted data needs to be shared with multiple parties simultaneously, imp
 
 1. **Encrypt source data** with a random 256-bit symmetric Content Key using ChaCha20-Poly1305 (the same cipher used internally by NIP-44). The ciphertext is stored in the source event's `content` field.
 2. **Distribute the CK** to each authorised recipient by wrapping it with NIP-44 (ECDH key exchange to shared secret, then encrypt the CK). The wrapped CK is placed in the Kind 30556 grant's `content` field.
-3. **Adding a new recipient** requires only a new Kind 30556 event with the CK wrapped to their pubkey — no re-encryption of the source data.
-4. **Revoking a recipient** re-publishes their Kind 30556 with `["revoked", "true"]` — other recipients are unaffected.
+3. **Adding a new recipient** requires only a new Kind 30556 event with the CK wrapped to their pubkey. No re-encryption of the source data is needed.
+4. **Revoking a recipient** re-publishes their Kind 30556 with `["revoked", "true"]`. Other recipients are unaffected.
 
-**Key rotation:** When a grantee is revoked, the grantor SHOULD rotate the CK for all future content and re-issue updated Kind 30556 events (with the new CK) to remaining grantees. Existing ciphertext encrypted with the old CK remains readable to anyone who previously received it — this is the same inherent limitation as revoking OAuth tokens or API keys.
+**Key rotation:** When a grantee is revoked, the grantor SHOULD rotate the CK for all future content and re-issue updated Kind 30556 events (with the new CK) to remaining grantees. Existing ciphertext encrypted with the old CK remains readable to anyone who previously received it. This is the same inherent limitation as revoking OAuth tokens or API keys.
 
 ---
 
@@ -135,7 +135,7 @@ When encrypted data needs to be shared with multiple parties simultaneously, imp
 
 ### Binary Revocation
 
-Re-publishing the same `d` tag with `["revoked", "true"]` immediately invalidates the grant. As an addressable event, relays replace the old version — clients querying for the grant will receive only the revoked version. Grantee clients MUST check grant validity (absence of `revoked` tag, `valid_until` not expired) before attempting decryption.
+Re-publishing the same `d` tag with `["revoked", "true"]` immediately invalidates the grant. As an addressable event, relays replace the old version. Clients querying for the grant will receive only the revoked version. Grantee clients MUST check grant validity (absence of `revoked` tag, `valid_until` not expired) before attempting decryption.
 
 Note the inherent limitation: revocation cuts off future access but cannot retroactively unread previously decrypted data. This is the same limitation as revoking OAuth tokens, API keys, or NIP-26 delegations. Grantors SHOULD set `valid_until` to the shortest practical window to minimise exposure.
 
@@ -146,19 +146,19 @@ For scenarios where a grantor wants to stop sharing **future** content while pre
 1. Historical content was encrypted with CK_1. The grantee already holds CK_1 (generation 1).
 2. The grantor rotates to CK_2 for all new content (generation 2).
 3. The grantor does NOT distribute CK_2 to the forward-revoked grantee.
-4. The grantor does NOT set `["revoked", "true"]` — the grant remains active for generation 1 data.
+4. The grantor does NOT set `["revoked", "true"]`. The grant remains active for generation 1 data.
 5. Result: the grantee can still decrypt historical data (CK_1) but cannot decrypt new content (CK_2).
 
 The `key_generation` tag on the Kind 30556 event records which CK generation the grantee has access to. Grantees with an older `key_generation` value can read content up to and including that generation but not content encrypted with subsequent CKs.
 
 **Use cases:**
 
-- **Ending a tutoring engagement** — the tutor retains access to historical session records from their teaching period but not future learning data.
-- **Changing healthcare provider** — the outgoing GP retains access to records from their care period for continuity purposes but does not receive new data after transfer.
-- **Contractor off-boarding** — the contractor retains access to deliverables they created during the engagement but not ongoing project data.
-- **Switching AI provider** — the old AI provider retains access to session data it generated but the new provider receives new CKs going forward.
+- **Ending a tutoring engagement** - the tutor retains access to historical session records from their teaching period but not future learning data.
+- **Changing healthcare provider** - the outgoing GP retains access to records from their care period for continuity purposes but does not receive new data after transfer.
+- **Contractor off-boarding** - the contractor retains access to deliverables they created during the engagement but not ongoing project data.
+- **Switching AI provider** - the old AI provider retains access to session data it generated but the new provider receives new CKs going forward.
 
-Forward-only revocation is OPTIONAL. Implementations that do not need granular revocation MAY use the standard binary revocation model (set `["revoked", "true"]`). Both models MAY coexist — a grantor can forward-revoke some grantees while fully revoking others.
+Forward-only revocation is OPTIONAL. Implementations that do not need granular revocation MAY use the standard binary revocation model (set `["revoked", "true"]`). Both models MAY coexist: a grantor can forward-revoke some grantees while fully revoking others.
 
 ---
 
@@ -182,7 +182,7 @@ Multiple parties can independently issue grants for the same data.
 
 ### Cascade Handover
 
-When the primary keyholder changes (custody transfer, employee departure, account migration), the new primary rotates the Content Key and re-issues grants to all remaining accessors. The old primary's grants become stale — grantees transition to CKs issued by the new primary for future content.
+When the primary keyholder changes (custody transfer, employee departure, account migration), the new primary rotates the Content Key and re-issues grants to all remaining accessors. The old primary's grants become stale. Grantees transition to CKs issued by the new primary for future content.
 
 **Example:** When a patient transfers from one GP practice to another, the new practice rotates the Content Key and re-issues grants to the patient's specialist and AI health assistant.
 
@@ -233,7 +233,7 @@ All validation rules for Kind 30556 events. Implementations MUST enforce these r
 
 ## Examples
 
-### Education — Parent Granting AI Tutor Access
+### Education - Parent Granting AI Tutor Access
 
 A parent grants an AI tutoring service read access to their child's learning records:
 
@@ -257,7 +257,7 @@ A parent grants an AI tutoring service read access to their child's learning rec
 }
 ```
 
-### Healthcare — Patient Granting Specialist Access
+### Healthcare - Patient Granting Specialist Access
 
 A patient grants a specialist time-bounded access to their medical records for a referral:
 
@@ -282,7 +282,7 @@ A patient grants a specialist time-bounded access to their medical records for a
 }
 ```
 
-### Finance — Account Holder Granting Adviser Access
+### Finance - Account Holder Granting Adviser Access
 
 An account holder grants a financial adviser read-only access to transaction history for an annual review:
 
@@ -363,7 +363,7 @@ A patient changes GP. The old GP retains access to historical records (generatio
 
 ### NIP-01 (Basic Protocol)
 
-Kind 30556 is an addressable event as defined by NIP-01. The `d` tag provides deduplication — re-publishing with the same `d` tag replaces the previous grant on relays. This mechanism enables both revocation and key rotation.
+Kind 30556 is an addressable event as defined by NIP-01. The `d` tag provides deduplication. Re-publishing with the same `d` tag replaces the previous grant on relays. This mechanism enables both revocation and key rotation.
 
 ### NIP-44 (Encrypted Payloads)
 
@@ -371,13 +371,42 @@ The `content` field of every Kind 30556 event MUST be NIP-44 encrypted to the gr
 
 ### NIP-26 (Delegated Event Signing)
 
-NIP-26 authorises one pubkey to sign events *as if* they were another pubkey — it is an identity delegation mechanism. NIP-DATA-ACCESS is complementary: it authorises reading and writing encrypted data owned by another party, without assuming the owner's identity. A party might hold both a NIP-26 delegation (to publish events on someone's behalf) and a Kind 30556 grant (to decrypt data the delegator owns). They solve different problems and are not interchangeable.
+NIP-26 authorises one pubkey to sign events *as if* they were another pubkey. It is an identity delegation mechanism. NIP-DATA-ACCESS is complementary: it authorises reading and writing encrypted data owned by another party, without assuming the owner's identity. A party might hold both a NIP-26 delegation (to publish events on someone's behalf) and a Kind 30556 grant (to decrypt data the delegator owns). They solve different problems and are not interchangeable.
 
 ### NIP-59 (Gift Wrap)
 
 Kind 30556 events are typically published publicly (so grantees can discover them), but implementations MAY deliver grants privately via NIP-59 gift wrap when the existence of the access relationship is itself sensitive.
 
 ---
+
+## Multi-Letter Tag Filtering
+
+This NIP uses several multi-letter tags (`grantee_type`, `permissions`, `entities`, `valid_from`, `valid_until`, `revocable`, `revoked`, `purpose`, `domain`, `reference`, `key_generation`). Standard Nostr relays index only single-letter tags for `#` filter queries. Multi-letter tags are stored in events and readable by clients, but cannot be used in relay-side `REQ` filters. Clients SHOULD filter by `kind` and use single-letter tags (`d`, `p`) for relay queries, then apply multi-letter tag filters client-side.
+
+## Test Vectors
+
+### Kind 30556 - Data Access Grant
+
+```json
+{
+  "kind": 30556,
+  "pubkey": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
+  "created_at": 1707500000,
+  "tags": [
+    ["d", "a1b2c3d4:access_grant:b2c3d4e5:education"],
+    ["p", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b200"],
+    ["grantee_type", "ai_agent"],
+    ["permissions", "read:30881,read:30882"],
+    ["entities", "c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b20011"],
+    ["valid_until", "1738800000"],
+    ["revocable", "true"],
+    ["purpose", "ai_tutoring"]
+  ],
+  "content": "<NIP-44 encrypted to grantee: Content Key for learner records>",
+  "id": "<32-byte-hex>",
+  "sig": "<64-byte-hex>"
+}
+```
 
 ## Dependencies
 
@@ -387,11 +416,11 @@ Kind 30556 events are typically published publicly (so grantees can discover the
 
 ## Reference Implementation
 
-Implementors SHOULD refer to the kind definitions and JSON examples above.
+No reference implementation exists yet. Implementors SHOULD refer to the kind definitions above.
 
 A minimal implementation requires:
 
 1. A Nostr client that supports addressable event publishing.
 2. NIP-44 encryption support for wrapping Content Keys to grantee pubkeys.
-3. Grant discovery logic — subscribing to `kind:30556` events and filtering by `p` tag (grantee) or `d` tag prefix.
-4. Validity checking — verifying `valid_until`, `revoked` tag, and `key_generation` before decryption.
+3. Grant discovery logic: subscribing to `kind:30556` events and filtering by `p` tag (grantee) or `d` tag prefix.
+4. Validity checking: verifying `valid_until`, `revoked` tag, and `key_generation` before decryption.

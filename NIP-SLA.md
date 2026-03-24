@@ -468,6 +468,8 @@ sequenceDiagram
 
 ## REQ Filters
 
+> **Note:** Tags such as `evidence_type`, `sla_template_ref`, `gate_authority`, `gate_type`, and `gate_status` are multi-letter tags and therefore not relay-indexed per NIP-01. The filters below show the intended query semantics; clients MUST post-filter results client-side for multi-letter tag matches.
+
 ### Discovering SLA Templates
 
 Find all SLA templates published by a specific provider:
@@ -684,7 +686,7 @@ Implementations MAY deploy automated monitoring systems that:
 
 ## Reference Implementation
 
-Implementors SHOULD refer to the kind definitions and tag conventions above.
+The `@trott/sdk` TypeScript library provides builders and parsers for the composed SLA workflow. For standalone use, implementers SHOULD refer to the kind definitions and tag conventions above.
 
 A minimal implementation requires:
 

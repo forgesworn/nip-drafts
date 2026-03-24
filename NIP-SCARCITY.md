@@ -6,9 +6,9 @@ Workforce & Resource Scarcity Signals
 
 `draft` `optional`
 
-One event kind for broadcasting workforce, skill, or resource scarcity signals on Nostr — any participant can publish a structured scarcity signal indicating that a specific skill, trade, material, or resource is at risk of shortage in a given area.
+One event kind for broadcasting workforce, skill, or resource scarcity signals on Nostr. Any participant can publish a structured scarcity signal indicating that a specific skill, trade, material, or resource is at risk of shortage in a given area.
 
-> **Design principle:** Scarcity signals are discoverable market intelligence. They do not restrict access — they inform discovery, pricing, and workforce development decisions. Signals are time-bounded and geographically scoped.
+> **Design principle:** Scarcity signals are discoverable market intelligence. They do not restrict access; they inform discovery, pricing, and workforce development decisions. Signals are time-bounded and geographically scoped.
 
 ## Motivation
 
@@ -16,13 +16,13 @@ Labour markets, skilled trades, and specialist resources face scarcity challenge
 
 Nostr's decentralised discovery layer can surface scarcity in near real-time:
 
-- **Heritage crafts** — the Heritage Crafts Association Red List tracks critically endangered crafts; this data could be machine-readable on Nostr
-- **Healthcare** — workforce shortages in specific specialties and regions
-- **Construction** — trade skill gaps (e.g. bricklayers, steel fixers) vary by region and season
-- **Education** — subject teacher shortages in specific areas
-- **Cybersecurity** — specialist skill gaps (penetration testing, incident response)
-- **Temp staffing** — shift-by-shift availability crunches
-- **Rural services** — veterinary, plumbing, and electrical coverage gaps in remote areas
+- **Heritage crafts** - the Heritage Crafts Association Red List tracks critically endangered crafts; this data could be machine-readable on Nostr
+- **Healthcare** - workforce shortages in specific specialties and regions
+- **Construction** - trade skill gaps (e.g. bricklayers, steel fixers) vary by region and season
+- **Education** - subject teacher shortages in specific areas
+- **Cybersecurity** - specialist skill gaps (penetration testing, incident response)
+- **Temp staffing** - shift-by-shift availability crunches
+- **Rural services** - veterinary, plumbing, and electrical coverage gaps in remote areas
 
 NIP-SCARCITY provides a minimal, discoverable primitive for broadcasting and consuming scarcity intelligence.
 
@@ -32,13 +32,13 @@ This NIP was promoted from `incubating` after demonstrating demand across 5 unre
 
 | Domain | Use case | Category |
 | ------ | -------- | -------- |
-| Heritage conservation | 86,500 heritage workers needed annually until 2050 — scarcity IS the sector crisis | Built environment |
+| Heritage conservation | 86,500 heritage workers needed annually until 2050; scarcity IS the sector crisis | Built environment |
 | Green retrofit | 230K additional skilled retrofit workers needed by 2030 for UK net-zero targets | Construction |
-| Outdoor education | 30 outdoor education centres closed since 2017 — provision gap heat maps needed | Education |
+| Outdoor education | 30 outdoor education centres closed since 2017; provision gap heat maps needed | Education |
 | SEND education | Nationwide shortage of Educational Psychologists, Speech & Language Therapists, Occupational Therapists | Healthcare/education |
-| Music events | 35% of grassroots music venues closed since 2007 — venue and promoter scarcity | Culture |
+| Music events | 35% of grassroots music venues closed since 2007; venue and promoter scarcity | Culture |
 
-These domains span built environment, construction, education, healthcare, and culture — confirming the pattern is domain-agnostic.
+These domains span built environment, construction, education, healthcare, and culture, confirming the pattern is domain-agnostic.
 
 ## Kinds
 
@@ -46,7 +46,7 @@ These domains span built environment, construction, education, healthcare, and c
 | ----- | ---------------- |
 | 30599 | Scarcity Signal  |
 
-Kind 30599 is an addressable event (NIP-01). Each signal is replaceable — a publisher updates their assessment by publishing a new event with the same `d` tag. Scarcity signals are living assessments, not append-only facts.
+Kind 30599 is an addressable event (NIP-01). Each signal is replaceable: a publisher updates their assessment by publishing a new event with the same `d` tag. Scarcity signals are living assessments, not append-only facts.
 
 ---
 
@@ -98,10 +98,10 @@ Tags:
 * `source` (OPTIONAL): Attribution for the scarcity data (e.g. "Heritage Crafts Association Red List 2025", "NHS Workforce Statistics").
 * `source_url` (OPTIONAL): URL of the source data.
 * `training_available` (OPTIONAL): Training pipeline status. One of `"active"`, `"limited"`, `"none"`, `"unknown"`.
-* `domain` (OPTIONAL): TROTT domain identifier, if the signal applies to a specific domain.
+* `domain` (OPTIONAL): Application domain identifier, if the signal applies to a specific domain (e.g. `heritage-skills`, `healthcare`, `construction`).
 * `p` (OPTIONAL): Parties to notify (e.g. training bodies, funding organisations).
 
-**Content:** Plain text description of the scarcity situation — context, contributing factors, and recommended actions. Content provides the human-readable narrative that the structured tags cannot capture.
+**Content:** Plain text description of the scarcity situation: context, contributing factors, and recommended actions. Content provides the human-readable narrative that the structured tags cannot capture.
 
 ---
 
@@ -128,9 +128,9 @@ flowchart TD
     F --> G
     G --> H["Resolved or expired"]
 
-    style A fill:#f4e8e8,stroke:#a44
-    style B fill:#f4f0e8,stroke:#a94
-    style H fill:#e8f4e8,stroke:#4a9
+    style A fill:#3d1b1b,stroke:#dc3545
+    style B fill:#2d2d1b,stroke:#f5a623
+    style H fill:#1b3d2d,stroke:#16c79a
 ```
 
 ### Sequence
@@ -154,13 +154,13 @@ flowchart TD
 ```
 
 1. **Publishing:** An industry body, operator, or informed participant publishes a `kind:30599` event with structured scarcity data.
-2. **Discovery integration:** Clients querying TROTT-02 discovery for a specific skill cross-reference `kind:30599` signals. When a task requires a scarce skill, the client displays a scarcity warning alongside discovery results.
+2. **Discovery integration:** Clients querying for a specific skill cross-reference `kind:30599` signals. When a task requires a scarce skill, the client displays a scarcity warning alongside discovery results.
 3. **Update:** The publisher updates the signal by publishing a new `kind:30599` with the same `d` tag. The relay replaces the previous version.
 4. **Expiry:** Signals expire via NIP-40. Expired signals are no longer surfaced in discovery. Publishers MUST republish to maintain active signals.
 
 ## Composing with Discovery
 
-When a TROTT-02 discovery query matches a skill with an active scarcity signal:
+When a discovery query matches a skill with an active scarcity signal:
 
 1. Client fetches `kind:30599` events matching the required `skill` tag and geographic area (`g` tag or `region`).
 2. If a signal with `severity` of `critically_endangered` or `endangered` exists, the client SHOULD display a warning: *"This skill is [severity] in your area. [active_practitioners] practitioners are available. Consider extended lead times."*
@@ -176,7 +176,7 @@ Scarcity signals are claims, not facts. Multiple publishers MAY issue conflictin
 - **Prefer recent signals.** More recent signals (`created_at`) take precedence over older ones from the same publisher.
 - **Verify expiry.** Expired signals MUST NOT be surfaced in discovery.
 
-## Use Cases Beyond TROTT
+## Use Cases
 
 ### Labour Market Intelligence
 
@@ -204,7 +204,7 @@ Training providers can discover scarcity signals and publish responsive offering
 
 ## Test Vectors
 
-### Kind 30599 — Scarcity Signal
+### Kind 30599 - Scarcity Signal
 
 ```json
 {
@@ -233,6 +233,24 @@ Training providers can discover scarcity signals and publish responsive offering
 }
 ```
 
+## Relationship to Existing NIPs
+
+### NIP-TRUST
+
+[NIP-TRUST](./NIP-TRUST.md) provides publisher authority verification. Scarcity signals are claims, not facts; weighting signals by the publisher's trust level (via NIP-TRUST operator bonds or endorsement chains) is RECOMMENDED for applications that aggregate signals from multiple sources.
+
+### NIP-REPUTATION
+
+[NIP-REPUTATION](./NIP-REPUTATION.md) provides publisher reputation scores. Applications MAY use reputation scores to weight competing scarcity signals for the same skill and region, preferring signals from publishers with higher domain-relevant reputation.
+
+### NIP-PROVENANCE
+
+[NIP-PROVENANCE](./NIP-PROVENANCE.md) tracks material and product provenance. When the `scarcity_type` is `material` or `equipment`, applications MAY cross-reference NIP-PROVENANCE records to verify supply chain claims.
+
+## Multi-Letter Tag Filtering
+
+This NIP uses several multi-letter tags (`scarcity_type`, `skill`, `specialism`, `severity`, `region`, `active_practitioners`, `demand_trend`, `source`, `source_url`, `training_available`, `domain`). Standard Nostr relays index only single-letter tags for `#` filter queries. Multi-letter tags are stored in events and readable by clients, but cannot be used in relay-side `REQ` filters. Clients SHOULD filter by `kind` and use single-letter tags (`d`, `t`, `g`, `p`) for relay queries, then apply multi-letter tag filters client-side.
+
 ## Dependencies
 
 * [NIP-01](https://github.com/nostr-protocol/nips/blob/master/01.md): Basic protocol flow, addressable events
@@ -243,10 +261,10 @@ Training providers can discover scarcity signals and publish responsive offering
 
 ## Reference Implementation
 
-Implementors SHOULD refer to the kind definitions and JSON examples above.
+No reference implementation exists yet. Implementors SHOULD refer to the kind definitions above.
 
 A minimal implementation requires:
 
 1. A Nostr client that supports addressable event publishing.
-2. Scarcity discovery logic — subscribing to `kind:30599` events and filtering by `t` tag, `skill`, `severity`, or geographic scope (`g` tag, `region`).
+2. Scarcity discovery logic: subscribing to `kind:30599` events and filtering by `t` tag, `skill`, `severity`, or geographic scope (`g` tag, `region`).
 3. Integration with discovery flows to surface scarcity warnings when users search for scarce skills.

@@ -6,13 +6,13 @@ Oracle Dispute Resolution
 
 `draft` `optional` `incubating`
 
-Four addressable event kinds for challenging and resolving oracle-reported outcomes on Nostr — outcome reporting, challenges, stake-weighted voting, and authoritative rulings.
+Four addressable event kinds for challenging and resolving oracle-reported outcomes on Nostr: outcome reporting, challenges, stake-weighted voting, and authoritative rulings.
 
-> **Design principle:** This NIP defines the *dispute process* for oracle outcomes — it does not define markets, oracle selection, or settlement execution. It composes with NIP-ESCROW for staking and settlement, and complements NIP-DISPUTES for subjective service disputes.
+> **Design principle:** This NIP defines the *dispute process* for oracle outcomes. It does not define markets, oracle selection, or settlement execution. It composes with NIP-ESCROW for staking and settlement, and complements NIP-DISPUTES for subjective service disputes.
 
 ## Motivation
 
-Prediction markets, insurance contracts, and automated escrow resolution all depend on oracles — external reporters of real-world outcomes. But oracles can be wrong, compromised, or malicious. When an oracle reports the wrong outcome and money moves based on that report, there is currently no standardised way on Nostr to:
+Prediction markets, insurance contracts, and automated escrow resolution all depend on oracles; external reporters of real-world outcomes. But oracles can be wrong, compromised, or malicious. When an oracle reports the wrong outcome and money moves based on that report, there is currently no standardised way on Nostr to:
 
 - **Challenge** a reported outcome with evidence and stake
 - **Escalate** unresolved challenges through increasingly authoritative resolution
@@ -23,7 +23,7 @@ This NIP defines an optimistic oracle dispute protocol: outcomes are assumed cor
 
 ## Prior Art
 
-This protocol adapts proven patterns from Ethereum-based oracle systems to the Nostr event model. ~80% of the core mechanism — the optimistic assertion model, bond escalation, and stake-weighted voting — is prior art from these systems. We are upfront about this lineage.
+This protocol adapts proven patterns from Ethereum-based oracle systems to the Nostr event model. ~80% of the core mechanism (the optimistic assertion model, bond escalation, and stake-weighted voting) is prior art from these systems. We are upfront about this lineage.
 
 | System | Mechanism | Used By |
 |--------|-----------|---------|
@@ -81,14 +81,14 @@ Tags:
 
 * `d` (REQUIRED): Unique identifier. RECOMMENDED format: `outcome_<random-id>`.
 * `type` (REQUIRED): Outcome type. One of:
-    * `binary` — yes/no, true/false, happened/didn't
-    * `categorical` — one option from a defined set
-    * `scalar` — numeric value
+    * `binary` - yes/no, true/false, happened/didn't
+    * `categorical` - one option from a defined set
+    * `scalar` - numeric value
 * `outcome` (REQUIRED): The asserted result. For `binary`: `yes` or `no`. For `categorical`: the selected option string. For `scalar`: the numeric value as a string.
 * `challenge_window` (REQUIRED): Seconds from `created_at` until the outcome finalises. Implementations SHOULD use NIP-40 `expiration` for relay-level enforcement of the finality deadline.
 * `min_challenge_stake` (REQUIRED): Minimum stake (in smallest currency unit) required to file a challenge.
 * `currency` (REQUIRED): Currency code (e.g. `SAT`, `USD`, `EUR`).
-* `a` (OPTIONAL): NIP-33 event coordinate referencing the market, contract, or escrow event this outcome settles.
+* `a` (OPTIONAL): Addressable event coordinate referencing the market, contract, or escrow event this outcome settles.
 * `options` (REQUIRED for `categorical`, multiple): `["options", "<option-string>"]`. Defines the valid set of outcomes.
 * `scalar_min`, `scalar_max` (OPTIONAL for `scalar`): Bounds for valid scalar values.
 * `scalar_precision` (OPTIONAL for `scalar`): Number of decimal places.
@@ -159,7 +159,7 @@ Challenges MUST be filed before `created_at + challenge_window` of the reference
 
 ## Outcome Vote (`kind:30549`)
 
-A stake-weighted vote on a disputed outcome. Only used during Level 2 escalation (community vote). Voters stake to participate — this is not a free poll.
+A stake-weighted vote on a disputed outcome. Only used during Level 2 escalation (community vote). Voters stake to participate; this is not a free poll.
 
 ```json
 {
@@ -187,11 +187,11 @@ Tags:
 * `vote` (REQUIRED): The voted outcome. Must be a valid value for the original Report's `type`.
 * `stake` (REQUIRED): Amount staked on this vote, in smallest currency unit.
 * `currency` (REQUIRED): Currency code.
-* `p` (REQUIRED): Dispute participants — challenger, oracle, and arbiter (if designated). Used as gift-wrap recipients.
+* `p` (REQUIRED): Dispute participants: challenger, oracle, and arbiter (if designated). Used as gift-wrap recipients.
 
 ### Voting Rules
 
-- Votes are weighted by stake amount — larger stakes carry more influence.
+- Votes are weighted by stake amount. Larger stakes carry more influence.
 - A supermajority (67% of total stake) resolves the dispute at Level 2.
 - Voters on the winning side receive their stake back plus a proportional share of losing stakes.
 - Voters on the losing side forfeit their stake.
@@ -207,7 +207,7 @@ The Ruling event (`level: 2`) MUST include these additional tags:
 * `outcome_stake` (REQUIRED, one per outcome): `["outcome_stake", "<outcome_value>", "<total_stake_for_this_outcome>"]`. Enables independent verification that the winning outcome met the 67% threshold.
 * `vote_count` (REQUIRED): Total number of votes cast.
 
-> **Open problem:** The aggregate tally proves the *margin* but not that individual votes were counted correctly — verifying that requires either a public vote reveal after the window closes or a cryptographic tally proof (e.g. homomorphic commitments). This NIP is marked `incubating` until a practical verification mechanism is specified.
+> **Open problem:** The aggregate tally proves the *margin* but not that individual votes were counted correctly. Verifying that requires either a public vote reveal after the window closes or a cryptographic tally proof (e.g. homomorphic commitments). This NIP is marked `incubating` until a practical verification mechanism is specified.
 
 > **Privacy:** This event MUST be delivered via NIP-59 gift wrap. See [Privacy](#privacy).
 
@@ -217,7 +217,7 @@ The Ruling event (`level: 2`) MUST include these additional tags:
 
 The final authoritative resolution of a challenged outcome. Non-appealable. The publisher depends on the escalation level:
 
-- **Level 1:** The oracle (concession — publishes a corrected Report and this Ruling)
+- **Level 1:** The oracle (concession; publishes a corrected Report and this Ruling)
 - **Level 2:** Any participant, once the voting window closes and the supermajority threshold is met. The published `outcome` MUST match the stake-weighted majority.
 - **Level 3:** The designated arbiter
 
@@ -243,7 +243,7 @@ Tags:
 * `e` (REQUIRED): References the Outcome Challenge that triggered this ruling.
 * `outcome` (REQUIRED): The final determined outcome.
 * `level` (REQUIRED): Which escalation level resolved the dispute. One of `1` (oracle concession), `2` (community vote), `3` (designated arbiter).
-* `a` (OPTIONAL): NIP-33 event coordinate referencing the market or escrow event, for settlement triggering.
+* `a` (OPTIONAL): Addressable event coordinate referencing the market or escrow event, for settlement triggering.
 
 `content`: Reasoning and evidence supporting the ruling. Signed by the ruling party's key.
 
@@ -254,7 +254,7 @@ After a Ruling is published:
 1. **Challenger wins** (Ruling outcome differs from original Report): Challenger's stake is returned. Oracle's stake (if bonded) is forfeited. Escrow settlement proceeds based on the corrected outcome.
 2. **Oracle wins** (Ruling outcome matches original Report): Challenger's stake is forfeited to the oracle. Original settlement stands.
 
-Settlement execution uses NIP-ESCROW Settlement events (`kind:30533` with `outcome: released` or `outcome: forfeited`) -- this NIP defines the dispute process, not the money movement.
+Settlement execution uses NIP-ESCROW Settlement events (`kind:30533` with `outcome: released` or `outcome: forfeited`). This NIP defines the dispute process, not the money movement.
 
 ---
 
@@ -271,7 +271,7 @@ sequenceDiagram
     Note right of O: Outcome assumed correct
 
     rect rgb(27, 45, 61)
-        Note over O,C: Level 1 — Evidence Window
+        Note over O,C: Level 1 - Evidence Window
         C-->>O: Outcome Challenge (gift-wrapped)
         Note left of C: Challenger stakes + provides evidence
 
@@ -285,7 +285,7 @@ sequenceDiagram
     end
 
     rect rgb(45, 45, 27)
-        Note over C,V: Level 2 — Community Vote
+        Note over C,V: Level 2 - Community Vote
         V-->>V: Outcome Vote (gift-wrapped)
         V-->>V: Outcome Vote (gift-wrapped)
         V-->>V: Outcome Vote (gift-wrapped)
@@ -300,13 +300,13 @@ sequenceDiagram
     end
 
     rect rgb(61, 27, 27)
-        Note over C,A: Level 3 — Designated Arbiter
+        Note over C,A: Level 3 - Designated Arbiter
         A->>A: Outcome Ruling level=3 (public)
         Note right of A: Final, non-appealable
     end
 ```
 
-> **Arrow legend:** `—>>` solid = public event · `-->>` dashed = NIP-59 gift-wrapped (private)
+> **Arrow legend:** `->>` solid = public event, `-->>` dashed = NIP-59 gift-wrapped (private)
 
 ### Level 1: Evidence Window
 
@@ -332,7 +332,7 @@ If no arbiter was designated, implementations SHOULD fall back to Level 2 with a
 
 ### Stake Economics
 
-Individual vote minimums are lower than challenge stakes (encouraging participation), but the total stake pool grows at each level — more participants means more capital at risk:
+Individual vote minimums are lower than challenge stakes (encouraging participation), but the total stake pool grows at each level. More participants means more capital at risk:
 
 ```mermaid
 flowchart LR
@@ -370,7 +370,7 @@ NIP-ORACLE and [NIP-DISPUTES](NIP-DISPUTES.md) are complementary:
 | | NIP-ORACLE | NIP-DISPUTES |
 |-|------------|--------------|
 | **Question** | "Did event X happen?" | "Was the service acceptable?" |
-| **Nature** | Objective — verifiable facts | Subjective — quality, fairness |
+| **Nature** | Objective: verifiable facts | Subjective: quality, fairness |
 | **Resolution** | Escalation ladder (evidence → vote → arbiter) | Mediator or community panel |
 | **Use case** | Prediction markets, insurance, automated resolution | Service disputes, marketplace complaints |
 
@@ -380,7 +380,7 @@ A platform might use both: NIP-ORACLE for outcome verification (did the event ha
 
 All four kinds are addressable events.
 
-For Outcome Report, replaceability is useful — an oracle MAY correct their report by republishing with the same `d` tag (this constitutes a Level 1 concession if a challenge is active).
+For Outcome Report, replaceability is useful. An oracle MAY correct their report by republishing with the same `d` tag (this constitutes a Level 1 concession if a challenge is active).
 
 For Outcome Challenge, Outcome Vote, and Outcome Ruling, these events represent real-world commitments (staked funds, cast votes, final decisions). Clients MUST treat the first valid instance of each `d` tag as canonical and SHOULD ignore replacements. Relays MAY enforce write-once semantics for these kinds.
 
@@ -388,7 +388,7 @@ For Outcome Challenge, Outcome Vote, and Outcome Ruling, these events represent 
 
 * **Optimistic finality.** Outcomes finalise automatically after the `challenge_window` expires without a challenge. Applications MUST NOT settle before this deadline.
 * **Stake requirements.** The `min_challenge_stake` prevents spam challenges. Implementations SHOULD set this high enough to deter frivolous disputes while remaining accessible for legitimate challenges.
-* **Sybil resistance.** Stake-weighted voting is inherently sybil-resistant — splitting stake across multiple identities provides no advantage. However, implementations SHOULD monitor for coordinated voting from recently-created pubkeys.
+* **Sybil resistance.** Stake-weighted voting is inherently sybil-resistant. Splitting stake across multiple identities provides no advantage. However, implementations SHOULD monitor for coordinated voting from recently-created pubkeys.
 * **Oracle collusion.** If the oracle and arbiter are the same entity or collude, the system degrades to a trusted oracle. Implementations SHOULD ensure the designated arbiter is independent of the oracle.
 * **Challenge window manipulation.** Oracles MUST NOT set unreasonably short challenge windows. Implementations SHOULD enforce a minimum (RECOMMENDED: 1 hour).
 * **Vote privacy.** Gift-wrapping votes prevents real-time vote tracking that could enable bandwagon effects or voter intimidation. Votes are revealed only after the voting window closes.
@@ -404,9 +404,9 @@ Oracle disputes involve staked funds and votes that should not be visible to pas
 | 30548 | Outcome Challenge | MUST gift-wrap | Challenger, oracle, arbiter (if designated) |
 | 30549 | Outcome Vote | MUST gift-wrap | Challenger, oracle, arbiter (if designated) |
 
-The inner event (the sealed rumour) retains its full tag structure — gift wrap provides the privacy layer, not tag restructuring. Recipients unwrap the NIP-59 envelope to access the original event.
+The inner event (the sealed rumour) retains its full tag structure. Gift wrap provides the privacy layer, not tag restructuring. Recipients unwrap the NIP-59 envelope to access the original event.
 
-Challenge content and vote stakes MAY additionally be NIP-44 encrypted pairwise to each gift-wrap recipient as defense in depth. NIP-44 is pairwise — each gift-wrapped copy carries content encrypted to that specific recipient.
+Challenge content and vote stakes MAY additionally be NIP-44 encrypted pairwise to each gift-wrap recipient as defence in depth. NIP-44 is pairwise; each gift-wrapped copy carries content encrypted to that specific recipient.
 
 ### Events that remain public
 
@@ -419,27 +419,131 @@ Challenge content and vote stakes MAY additionally be NIP-44 encrypted pairwise 
 
 On Ethereum-based oracle systems (UMA, Kleros, Augur), all challenge and voting activity is fully visible on-chain. This creates:
 
-- **Social pressure** — challengers are publicly identified, discouraging challenges against powerful oracles
-- **Retaliation risk** — voters can be targeted based on how they voted
-- **Bandwagon effects** — real-time vote tallies influence subsequent voters
+- **Social pressure** - challengers are publicly identified, discouraging challenges against powerful oracles
+- **Retaliation risk** - voters can be targeted based on how they voted
+- **Bandwagon effects** - real-time vote tallies influence subsequent voters
 
 Gift-wrapping challenges and votes eliminates these problems while maintaining the same game-theoretic incentives.
 
 ### Metadata minimisation
 
-Implementations SHOULD include only the tags marked REQUIRED in each event kind. Optional tags increase the metadata surface — omit them unless the application specifically needs them.
+Implementations SHOULD include only the tags marked REQUIRED in each event kind. Optional tags increase the metadata surface; omit them unless the application specifically needs them.
 
 ## Dependencies
 
 * [NIP-01](https://github.com/nostr-protocol/nips/blob/master/01.md): Basic protocol flow, addressable events
 * [NIP-40](https://github.com/nostr-protocol/nips/blob/master/40.md): Expiration timestamps (challenge window enforcement)
-* [NIP-44](https://github.com/nostr-protocol/nips/blob/master/44.md): Versioned encrypted payloads (defense in depth for challenges and votes)
+* [NIP-44](https://github.com/nostr-protocol/nips/blob/master/44.md): Versioned encrypted payloads (defence in depth for challenges and votes)
 * [NIP-59](https://github.com/nostr-protocol/nips/blob/master/59.md): Gift wrap (private delivery of challenges and votes)
+
+## Relationship to Existing NIPs
+
+### NIP-DISPUTES
+
+[NIP-DISPUTES](NIP-DISPUTES.md) handles *subjective* service disputes ("was the work acceptable?"). NIP-ORACLE handles *objective* outcome disputes ("did event X happen?"). They are complementary: a platform might use NIP-ORACLE for outcome verification and NIP-DISPUTES for service quality complaints. Both compose with NIP-ESCROW for staking and settlement, but serve different dispute categories.
+
+### NIP-CONSENSUS
+
+[NIP-CONSENSUS](NIP-CONSENSUS.md) defines threshold-based group decision-making with identified voters. NIP-ORACLE's Level 2 community vote is a specialised form of group decision-making, but differs in three key ways: (1) votes are stake-weighted rather than equal-weight, (2) votes are gift-wrapped for privacy during the voting window, and (3) outcomes are constrained to match the original oracle report's `type` (binary/categorical/scalar). Applications that need general-purpose group consensus SHOULD use NIP-CONSENSUS; applications that need oracle-specific dispute resolution SHOULD use NIP-ORACLE.
+
+### NIP-EVIDENCE
+
+[NIP-EVIDENCE](NIP-EVIDENCE.md) provides a standardised evidence record kind. NIP-ORACLE challenges include evidence in the `content` field of the Outcome Challenge event. For complex disputes with multiple evidence items, implementations MAY publish separate NIP-EVIDENCE records and reference them from the challenge via `e` tags.
+
+## Multi-Letter Tag Filtering
+
+This NIP uses several multi-letter tags (`type`, `outcome`, `challenge_window`, `min_challenge_stake`, `currency`, `options`, `proposed_outcome`, `stake`, `vote`, `level`, `total_stake`, `outcome_stake`, `vote_count`, `source`). Standard Nostr relays index only single-letter tags for `#` filter queries. Multi-letter tags are stored in events and readable by clients, but cannot be used in relay-side `REQ` filters. Clients SHOULD filter by `kind` and use single-letter tags (`d`, `e`, `a`, `p`) for relay queries, then apply multi-letter tag filters client-side.
+
+## Test Vectors
+
+### Kind 30547 - Outcome Report
+
+```json
+{
+  "kind": 30547,
+  "pubkey": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
+  "created_at": 1698765000,
+  "tags": [
+    ["d", "outcome_btc100k_20251201"],
+    ["type", "binary"],
+    ["outcome", "yes"],
+    ["challenge_window", "7200"],
+    ["min_challenge_stake", "10000"],
+    ["currency", "SAT"],
+    ["expiration", "1698772200"]
+  ],
+  "content": "Bitcoin exceeded $100,000 USD on 2025-12-01 per CoinGecko 00:00 UTC closing price.",
+  "id": "<32-byte-hex>",
+  "sig": "<64-byte-hex>"
+}
+```
+
+### Kind 30548 - Outcome Challenge
+
+```json
+{
+  "kind": 30548,
+  "pubkey": "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b200",
+  "created_at": 1698766000,
+  "tags": [
+    ["d", "challenge_btc100k_20251201"],
+    ["e", "<outcome-report-event-id>"],
+    ["proposed_outcome", "no"],
+    ["stake", "10000"],
+    ["currency", "SAT"],
+    ["p", "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"]
+  ],
+  "content": "CoinGecko 00:00 UTC closing price on 2025-12-01 was $97,842.",
+  "id": "<32-byte-hex>",
+  "sig": "<64-byte-hex>"
+}
+```
+
+### Kind 30549 - Outcome Vote
+
+```json
+{
+  "kind": 30549,
+  "pubkey": "c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b20011",
+  "created_at": 1698770000,
+  "tags": [
+    ["d", "vote_btc100k_20251201_01"],
+    ["e", "<outcome-challenge-event-id>"],
+    ["vote", "no"],
+    ["stake", "5000"],
+    ["currency", "SAT"],
+    ["p", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b200"],
+    ["p", "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"]
+  ],
+  "content": "",
+  "id": "<32-byte-hex>",
+  "sig": "<64-byte-hex>"
+}
+```
+
+### Kind 30543 - Outcome Ruling
+
+```json
+{
+  "kind": 30543,
+  "pubkey": "d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2003344",
+  "created_at": 1698775000,
+  "tags": [
+    ["d", "ruling_btc100k_20251201"],
+    ["e", "<outcome-challenge-event-id>"],
+    ["outcome", "no"],
+    ["level", "3"]
+  ],
+  "content": "After reviewing CoinGecko, CoinMarketCap, and Binance price data, BTC closed at $97,842 on 2025-12-01. Original report was incorrect.",
+  "id": "<32-byte-hex>",
+  "sig": "<64-byte-hex>"
+}
+```
 
 ## Reference Implementation
 
 No reference implementation exists yet. The protocol is designed to compose with:
 
-* [NIP-ESCROW](NIP-ESCROW.md) — Conditional payment coordination (staking and settlement)
-* [NIP-DISPUTES](NIP-DISPUTES.md) — Subjective dispute resolution (complementary protocol)
-* @trott/sdk — TypeScript library with builders and parsers for NIP-ESCROW and NIP-DISPUTES kinds
+* [NIP-ESCROW](NIP-ESCROW.md) - Conditional payment coordination (staking and settlement)
+* [NIP-DISPUTES](NIP-DISPUTES.md) - Subjective dispute resolution (complementary protocol)
+* [NIP-EVIDENCE](NIP-EVIDENCE.md) - Structured evidence records (optional, for complex disputes)

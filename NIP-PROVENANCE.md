@@ -32,7 +32,7 @@ A product certificate captures the maker's identity, materials, techniques, and 
 - **NIP-CUSTODY (kind 30572):** Ownership transfers use NIP-CUSTODY Custody Transfer events with `asset_type: product`. A product changing hands is a custody transfer. Successive transfers form a chain, exactly as NIP-CUSTODY defines. See [Composing with NIP-CUSTODY](#composing-with-nip-custody).
 - **NIP-EVIDENCE (kind 30578):** Material provenance records use NIP-EVIDENCE Evidence Records with supply chain tags (`material_name`, `material_source`, `origin_region`, `specification_ref`, etc.). A record of material origin and composition is timestamped evidence of a supply chain fact. See [Composing with NIP-EVIDENCE](#composing-with-nip-evidence).
 - **NIP-32 (Labelling):** Category tags for product classification. Product certificates SHOULD include `L` and `l` tags for discoverability.
-- **NIP-CRAFTS:** Skill Profile (kind 30400) and Technique Record (kind 30401) provide soft cross-references for maker identity and technique documentation. Clients that do not implement NIP-CRAFTS SHOULD ignore `provenance:maker_profile` and `provenance:technique_record` tags.
+- **NIP-CRAFTS:** Provider Profile with craft extensions (kind 30510, via NIP-PROVIDER-PROFILES) and Technique Record (kind 30401) provide soft cross-references for maker identity and technique documentation. Clients that do not implement NIP-CRAFTS SHOULD ignore `provenance:maker_profile` and `provenance:technique_record` tags.
 - **NIP-VARIATION:** Material substitution approval flows (optional composition).
 - **NIP-APPROVAL:** Multi-party sign-off on material choices (optional composition).
 
@@ -62,7 +62,7 @@ Published by a maker to declare what they made and how. A product certificate is
         ["provenance:item_name", "Victorian scroll-top driveway gate"],
         ["provenance:description", "Hand-forged wrought iron gate, 2.4m wide, scroll-top design with dog bars"],
         ["provenance:completed_date", "2026-02-28"],
-        ["provenance:maker_profile", "<maker-skill-profile-event-id>", "", "30400"],
+        ["provenance:maker_profile", "<maker-provider-profile-event-id>", "", "30510"],
         ["provenance:material", "Wrought iron bar stock, 25mm x 6mm flat"],
         ["provenance:material", "Wrought iron rod, 12mm round"],
         ["provenance:material_source", "<iron-stock-provenance-event-id>", "", "30578"],
@@ -96,7 +96,7 @@ Tags:
 * `provenance:completed_date` (REQUIRED): ISO 8601 date when the product was completed (e.g. `2026-02-28`).
 * `provenance:item_name` (OPTIONAL): Human-readable name or title of the product.
 * `provenance:description` (OPTIONAL): Short description of the product; dimensions, features, notable characteristics.
-* `provenance:maker_profile` (OPTIONAL): Event reference to the maker's NIP-CRAFTS Kind 30400 Skill Profile. Format: `["provenance:maker_profile", "<event-id>", "", "30400"]`. Soft dependency; clients that do not implement NIP-CRAFTS SHOULD ignore this tag.
+* `provenance:maker_profile` (OPTIONAL): Event reference to the maker's NIP-PROVIDER-PROFILES Provider Profile (kind 30510) with NIP-CRAFTS extension tags. Format: `["provenance:maker_profile", "<event-id>", "", "30510"]`. Soft dependency; clients that do not implement NIP-CRAFTS SHOULD ignore this tag.
 * `provenance:material` (OPTIONAL, repeatable): Plain text description of a material used. One tag per distinct material.
 * `provenance:material_source` (OPTIONAL, repeatable): Event reference to a Kind 30578 Evidence Record documenting material provenance. Format: `["provenance:material_source", "<event-id>", "", "30578"]`.
 * `provenance:technique` (OPTIONAL, repeatable): Machine-readable technique identifier (e.g. `fire_welding`, `hand_stitching`, `wheel_throwing`).
@@ -113,6 +113,40 @@ Tags:
 * `l` (OPTIONAL, repeatable): NIP-32 labels within the declared namespace for category and subcategory.
 
 **Content:** Free-text narrative of the making process; the maker's story. SHOULD describe the materials, techniques, and any notable aspects of the work. MAY be NIP-44 encrypted if the making process is commercially sensitive.
+
+### REQ Filters
+
+Discover product certificates by maker:
+
+```json
+{"kinds": [30404], "authors": ["<maker-hex-pubkey>"]}
+```
+
+Discover product certificates by category label:
+
+```json
+{"kinds": [30404], "#l": ["metalwork"]}
+```
+
+Discover a specific product certificate by its `d` tag:
+
+```json
+{"kinds": [30404], "#d": ["wrought_iron_gate_001"], "authors": ["<maker-hex-pubkey>"]}
+```
+
+Discover authenticity attestations for a product:
+
+```json
+{"kinds": [31000], "#a": ["30404:<maker-hex-pubkey>:wrought_iron_gate_001"]}
+```
+
+Discover ownership chain for a product:
+
+```json
+{"kinds": [30572], "#asset_id": ["wrought_iron_gate_001"]}
+```
+
+> **Note:** The `#asset_id` filter uses a multi-letter tag. Standard relays index only single-letter tags. Clients MAY need to fetch all `kind:30572` events from a maker and filter client-side, or use relays that support extended tag indexing. Similarly, tags prefixed with `provenance:` are multi-letter tags. Discovery SHOULD use `#l` (NIP-32 labels), `#d`, `#t`, and `authors` filters as shown above. Clients post-filter by `provenance:*` tag values after fetching matching events.
 
 ---
 
@@ -302,11 +336,11 @@ flowchart TD
     C --> D["Sold / transferred\n(NIP-CUSTODY kind 30572)\nasset_type: product"]
     D --> E["Resold\n(NIP-CUSTODY kind 30572)\ncustody_handoff_ref links chain"]
 
-    style A fill:#e8f4e8,stroke:#4a9
-    style B fill:#e8eef4,stroke:#49a
-    style C fill:#f4f0e8,stroke:#a94
-    style D fill:#f4e8e8,stroke:#a44
-    style E fill:#f4e8e8,stroke:#a44
+    style A fill:#1a3a1a,stroke:#4a9,color:#e0e0e0
+    style B fill:#1a2a3a,stroke:#49a,color:#e0e0e0
+    style C fill:#3a2a1a,stroke:#a94,color:#e0e0e0
+    style D fill:#3a1a1a,stroke:#a44,color:#e0e0e0
+    style E fill:#3a1a1a,stroke:#a44,color:#e0e0e0
 ```
 
 1. **Material sourcing:** The maker publishes `kind:30578` evidence records with `evidence_type: provenance` for each material used, documenting origin and composition.
@@ -364,7 +398,7 @@ Status values are scheme-specific but SHOULD use one of: `certified`, `verified`
 
 ### Craft & Artisan Products
 
-Makers publish a `kind:30404` product certificate for each finished piece, linking materials (kind 30578 evidence records), techniques (NIP-CRAFTS kind 30401), and their skill profile (NIP-CRAFTS kind 30400). Guild assessors or certification bodies publish `kind:31000` NIP-VA attestations with `type: authenticity`. When the piece is sold, `kind:30572` creates a permanent ownership record, and future resales extend the chain.
+Makers publish a `kind:30404` product certificate for each finished piece, linking materials (kind 30578 evidence records), techniques (NIP-CRAFTS kind 30401), and their Provider Profile with craft extensions (kind 30510). Guild assessors or certification bodies publish `kind:31000` NIP-VA attestations with `type: authenticity`. When the piece is sold, `kind:30572` creates a permanent ownership record, and future resales extend the chain.
 
 ### Food & Ingredient Traceability
 
@@ -414,7 +448,7 @@ High-value products combine all three composition patterns. The maker publishes 
     ["provenance:item_name", "Victorian scroll-top driveway gate"],
     ["provenance:description", "Hand-forged wrought iron gate, 2.4m wide, scroll-top design with dog bars"],
     ["provenance:completed_date", "2026-02-28"],
-    ["provenance:maker_profile", "c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4", "", "30400"],
+    ["provenance:maker_profile", "c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4", "", "30510"],
     ["provenance:material", "Wrought iron bar stock, 25mm x 6mm flat"],
     ["provenance:material", "Wrought iron rod, 12mm round"],
     ["provenance:material_source", "d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5", "", "30578"],
@@ -525,7 +559,7 @@ High-value products combine all three composition patterns. The maker publishes 
 * [NIP-40](https://github.com/nostr-protocol/nips/blob/master/40.md): Expiration timestamps (time-limited certifications, attestation validity)
 * [NIP-44](https://github.com/nostr-protocol/nips/blob/master/44.md): Versioned encrypted payloads (sensitive sourcing data, private transaction details)
 * [NIP-VA](https://github.com/nostr-protocol/nips/blob/master/VA.md): Verifiable Attestations (kind 31000) - authenticity attestation composition
-* [NIP-CRAFTS](./NIP-CRAFTS.md): Skill Profile (kind 30400) and Technique Record (kind 30401) - soft dependency for product certificate cross-references. Clients that do not implement NIP-CRAFTS SHOULD ignore `provenance:maker_profile` and `provenance:technique_record` tags
+* [NIP-CRAFTS](./NIP-CRAFTS.md): Provider Profile with craft extensions (kind 30510, via NIP-PROVIDER-PROFILES) and Technique Record (kind 30401) - soft dependency for product certificate cross-references. Clients that do not implement NIP-CRAFTS SHOULD ignore `provenance:maker_profile` and `provenance:technique_record` tags
 * [NIP-CUSTODY](./NIP-CUSTODY.md): Chain-of-custody tracking (kind 30572) - ownership transfer composition
 * [NIP-EVIDENCE](./NIP-EVIDENCE.md): Timestamped evidence recording (kind 30578) - material provenance composition
 * [NIP-VARIATION](./NIP-VARIATION.md): Material substitution approval flows (optional composition)
@@ -533,7 +567,7 @@ High-value products combine all three composition patterns. The maker publishes 
 
 ## Reference Implementation
 
-For authenticity attestation, use the NIP-VA builders from [`nostr-attestations`](https://github.com/forgesworn/nostr-attestations). Implementors SHOULD refer to the kind definitions and JSON examples above.
+A reference implementation is available in the `@trott/sdk` TypeScript library, which provides builders and parsers for kind 30404 (Product Certificate). For authenticity attestation, use the NIP-VA builders from `nostr-attestations`. For standalone use, implementors SHOULD refer to the kind definitions above.
 
 A minimal implementation requires:
 

@@ -4,7 +4,7 @@ NIP-REFERRAL-ROUTING
 Institutional Referral Routing (Composition Guide)
 -----------------------------------------------------
 
-`ecosystem` `draft` `optional` `composition-guide`
+`draft` `optional` `composition-guide`
 
 This document shows how to model institutional referral routing on Nostr using existing NIPs. No new event kinds are required.
 
@@ -243,6 +243,8 @@ sequenceDiagram
 ---
 
 ## REQ Filters
+
+> **Note:** Tags such as `gate_authority`, `gate_type`, `gate_status`, and `referral:jurisdiction` are multi-letter tags and therefore not relay-indexed per NIP-01. The filters below show the intended query semantics; clients MUST post-filter results client-side for multi-letter tag matches. Single-letter tags (`t`, `p`, `e`) are relay-indexed and filter correctly.
 
 ### Discover all referral pathways from a known institution
 

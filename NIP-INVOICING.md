@@ -28,6 +28,8 @@ Without a standard, each invoicing application invents its own format. NIP-INVOI
 - **NIP-ESCROW Receipt (kind 30535):** Invoice payments use Receipt events with an `e` tag referencing the invoice event. This supports partial payments via multiple Receipts against the same invoice. See [Composing with NIP-ESCROW Receipt](#composing-with-nip-escrow-receipt).
 - **NIP-APPROVAL (kinds 30570-30571):** Expense reimbursement uses Approval Gates with expense line items and receipt evidence. The approver responds with an Approval Response. See [Composing with NIP-APPROVAL](#composing-with-nip-approval).
 - **NIP-EVIDENCE (kind 30578):** Receipt documentation for expense claims uses Evidence records. Expense Approval Gates reference Evidence events via `e` tags.
+- **NIP-57 (Zaps):** NIP-57 handles Lightning zap receipts for tips and donations. NIP-INVOICING handles structured billing with line items, payment terms, and partial payments. They serve different use cases: zaps are spontaneous one-click payments; invoices are formal requests with itemised breakdowns.
+- **NIP-69 (Peer-to-Peer Order Events):** NIP-69 defines buy/sell order matching for marketplaces. NIP-INVOICING handles the billing step after a transaction is agreed. An invoice MAY reference a NIP-69 order event via its `e` tag, recording the formal payment request for a matched order.
 
 ## Kinds
 
@@ -149,6 +151,28 @@ Each `line_item` tag value is a JSON string with the following structure:
 | `discount_reason`| MAY      | No       | Reason for discount                        |
 | `notes`          | MAY      | No       | Additional invoice notes                   |
 | `expiration`     | MAY      | No       | Invoice validity period                    |
+
+### REQ Filters
+
+Discover invoices addressed to a specific recipient:
+
+```json
+{"kinds": [30588], "#p": ["<recipient-hex-pubkey>"]}
+```
+
+Discover all invoices published by a specific provider:
+
+```json
+{"kinds": [30588], "authors": ["<provider-hex-pubkey>"]}
+```
+
+Discover a specific invoice by its `d` tag:
+
+```json
+{"kinds": [30588], "#d": ["INV-2026-0042"], "authors": ["<provider-hex-pubkey>"]}
+```
+
+> **Note:** Tags such as `invoice_number`, `payment_terms`, `line_item`, and `tax_rate` are multi-letter tags. Standard relays index only single-letter tags (`d`, `e`, `p`, `t`). Discovery SHOULD use `kinds`, `authors`, `#p`, and `#d` filters as shown above. Multi-letter tag values are available after fetching the event.
 
 ---
 
@@ -660,7 +684,7 @@ A freelance photographer travelling for a commissioned shoot publishes NIP-EVIDE
 
 ## Reference Implementation
 
-Implementors SHOULD refer to the kind definitions and JSON examples above.
+A reference implementation is available in the `@trott/sdk` TypeScript library, which provides builders and parsers for the Invoice kind defined in this NIP, as well as the composed NIP-ESCROW, NIP-APPROVAL, and NIP-EVIDENCE kinds. For standalone use, implementors SHOULD refer to the kind definitions above.
 
 A minimal implementation requires:
 

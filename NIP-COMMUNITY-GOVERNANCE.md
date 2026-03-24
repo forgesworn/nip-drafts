@@ -165,6 +165,8 @@ Clients SHOULD enforce supermajority requirements for sensitive proposal types (
 
 ### REQ Filters
 
+> **Note:** Tags such as `collective_id`, `proposal_type`, and `evidence_type` are multi-letter tags and therefore not relay-indexed per NIP-01. The filters below show the intended query semantics; clients MUST post-filter results client-side for multi-letter tag matches.
+
 ```json
 [
     {"kinds": [30574], "#collective_id": ["collective:southwark-mutual-aid"]},
@@ -198,7 +200,7 @@ A governance vote IS a NIP-CONSENSUS vote (`kind:30575`) with a `collective_id` 
 
 Tags (in addition to standard NIP-CONSENSUS tags):
 
-* `a` (REQUIRED): NIP-33 coordinate of the `kind:30574` governance proposal being voted on.
+* `a` (REQUIRED): Addressable event coordinate of the `kind:30574` governance proposal being voted on.
 * `collective_id` (REQUIRED): The `d` tag value of the NIP-51 collective list. Redundant with the proposal's collective reference but included for efficient relay filtering.
 * `vote` (REQUIRED): The member's decision. One of `"agree"`, `"disagree"`, or `"abstain"`.
 

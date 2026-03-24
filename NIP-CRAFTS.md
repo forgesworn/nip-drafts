@@ -192,6 +192,8 @@ Certain techniques (e.g. conservation methods that could enable theft if publish
 ]
 ```
 
+> **Note:** Tags prefixed with `craft:` are multi-letter tags. Standard relays index only single-letter tags. Discovery SHOULD use `#l` (NIP-32 labels) and `authors` filters as shown above. Clients post-filter by `craft:*` tag values after fetching matching events.
+
 ---
 
 ## Craft Taxonomy
@@ -379,7 +381,7 @@ NIP-REPUTATION defines Credential Attestations for third-party verification of q
 
 ## Reference Implementation
 
-Implementors SHOULD refer to the kind definitions and JSON examples above.
+A reference implementation is available in the `@trott/sdk` TypeScript library, which provides builders and parsers for the kinds defined in this NIP. For standalone use, implementors SHOULD refer to the kind definitions above.
 
 A minimal implementation requires:
 

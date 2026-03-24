@@ -51,6 +51,17 @@ NIPS=(
   "nip-channels|NIP-CHANNELS: Context-Scoped Messaging Primitives"
   "nip-provider-profiles|NIP-PROVIDER-PROFILES: Service Provider Profiles"
   "nip-l402-services|NIP-L402-SERVICES: Paid API Service Announcements"
+  "nip-invoicing|NIP-INVOICING: Structured Invoicing"
+  "nip-provenance|NIP-PROVENANCE: Product & Supply Chain Provenance"
+  "nip-crafts|NIP-CRAFTS: Craft Technique Documentation"
+  "nip-scarcity|NIP-SCARCITY: Workforce & Resource Scarcity Signals"
+  "nip-spatial-signals|NIP-SPATIAL-SIGNALS: Spatial Signals & Corroboration"
+  "nip-data-access|NIP-DATA-ACCESS: Scoped, Revocable Data Access Grants"
+  "nip-mentorship|NIP-MENTORSHIP: Mentorship Pipelines & Training Progression"
+  "nip-sla|NIP-SLA: Service Level Agreements (Composition Guide)"
+  "nip-community-governance|NIP-COMMUNITY-GOVERNANCE: Community Governance (Composition Guide)"
+  "nip-referral-routing|NIP-REFERRAL-ROUTING: Institutional Referral Routing (Composition Guide)"
+  "nip-oracle|NIP-ORACLE: Oracle Dispute Resolution"
 )
 
 published=0
