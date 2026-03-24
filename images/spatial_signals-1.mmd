@@ -1,0 +1,19 @@
+sequenceDiagram
+    participant Observer1 as First Observer
+    participant Relay
+    participant Subscriber as Subscribers
+    participant Observer2 as Second Observer
+
+    Observer1->>Relay: Publish Signal Report (kind 1315)<br/>geohash + category + severity
+    Subscriber->>Relay: REQ {kinds:[1315,1316], #g:[target + neighbours]}
+    Relay-->>Subscriber: Signal Report received
+
+    Note over Subscriber: Effective lifetime begins<br/>(created_at + base_ttl)
+
+    Observer2->>Relay: Publish Corroboration (kind 1316)<br/>e: report-id, status: still_there
+    Relay-->>Subscriber: Corroboration extends lifetime
+
+    Note over Subscriber: effective_expiry extended
+
+    Observer1->>Relay: Publish Corroboration (kind 1316)<br/>e: report-id, status: no_longer_there
+    Relay-->>Subscriber: Signal cleared

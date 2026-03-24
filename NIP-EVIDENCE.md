@@ -10,8 +10,6 @@ One event kind for recording signed, timestamped facts on Nostr — any particip
 
 > **Design principle:** Evidence records are append-only facts. Each record is independently verifiable via its cryptographic signature and optional file hash. They do not enforce truth — they record claims with provable authorship and timing.
 
-> **Standalone usability:** This NIP works independently on any Nostr application. Within the [TROTT protocol](https://github.com/forgesworn/nip-drafts) (v0.9), it is pattern P5 in TROTT-00: Core Patterns. TROTT composes evidence recording with inspection sign-offs, dispute evidence, credential verification, and compliance records — but adoption of TROTT is not required.
-
 ## Motivation
 
 Nostr events are inherently signed and timestamped, but there is no standard kind dedicated to **recording facts for later verification**. Many workflows need an immutable audit trail:
@@ -30,7 +28,8 @@ NIP-01 events provide signatures and timestamps, but applications need a dedicat
 
 - **"Every Nostr event is already timestamped evidence."** True, but NIP-EVIDENCE adds structured metadata (evidence type, file hash, capture timestamp, geolocation, condition grade) that enables interoperable evidence systems. A kind 1 note with a SHA-256 hash in the text is human-readable but not machine-parseable. A kind 30578 evidence record with `evidence_type`, `file_hash`, `captured_at`, and `g` tags is filterable, verifiable, and composable with other NIPs.
 - **NIP-03 (OpenTimestamps):** NIP-03 proves that an event existed at a given time. NIP-EVIDENCE adds structured metadata about what was captured, where, when, and under what conditions. NIP-03 could complement NIP-EVIDENCE (timestamp an evidence record for additional assurance) but does not replace it.
-- **NIP-94 (File Metadata):** NIP-94 covers file hashing and media metadata but not evidence context (capture conditions, geolocation, evidence type, chain linkage). Critically, not all evidence is file-based. Sensor readings, condition assessments, verbal confirmations, and witnessed observations have no associated file. NIP-94 requires a file URL; NIP-EVIDENCE does not.
+- **NIP-CUSTODY (kind 30572):** Custody evidence is recorded as kind 30578 events with custody-specific tags (`evidence_type: custody_inspection`, `custody_handoff_ref`, `condition_grade`, `asset_id`). The `e` tag references the custody transfer event, and `custody_handoff_ref` links evidence to a specific leg in a multi-leg chain. See the [NIP-CUSTODY](./NIP-CUSTODY.md) composing section for full details and examples.
+- **NIP-94 (File Metadata):** NIP-94 covers file hashing and media metadata but not evidence context: capture conditions, geolocation at time of capture, evidence type classification, or chain linkage to related events.
 
 ## Kinds
 
@@ -87,6 +86,24 @@ Tags:
 
 ## Protocol Flow
 
+```
+  Author                         Relay                     Interested Parties
+      |                            |                            |
+      |-- kind:30578 Evidence ---->|                            |
+      |  (evidence_type: inspection|                            |
+      |   file_hash: sha256:...)   |------- notification ------>|
+      |                            |                            |
+      |-- kind:30578 Evidence ---->|  (additional finding)      |
+      |  (evidence_type: photo)    |------- notification ------>|
+      |                            |                            |
+      |-- kind:30578 Evidence ---->|  (another finding)         |
+      |  (evidence_type: measurement)                           |
+      |                            |------- notification ------>|
+      |                            |                            |
+      |  Immutable audit trail     |                            |
+      |  recorded on relays        |                            |
+```
+
 1. **Recording:** Any participant publishes `kind:30578` events to record facts. Each record gets a unique `d` tag value (append-only).
 2. **Verification:** Interested parties verify the author's signature, check `file_hash` integrity for any attached files, and cross-reference `captured_at` with `created_at` for timing consistency.
 3. **Accumulation:** Additional evidence is published as new `kind:30578` events — never by overwriting existing records.
@@ -108,7 +125,7 @@ Professionals (inspectors, surveyors, auditors, medical practitioners) can publi
 
 ### Environmental & IoT Readings
 
-IoT devices and environmental sensors can publish `kind:30578` events with `evidence_type: reading` to record measurements (temperature, humidity, air quality, noise levels). The `g` tag provides location context, and `captured_at` records the precise measurement time. This creates a decentralised, signed sensor data log.
+IoT devices and environmental sensors can publish `kind:30578` events with `evidence_type: reading` to record measurements (temperature, humidity, air quality, noise levels). The `g` tag provides location context, and `captured_at` records the precise measurement time. This creates a decentralized, signed sensor data log.
 
 ### Progress Photography
 
@@ -118,17 +135,35 @@ Any project requiring photographic documentation (construction progress, restora
 
 Individuals, institutions, or AI systems can publish `kind:30578` events with `evidence_type: accomplishment` or `evidence_type: portfolio` to record achievements — certifications earned, courses completed, projects finished, skills demonstrated. The `file_hash` tag can reference a certificate image, project output, or portfolio artefact. When combined with NIP-58 badges, evidence records provide the underlying proof that a badge attestation is based on.
 
-### REQ Filters
+### Custody Evidence Composition
+
+NIP-CUSTODY uses kind 30578 to record asset condition at each handoff point. Custody evidence events add `custody_handoff_ref` (linking to a specific transfer in the chain), `condition_grade`, and `asset_id` tags. This enables multi-leg audit trails without a dedicated evidence kind.
 
 ```json
-[
-    {"kinds": [30578], "#e": ["<related-event-id>"]},
-    {"kinds": [30578], "#evidence_type": ["inspection"]},
-    {"kinds": [30578], "authors": ["<inspector-pubkey>"], "#g": ["gcpuuz"]}
-]
+{
+    "kind": 30578,
+    "pubkey": "<custodian-hex-pubkey>",
+    "created_at": 1698767100,
+    "tags": [
+        ["d", "parcel_042:custody:handoff_01:evidence:01"],
+        ["t", "evidence-record"],
+        ["e", "<custody-transfer-30572-event-id>", "wss://relay.example.com"],
+        ["evidence_type", "custody_inspection"],
+        ["custody_handoff_ref", "<custody-transfer-30572-event-id>"],
+        ["condition_grade", "good"],
+        ["asset_id", "parcel_042"],
+        ["file_hash", "sha256:9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"],
+        ["captured_at", "1698767050"],
+        ["g", "gcpuuz"],
+        ["mime_type", "image/jpeg"]
+    ],
+    "content": "<NIP-44 encrypted JSON: {\"url\":\"https://cdn.example.com/custody/photo.jpg\"}>",
+    "id": "<32-bytes lowercase hex>",
+    "sig": "<64-bytes lowercase hex>"
+}
 ```
 
-The first filter fetches all evidence linked to a specific event. The second discovers all inspection-type evidence. The third finds evidence from a specific author in a geographic area.
+See [NIP-CUSTODY](./NIP-CUSTODY.md) for full custody transfer details and multi-leg chain diagrams.
 
 ## Security Considerations
 
@@ -136,7 +171,6 @@ The first filter fetches all evidence linked to a specific event. The second dis
 * **Timestamp verification.** Clients SHOULD cross-reference `created_at` timestamps with `captured_at` on evidence events. Large discrepancies MAY indicate fabricated or backdated evidence. For high-integrity use cases, clients MAY cross-reference with relay receipt timestamps.
 * **Append-only enforcement.** Although relays cannot enforce append-only semantics for addressable events, clients MUST treat each unique `d` tag as an immutable record. Applications SHOULD warn users if a record with a previously-seen `d` tag appears with different content.
 * **Content encryption.** When evidence contains sensitive information (medical findings, security vulnerabilities, personal details), the `content` field SHOULD be NIP-44 encrypted to relevant parties.
-* **Sensitive evidence delivery.** Evidence containing sensitive content (medical records, security footage, personal identification) SHOULD be delivered via NIP-59 gift wrap to protect both the author and the subject.
 * **File availability.** Evidence records reference external files via URLs in the content. File availability is not guaranteed by the Nostr event. High-integrity applications SHOULD use content-addressed storage or mirror files across multiple hosts.
 * **Non-repudiation.** The combination of Nostr event signature, `created_at` timestamp, and relay storage provides non-repudiation — the author cannot deny having published the record. Applications SHOULD archive evidence events on multiple relays for durability.
 
@@ -148,7 +182,7 @@ The first filter fetches all evidence linked to a specific event. The second dis
 
 ## Reference Implementation
 
-The `@trott/sdk` (TypeScript SDK) provides builders and parsers for the evidence record kind defined in this NIP. For standalone use without TROTT, implementors SHOULD refer to the kind definitions above.
+The [`@trott/sdk`](https://github.com/TheCryptoDonkey/trott-sdk) TypeScript library provides builders and parsers for the evidence record kind defined in this NIP. For standalone use without TROTT, implementors SHOULD refer to the kind definitions above.
 
 A minimal implementation requires:
 

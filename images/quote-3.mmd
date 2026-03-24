@@ -1,0 +1,11 @@
+sequenceDiagram
+    actor R as Requester
+    actor P as Provider
+
+    P->>R: kind:30530 Quote
+    Note right of P: Provider proposes price<br/>with breakdown and validity
+
+    R->>P: kind:30531 Payment Terms
+    Note left of R: Parties agree on payment type,<br/>trust model, and rail
+
+    Note over R,P: Downstream: NIP-ESCROW Lock,<br/>Settlement, and Receipt

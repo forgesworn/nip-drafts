@@ -1,0 +1,7 @@
+flowchart LR
+    L1["Level 1\nChallenge stake\n≥ min_challenge_stake"] --> L2["Level 2\nVote stake\n≥ min_challenge_stake × 0.5"]
+    L2 --> L3["Level 3\nArbiter review\n(no additional stake)"]
+
+    style L1 fill:#d4edda,stroke:#28a745
+    style L2 fill:#fff3cd,stroke:#ffc107
+    style L3 fill:#f8d7da,stroke:#dc3545

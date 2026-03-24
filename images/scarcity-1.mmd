@@ -1,0 +1,13 @@
+flowchart TD
+    A["Scarcity detected"] --> B["Signal published (kind 30599)\nseverity + #g geohash + skill"]
+    B --> C["Clients subscribe\nby #g + #t filters"]
+    C --> D{"Training providers\nrespond?"}
+    D -- Yes --> E["training_available\nupdated to 'active'"]
+    D -- No --> F["Signal persists\nuntil expiration"]
+    E --> G["Signal updated\n(same d tag, revised severity)"]
+    F --> G
+    G --> H["Resolved or expired"]
+
+    style A fill:#f4e8e8,stroke:#a44
+    style B fill:#f4f0e8,stroke:#a94
+    style H fill:#e8f4e8,stroke:#4a9

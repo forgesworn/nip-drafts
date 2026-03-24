@@ -1,0 +1,22 @@
+flowchart TD
+    A["Do parties trust each other?"] -->|Yes| D["direct\n(peer-to-peer, no escrow)"]
+    A -->|No| B["Is payment collected upfront?"]
+    B -->|Yes| P["prepaid\n(pay before service)"]
+    B -->|No| C["Is there a third-party custodian?"]
+    C -->|Yes| E["Fiat or crypto?"]
+    E -->|Fiat| F["fiat-escrow\n(payment processor holds funds)"]
+    E -->|Crypto| G["custodial-escrow\n(third party holds funds)"]
+    C -->|No| H["Which payment rail?"]
+    H -->|Lightning| T["trustless\n(hold invoices, atomic swaps)"]
+    H -->|"Cashu NUT-14"| HTLC["ecash-htlc\n(HTLC spending conditions)"]
+    H -->|"Cashu NUT-11"| P2PK["ecash-p2pk\n(P2PK signatures)"]
+    H -->|"Taproot on-chain"| AS["adaptor-escrow\n(adaptor signatures, experimental)"]
+
+    style D fill:#d4edda,stroke:#28a745
+    style P fill:#d4edda,stroke:#28a745
+    style F fill:#fff3cd,stroke:#ffc107
+    style G fill:#fff3cd,stroke:#ffc107
+    style T fill:#cce5ff,stroke:#007bff
+    style HTLC fill:#cce5ff,stroke:#007bff
+    style P2PK fill:#cce5ff,stroke:#007bff
+    style AS fill:#e2d5f1,stroke:#6f42c1

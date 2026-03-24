@@ -1,0 +1,43 @@
+sequenceDiagram
+    actor O as Oracle
+    actor C as Challenger
+    participant V as Voters
+    participant A as Arbiter
+
+    O->>O: Outcome Report (public)
+    Note right of O: Outcome assumed correct
+
+    rect rgb(240, 248, 255)
+        Note over O,C: Level 1 — Evidence Window
+        C-->>O: Outcome Challenge (gift-wrapped)
+        Note left of C: Challenger stakes + provides evidence
+
+        alt Oracle concedes
+            O->>O: New Outcome Report (corrected)
+            O->>C: Outcome Ruling level=1 (public)
+            Note right of O: Challenger stake returned
+        else Oracle does not concede
+            Note over O,C: Escalates to Level 2
+        end
+    end
+
+    rect rgb(255, 243, 205)
+        Note over C,V: Level 2 — Community Vote
+        V-->>V: Outcome Vote (gift-wrapped)
+        V-->>V: Outcome Vote (gift-wrapped)
+        V-->>V: Outcome Vote (gift-wrapped)
+        Note right of V: Stake-weighted, 67% supermajority
+
+        alt Supermajority reached
+            V->>V: Outcome Ruling level=2 (public)
+            Note right of V: Winning voters share losing stakes
+        else No supermajority
+            Note over V,A: Escalates to Level 3
+        end
+    end
+
+    rect rgb(248, 215, 218)
+        Note over C,A: Level 3 — Designated Arbiter
+        A->>A: Outcome Ruling level=3 (public)
+        Note right of A: Final, non-appealable
+    end

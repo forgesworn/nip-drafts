@@ -1,0 +1,24 @@
+sequenceDiagram
+    participant A as Alice (Buyer)
+    participant R as Relay
+    participant B as Bob (Seller)
+
+    Note over A,B: Context established (order_abc123)
+
+    A->>R: NIP-17 gift wrap (kind 1059)<br/>inner rumour has context_id: order_abc123
+    R->>B: Deliver gift wrap
+    B->>B: Decrypt rumour, extract context_id
+
+    B->>R: Message Status (kind 30565)<br/>last_read: <alice-message-id>
+    R->>A: Deliver status (Alice sees "read")
+
+    B->>R: Typing Indicator (kind 20502)<br/>context_id: order_abc123, expiration: +5s
+    R->>A: Deliver typing signal (Alice sees "typing...")
+
+    B->>R: NIP-17 gift wrap (kind 1059)<br/>inner rumour: reply message
+    R->>A: Deliver gift wrap
+
+    A->>R: Message Status (kind 30565)<br/>last_read: <bob-message-id>
+    R->>B: Deliver status (Bob sees "read")
+
+    Note over A,B: Context completes, messages expire via NIP-40

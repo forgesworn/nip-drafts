@@ -1,0 +1,18 @@
+sequenceDiagram
+    participant Mentor
+    participant Relay
+    participant Apprentice
+    participant Verifier
+
+    Mentor->>Relay: Publish Endorsement (kind 30517)<br/>endorsement_type: mentorship
+    Note right of Mentor: competencies, supervision level, stage
+
+    Apprentice->>Relay: Publish Evidence (kind 30578, NIP-EVIDENCE)
+    Note right of Apprentice: portfolio of supervised work
+
+    Verifier->>Relay: Publish Credential (kind 31000, NIP-VA)
+    Note right of Verifier: formal qualification attestation
+
+    Apprentice->>Relay: Update Profile (kind 30510)<br/>craft:mentorship_ref + craft:certification_ref
+    Note over Mentor,Verifier: Progression update
+    Mentor->>Relay: Republish Endorsement (same d tag)<br/>updated stage + supervision level

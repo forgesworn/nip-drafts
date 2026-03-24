@@ -6,38 +6,59 @@ Dispute Resolution Protocol
 
 `draft` `optional`
 
-Three regular event kinds and two addressable event kinds for structured dispute resolution on Nostr — claim filing, evidence submission, mediator resolution, abuse reporting, and media attachments.
-
-> **Standalone usability:** This NIP works independently on any Nostr application. Within the [TROTT protocol](https://github.com/forgesworn/nip-drafts) (v0.9), these kinds are extended with operator-managed dispute workflows, safety check-ins, and emergency signals — but adoption of TROTT is not required.
+Two event kinds for structured dispute resolution on Nostr; claim filing and mediator resolution.
 
 ## Motivation
 
-NIP-56 provides content reporting (flagging notes for moderation), but Nostr has no protocol for resolving disputes between transacting parties. When a marketplace purchase goes wrong, a freelance job is abandoned, or a service isn't delivered — there's no standardised way to:
+NIP-56 provides content reporting (flagging notes for moderation), but Nostr has no protocol for resolving disputes between transacting parties. When a marketplace purchase goes wrong, a freelance job is abandoned, or a service is not delivered, there is no standardised way to:
 
-- **File a structured complaint** with typed dispute categories
-- **Submit evidence** (photos, logs, receipts) with cryptographic hashes
+- **File a structured complaint** with typed dispute categories, financial amounts, and mediator assignment
 - **Resolve via mediation** with transparent, signed rulings
-- **Detect serial offenders** through abuse pattern reporting
 
-This NIP defines a dispute lifecycle that works with any Nostr-based transaction — marketplace (NIP-15), classified listings (NIP-99), service coordination, or any custom application.
+Evidence submission uses [NIP-EVIDENCE](NIP-EVIDENCE.md) (`kind:30578`), which provides structured, immutable evidence records with file hashes, evidence types, and geolocation. Abuse reporting and serial offender detection use [NIP-56](https://github.com/nostr-protocol/nips/blob/master/56.md) at the application layer.
+
+This NIP defines the dispute claim and resolution lifecycle. It works with any Nostr-based transaction: marketplace (NIP-15), classified listings (NIP-99), service coordination, or any custom application.
+
+## Relationship to Existing NIPs
+
+### NIP-56 (Reporting)
+
+NIP-56 handles content and user reporting for moderation. Dispute Claims (`kind:7543`) are structured complaints between transacting parties with typed dispute categories, financial amounts, and mediator assignment. The two serve different purposes: NIP-56 is unilateral reporting to relays; NIP-DISPUTES is bilateral dispute resolution between parties.
+
+For serial offender pattern detection, use NIP-56 reports referencing resolved disputes. When an application detects patterns (e.g. 3+ at-fault rulings against the same pubkey within 30 days), it SHOULD publish NIP-56 reports with structured `report` tags. This keeps abuse reporting at the application layer where pattern detection logic belongs.
+
+### NIP-EVIDENCE (kind 30578)
+
+Dispute evidence SHOULD be submitted as [NIP-EVIDENCE](NIP-EVIDENCE.md) records (`kind:30578`). The `e` tag references the dispute claim event. Evidence types (photo, video, screenshot, receipt, etc.) map directly to NIP-EVIDENCE's `evidence_type` vocabulary. This composability means dispute evidence is discoverable alongside other evidence records and benefits from NIP-EVIDENCE's file hash verification, geolocation, and capture timestamp metadata.
+
+See [Composing with NIP-EVIDENCE](#composing-with-nip-evidence) for concrete examples.
+
+### NIP-94 / Blossom
+
+For media attachments (photos, videos, documents), use NIP-94 file metadata or Blossom (BUD-01) uploads, referenced from NIP-EVIDENCE records via `file_hash` and URL tags. Media upload is a generic file management concern, not dispute-specific.
+
+### NIP-ESCROW
+
+Disputes compose with [NIP-ESCROW](NIP-ESCROW.md). A dispute resolution MAY trigger settlement (Lock to Settlement with `release_reason: dispute_resolved`). When a `kind:30545` resolution includes a refund ruling, the escrow system can use the resolution event as authorisation to release or forfeit funds.
+
+### NIP-APPROVAL
+
+For multi-party dispute panels (e.g. three-mediator arbitration), compose with [NIP-APPROVAL](NIP-APPROVAL.md) gates. Each panel member publishes an approval event; the dispute resolution is published once the required threshold is met.
 
 ## Kinds
 
 | kind  | description         | type        |
 | ----- | ------------------- | ----------- |
 | 7543  | Dispute Claim       | regular     |
-| 7544  | Dispute Evidence    | regular     |
 | 30545 | Dispute Resolution  | addressable |
-| 30546 | Abuse Report        | addressable |
-| 7547  | Media Attachment    | regular     |
 
-Claims, evidence, and media attachments are regular events (NIP-01) — once published, they cannot be replaced or deleted at the relay level, guaranteeing immutability for accusations and evidence. Resolutions and abuse reports are addressable events — mediators may correct rulings before settlement, and abuse reports are updated as new incidents are detected.
+Claims are regular events (NIP-01); once published, they cannot be replaced at the relay level (regular events have no addressable replacement semantics). NIP-09 deletion requests may be issued but relays MAY ignore them; the cryptographic signature on the original event remains independently verifiable. Resolutions are addressable events; mediators may correct rulings before settlement.
 
 ---
 
 ## Dispute Claim (`kind:7543`)
 
-Filed by a complainant against an accused party. Immutable — as a regular event, the claim cannot be replaced or retracted at the relay level. It can only be resolved via a `kind:30545` resolution.
+Filed by a complainant against an accused party. Immutable: as a regular event, the claim cannot be replaced or retracted at the relay level. It can only be resolved via a `kind:30545` resolution.
 
 ```json
 {
@@ -51,6 +72,7 @@ Filed by a complainant against an accused party. Immutable — as a regular even
         ["resolution_model", "mediator"],
         ["mediator", "<mediator-pubkey>"],
         ["domain", "freelance"],
+        ["t", "domain:freelance"],
         ["amount_disputed", "25000"],
         ["currency", "SAT"]
     ],
@@ -63,24 +85,38 @@ Tags:
 * `p` (REQUIRED): Accused party's pubkey.
 * `e` (REQUIRED): References the transaction event.
 * `dispute_type` (REQUIRED): One of:
-    * `no_show` — party did not appear or deliver
-    * `quality` — work or goods below agreed standard
-    * `pricing` — overcharging, hidden fees
-    * `damage` — property or goods damaged
-    * `safety` — unsafe behaviour
-    * `fraud` — deliberate deception
+    * `no_show` - party did not appear or deliver
+    * `quality` - work or goods below agreed standard
+    * `pricing` - overcharging, hidden fees
+    * `damage` - property or goods damaged
+    * `safety` - unsafe behaviour
+    * `fraud` - deliberate deception
 * `resolution_model` (REQUIRED): One of:
-    * `mediator` — designated mediator reviews and rules
-    * `mutual` — parties negotiate directly
-    * `automated` — rule-based auto-resolution
+    * `mediator` - designated mediator reviews and rules
+    * `mutual` - parties negotiate directly
+    * `automated` - rule-based auto-resolution
 * `mediator` (OPTIONAL): Nominated mediator's pubkey. How the mediator is selected (marketplace-assigned, mutually agreed, random from pool) is application-defined.
-* `domain` (OPTIONAL): Service or transaction category (e.g. `freelance`, `delivery`, `marketplace`).
+* `domain` (OPTIONAL): Service or transaction category (e.g. `freelance`, `delivery`, `marketplace`). This is a multi-letter tag; relays cannot filter on it. Clients MUST post-filter by `domain` after retrieval.
+* `t` (RECOMMENDED when `domain` is present): `["t", "domain:<category>"]` (e.g. `["t", "domain:freelance"]`). Enables relay-side discovery by domain via `#t` filters. The `domain` tag remains the canonical source; the `t` tag is a relay-filterable mirror.
 * `amount_disputed` (OPTIONAL): Financial amount in dispute, in smallest currency unit.
 * `currency` (OPTIONAL): Currency code (e.g. `GBP`, `USD`, `EUR`, `SAT`).
 
 ### Filing Window
 
 Disputes SHOULD be filed within the dispute window defined by the transaction terms (default: 24 hours after completion). "Completion" means the `created_at` timestamp of the completion-state event (e.g. a status update to `completed`, a delivery confirmation, or the final transaction event). If the application has no explicit completion event, the `created_at` of the transaction event referenced by the `e` tag is used. Implementations MAY reject claims filed after this window.
+
+### REQ Filters
+
+```jsonc
+// Subscribe to all disputes involving a specific pubkey (as accused)
+["REQ", "disputes", {"kinds": [7543], "#p": ["<accused-pubkey>"]}]
+
+// Subscribe to all disputes filed by a specific pubkey
+["REQ", "my-disputes", {"kinds": [7543], "authors": ["<complainant-pubkey>"]}]
+
+// Subscribe to disputes for a specific transaction
+["REQ", "tx-disputes", {"kinds": [7543], "#e": ["<transaction-event-id>"]}]
+```
 
 ### Appeals
 
@@ -91,53 +127,30 @@ An appeal is a new `kind:7543` with:
 
 Appeals MUST be filed within 48 hours of the original resolution, MUST be assigned a different mediator, and are final (no further appeals at protocol level).
 
-> **Privacy:** This event MUST be delivered via NIP-59 gift wrap. See [Privacy](#privacy).
-
----
-
-## Dispute Evidence (`kind:7544`)
-
-Evidence submission by either party or the mediator. Immutable — as a regular event, evidence cannot be replaced or deleted at the relay level.
-
 ```json
 {
-    "kind": 7544,
-    "pubkey": "<submitter-hex-pubkey>",
-    "created_at": 1698771000,
+    "kind": 7543,
+    "pubkey": "<complainant-hex-pubkey>",
+    "created_at": 1698790000,
     "tags": [
-        ["e", "<dispute-claim-event-id>"],
-        ["e", "<transaction-event-id>"],
-        ["evidence_type", "screenshot"],
-        ["evidence_hash", "sha256:a1b2c3d4e5f6..."],
-        ["p", "<complainant-pubkey>"],
         ["p", "<accused-pubkey>"],
-        ["p", "<mediator-pubkey>"]
+        ["e", "<original-resolution-event-id>"],
+        ["dispute_type", "quality"],
+        ["resolution_model", "mediator"],
+        ["mediator", "<different-mediator-pubkey>"],
+        ["appeal", "true"]
     ],
-    "content": "<evidence URL, summary, and data format — plaintext in the rumour; privacy provided by NIP-59 gift wrap>"
+    "content": "The original ruling did not consider the evidence submitted in items 2 and 3. Requesting review by a different mediator."
 }
 ```
 
-Tags:
-
-* `e` (REQUIRED): First `e` tag references the Dispute Claim event (`kind:7543`).
-* `e` (RECOMMENDED): Second `e` tag references the transaction event for cross-referencing.
-* `evidence_type` (REQUIRED): One of `photo`, `video`, `audio`, `gps_log`, `screenshot`, `message_log`, `receipt`, `timestamp_proof`.
-* `evidence_hash` (REQUIRED): `sha256:<hex>` hash of the original file for integrity verification.
-* `p` (REQUIRED): All dispute participants (complainant, accused, mediator) — gift-wrap recipients.
-
-`content`: Contains evidence URL, summary description, and format hints. Privacy is provided by NIP-59 gift wrap (one gift-wrapped copy per recipient). Content MAY additionally be NIP-44 encrypted pairwise to the gift-wrap recipient as defence in depth.
-
-### Submission Window
-
-Evidence SHOULD be submitted within 48 hours of the dispute filing. Implementations MAY reject evidence submitted after this window.
-
-> **Privacy:** This event MUST be delivered via NIP-59 gift wrap (one copy per recipient). Evidence content MAY additionally be NIP-44 encrypted pairwise to each gift-wrap recipient as defence in depth. See [Privacy](#privacy).
+> **Privacy:** This event MUST be delivered via NIP-59 gift wrap. See [Privacy](#privacy).
 
 ---
 
 ## Dispute Resolution (`kind:30545`)
 
-The mediator's ruling. Addressable — can be updated if the mediator corrects an error before settlement.
+The mediator's ruling. Addressable: can be updated if the mediator corrects an error before settlement.
 
 ```json
 {
@@ -165,12 +178,12 @@ Tags:
 * `d` (REQUIRED): Format `resolution_<dispute-claim-event-id>`. The `<dispute-claim-event-id>` is the SHA-256 event ID from the `e` tag referencing the claim. Using the event ID (a globally unique SHA-256 hash) guarantees uniqueness without requiring application-level identifiers.
 * `e` (REQUIRED): References the Dispute Claim event (`kind:7543`).
 * `ruling` (REQUIRED): One of:
-    * `full_refund` — requester receives full refund
-    * `partial_refund` — requester receives partial refund
-    * `no_refund` — provider keeps payment
-    * `provider_compensated` — provider awarded additional compensation
-    * `mutual_release` — both parties agree to walk away
-    * `voided` — transaction voided entirely
+    * `full_refund` - requester receives full refund
+    * `partial_refund` - requester receives partial refund
+    * `no_refund` - provider keeps payment
+    * `provider_compensated` - provider awarded additional compensation
+    * `mutual_release` - both parties agree to walk away
+    * `voided` - transaction voided entirely
 * `resolution_model` (REQUIRED): Model used (matches the claim's `resolution_model`).
 * `at_fault` (OPTIONAL): Pubkey of the party found at fault.
 * `refund_amount`, `refund_currency` (OPTIONAL): Refund details. Amount in smallest currency unit.
@@ -190,97 +203,119 @@ Tags:
 
 If no resolution is published within the time limit, implementations SHOULD treat the dispute as `mutual_release`.
 
+### REQ Filters
+
+```jsonc
+// Subscribe to resolutions for a specific dispute
+["REQ", "resolution", {"kinds": [30545], "#e": ["<dispute-claim-event-id>"]}]
+
+// Subscribe to all resolutions by a specific mediator
+["REQ", "mediator-rulings", {"kinds": [30545], "authors": ["<mediator-pubkey>"]}]
+```
+
 > **Privacy:** This event MUST be delivered via NIP-59 gift wrap. See [Privacy](#privacy).
 
 ---
 
-## Abuse Report (`kind:30546`)
+## Composing with NIP-EVIDENCE
 
-NIP-56 compatible abuse report for serial offenders. Published after verified pattern detection — NOT for unverified complaints.
+Dispute evidence SHOULD be submitted as [NIP-EVIDENCE](NIP-EVIDENCE.md) records (`kind:30578`). The `e` tag on the evidence record references the dispute claim event, linking evidence to the dispute.
 
-```json
-{
-    "kind": 30546,
-    "pubkey": "<reporter-hex-pubkey>",
-    "created_at": 1698780000,
-    "tags": [
-        ["d", "abuse_report_a1b2c3d4"],
-        ["p", "<accused-pubkey>", "fraud"],
-        ["L", "abuse"],
-        ["l", "fraud", "abuse"],
-        ["l", "serial_offender", "abuse"],
-        ["report_type", "fraud"],
-        ["domain", "freelance"],
-        ["incident_count", "4"],
-        ["first_incident", "1696000000"],
-        ["last_incident", "1698700000"]
-    ],
-    "content": "Four disputes filed by different requesters over 60 days, each resulting in at_fault ruling. Pattern: accepts job, delivers partial work, disputes refund."
-}
-```
+### Submitting Dispute Evidence
 
-Tags:
-
-* `d` (REQUIRED): Unique identifier. RECOMMENDED format: `abuse_report_<random-id>`. The accused pubkey MUST NOT be included in the `d` tag — clients filter by `p` tag instead.
-* `p` (REQUIRED): Accused pubkey with NIP-56 report type as the third element.
-* `L` (REQUIRED): Label namespace (`abuse`).
-* `l` (REQUIRED, one or more): NIP-32 labels in the `abuse` namespace. Values: `fraud`, `spam`, `harassment`, `safety_violation`, `serial_offender`, `sybil_attack`.
-* `report_type` (REQUIRED): Primary abuse category.
-* `domain` (OPTIONAL): Service or transaction category.
-* `incident_count` (REQUIRED): Number of confirmed incidents.
-* `first_incident`, `last_incident` (RECOMMENDED): Unix timestamps bounding the pattern.
-* `e` (OPTIONAL): References resolution events (`kind:30545`) as supporting evidence. **Privacy note:** since abuse reports are public and resolutions are gift-wrapped, including resolution event IDs allows observers to correlate public reports with private dispute events by matching event IDs on relays. Implementations SHOULD omit `e` tags unless the referenced resolution events are also public, or unless correlation is acceptable for the use case.
-
-### Pattern Detection Thresholds
-
-Abuse reports SHOULD only be published after verification. Recommended thresholds:
-
-- 3+ disputes within 30 days, each with an `at_fault` ruling against the same pubkey
-- Anomalous rating inflation from recently-created pubkeys
-- Greater than 10% no-show rate across completed transactions
-
-Implementations MUST NOT publish abuse reports based on a single dispute or unverified complaints.
-
-> **Privacy:** This event is intentionally **public**. Abuse reports are community safety signals and MUST NOT be gift-wrapped. They are only published after verified pattern detection (3+ at-fault rulings).
-
----
-
-## Media Attachment (`kind:7547`)
-
-Photo, video, audio, or document evidence for disputes or transaction handovers. Immutable — as a regular event, media attachments cannot be replaced or deleted at the relay level.
+A complainant submitting photographic evidence of a quality dispute:
 
 ```json
 {
-    "kind": 7547,
-    "pubkey": "<submitter-hex-pubkey>",
-    "created_at": 1698770500,
+    "kind": 30578,
+    "pubkey": "<complainant-hex-pubkey>",
+    "created_at": 1698771000,
     "tags": [
-        ["e", "<dispute-or-transaction-event-id>"],
-        ["media_type", "photo"],
-        ["media_hash", "sha256:a1b2c3d4e5f6..."],
+        ["d", "<dispute-claim-event-id>:evidence:photo_01"],
+        ["t", "evidence-record"],
+        ["e", "<dispute-claim-event-id>"],
+        ["evidence_type", "photo"],
         ["captured_at", "1698770500"],
-        ["p", "<recipient-1-pubkey>"],
-        ["p", "<recipient-2-pubkey>"]
+        ["file_hash", "sha256:a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"],
+        ["g", "gcpuuz"],
+        ["p", "<accused-pubkey>"],
+        ["p", "<mediator-pubkey>"]
     ],
-    "content": "<media URL and description — plaintext in the rumour; privacy provided by NIP-59 gift wrap>"
+    "content": "Photo of delivered item showing visible damage to left panel. Compare with agreed specification in the original listing."
 }
 ```
 
-Tags:
+An accused party submitting a screenshot of the agreed terms:
 
-* `e` (REQUIRED): References the dispute or transaction event this media relates to.
-* `media_type` (REQUIRED): One of `photo`, `video`, `audio`, `document`.
-* `media_hash` (REQUIRED): `sha256:<hex>` hash of the original file for integrity verification.
-* `captured_at` (OPTIONAL): Unix timestamp when the media was captured.
-* `p` (REQUIRED): Gift-wrap recipients.
+```json
+{
+    "kind": 30578,
+    "pubkey": "<accused-hex-pubkey>",
+    "created_at": 1698772000,
+    "tags": [
+        ["d", "<dispute-claim-event-id>:evidence:screenshot_01"],
+        ["t", "evidence-record"],
+        ["e", "<dispute-claim-event-id>"],
+        ["evidence_type", "screenshot"],
+        ["captured_at", "1698772000"],
+        ["file_hash", "sha256:b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3"],
+        ["p", "<complainant-pubkey>"],
+        ["p", "<mediator-pubkey>"]
+    ],
+    "content": "Screenshot of original agreement showing the five deliverables. Items 1 and 2 were delivered as specified."
+}
+```
 
-`content`: Contains the media URL and description. Privacy is provided by NIP-59 gift wrap (one gift-wrapped copy per recipient). Content MAY additionally be NIP-44 encrypted pairwise to each gift-wrap recipient as defence in depth.
+A receipt submission for a pricing dispute:
 
-> **Privacy:** This event MUST be delivered via NIP-59 gift wrap (one copy per recipient). Media content MAY additionally be NIP-44 encrypted pairwise to each gift-wrap recipient as defence in depth. See [Privacy](#privacy).
+```json
+{
+    "kind": 30578,
+    "pubkey": "<complainant-hex-pubkey>",
+    "created_at": 1698771500,
+    "tags": [
+        ["d", "<dispute-claim-event-id>:evidence:receipt_01"],
+        ["t", "evidence-record"],
+        ["e", "<dispute-claim-event-id>"],
+        ["evidence_type", "receipt"],
+        ["captured_at", "1698771500"],
+        ["file_hash", "sha256:c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4"],
+        ["p", "<accused-pubkey>"],
+        ["p", "<mediator-pubkey>"]
+    ],
+    "content": "Payment receipt showing 25000 SAT charged. The agreed price was 18000 SAT per the original quote."
+}
+```
+
+### Evidence `d` Tag Convention
+
+For dispute evidence, the recommended `d` tag format is:
+
+```
+<dispute-claim-event-id>:evidence:<label>
+```
+
+This links evidence to the dispute while ensuring each record has a unique `d` tag (append-only semantics). The `<label>` is author-chosen (e.g. `photo_01`, `screenshot_01`, `receipt_01`).
+
+### Discovering Dispute Evidence
+
+Clients can discover all evidence for a dispute by filtering on the `e` tag:
+
+```json
+["REQ", "dispute-evidence", {"kinds": [30578], "#e": ["<dispute-claim-event-id>"]}]
+```
+
+### Evidence Submission Window
+
+Evidence SHOULD be submitted within 48 hours of the dispute filing. Implementations MAY reject evidence submitted after this window.
+
+### Evidence Privacy
+
+When dispute evidence contains sensitive information, the NIP-EVIDENCE `content` field SHOULD be NIP-44 encrypted to the relevant parties. Evidence events MUST be delivered via NIP-59 gift wrap (one copy per recipient: complainant, accused, mediator). See [Privacy](#privacy).
 
 ---
 
-## Dispute Lifecycle
+## Protocol Flow
 
 ```mermaid
 sequenceDiagram
@@ -293,10 +328,9 @@ sequenceDiagram
 
     rect rgb(240, 248, 255)
         Note over C,A: Evidence phase (48-hour window)
-        C-->>M: kind:7544 Evidence (gift-wrapped)
-        C-->>M: kind:7547 Media (gift-wrapped)
-        A-->>M: kind:7544 Evidence (gift-wrapped)
-        A-->>M: kind:7547 Media (gift-wrapped)
+        C-->>M: kind:30578 Evidence (gift-wrapped)
+        A-->>M: kind:30578 Evidence (gift-wrapped)
+        Note over C,M: NIP-EVIDENCE records with e tag<br/>referencing the dispute claim
     end
 
     M-->>C: kind:30545 Resolution (gift-wrapped)
@@ -306,25 +340,24 @@ sequenceDiagram
     alt At-fault ruling confirmed
         Note over C,A: Escrow released or forfeited per ruling (NIP-ESCROW)
     else Pattern detected (3+ at-fault)
-        C->>C: kind:30546 Abuse Report (public)
-        Note left of C: Community safety signal
+        Note over C,A: Application publishes NIP-56 report
     end
 ```
 
-> **Arrow legend:** `—>>` solid = public event · `-->>` dashed = NIP-59 gift-wrapped (private)
+> **Arrow legend:** `-->>` dashed = NIP-59 gift-wrapped (private)
 
 1. **Filing:** Complainant publishes `kind:7543` within the dispute window.
-2. **Evidence:** Both parties submit `kind:7544` evidence and `kind:7547` media (48-hour window).
+2. **Evidence:** Both parties submit `kind:30578` evidence records (NIP-EVIDENCE) within the 48-hour window.
 3. **Ruling:** Mediator publishes `kind:30545` resolution with reasoning.
 4. **Settlement:** Escrow released or forfeited per ruling (see [NIP-ESCROW](NIP-ESCROW.md)).
-5. **Abuse:** If pattern detected across multiple disputes, `kind:30546` published publicly.
+5. **Abuse reporting:** If patterns are detected across multiple disputes, the application publishes NIP-56 reports.
 
 ### State Transitions
 
 ```mermaid
 flowchart TD
     TC["Transaction Complete"] --> CF["Claim Filed\nkind:7543"]
-    CF --> ES["Evidence Submission\nkind:7544 + kind:7547\n(48-hour window)"]
+    CF --> ES["Evidence Submission\nkind:30578 (NIP-EVIDENCE)\n(48-hour window)"]
     ES --> RU["Ruling\nkind:30545"]
     RU --> SE["Settled"]
     RU --> AP["Appeal\nkind:7543 (appeal variant)"]
@@ -341,7 +374,7 @@ flowchart TD
     style RU2 fill:#d4edda,stroke:#28a745
 ```
 
-Legend: <span style="color:#ffc107">**yellow**</span> = in progress · <span style="color:#28a745">**green**</span> = terminal · <span style="color:#007bff">**blue**</span> = appeal path
+Legend: <span style="color:#ffc107">**yellow**</span> = in progress, <span style="color:#28a745">**green**</span> = terminal, <span style="color:#007bff">**blue**</span> = appeal path
 
 ### Enforcement Note
 
@@ -350,71 +383,126 @@ The state transitions above are **client-side guidance**, not relay-enforced con
 ## Use Cases Beyond Task Coordination
 
 ### Marketplace Purchase Disputes
-Buyer and seller disagree on item condition. Dispute claim (`kind:7543`) references the original listing. Evidence events (`kind:7544`) include photos. A designated mediator issues resolution (`kind:30545`).
+Buyer and seller disagree on item condition. Dispute claim (`kind:7543`) references the original listing. Evidence records (`kind:30578`) include photos with file hashes. A designated mediator issues resolution (`kind:30545`).
 
 ### Freelance Contract Disputes
-Client claims deliverable doesn't match brief. Structured dispute flow with evidence and optional mediation replaces unstructured DM arguments.
+Client claims deliverable does not match brief. Structured dispute flow with evidence and optional mediation replaces unstructured DM arguments.
 
 ### Rental Damage Claims
-Landlord claims damage after checkout. Tenant submits counter-evidence (pre-checkout photos). Third-party mediator reviews both sides.
+Landlord claims damage after checkout. Tenant submits counter-evidence (pre-checkout photos as `kind:30578` records). Third-party mediator reviews both sides.
 
 ### Content Takedown Appeals
-Creator disputes a content removal. Abuse report (`kind:30546`) initiated the takedown; creator submits counter-evidence. Resolution documents the outcome for transparency.
+Creator disputes a content removal. The creator submits counter-evidence via NIP-EVIDENCE. Resolution documents the outcome for transparency.
 
 ## Security Considerations
 
-* **Evidence integrity.** `evidence_hash` and `media_hash` tags use SHA-256 hashes for tamper detection. Implementations SHOULD verify hashes against submitted files and reject mismatches.
-* **Encrypted evidence.** All evidence content is NIP-44 encrypted to dispute participants only. Relays see event metadata (kind, tags, pubkeys) but cannot read evidence content.
-* **Mediator accountability.** Resolutions are signed events — the mediator's pubkey is transparent and their ruling history is publicly auditable. Clients MAY display mediator statistics (rulings issued, appeal rate, average resolution time).
-* **No unverified abuse reports.** `kind:30546` SHOULD only be published after pattern verification (multiple at-fault rulings, not single complaints). Publishing unverified reports undermines the system.
+* **Evidence integrity.** NIP-EVIDENCE records include `file_hash` tags with SHA-256 hashes for tamper detection. Implementations SHOULD verify hashes against submitted files and reject mismatches.
+* **Encrypted evidence.** Evidence content SHOULD be NIP-44 encrypted to dispute participants only. Relays see event metadata (kind, tags, pubkeys) but cannot read evidence content.
+* **Mediator accountability.** Resolutions are signed events; the mediator's pubkey is transparent and their ruling history is publicly auditable. Clients MAY display mediator statistics (rulings issued, appeal rate, average resolution time).
 * **Appeal safeguards.** Appeals MUST be assigned a different mediator, preventing the same person from ruling twice on the same dispute.
-* **Immutability guarantees.** Dispute claims (`kind:7543`), evidence (`kind:7544`), and media attachments (`kind:7547`) are regular events — relays cannot replace them once published. This ensures accusations and evidence are tamper-proof at the protocol level. Resolutions (`kind:30545`) remain addressable to allow mediator corrections before settlement.
+* **Immutability guarantees.** Dispute claims (`kind:7543`) are regular events; relays cannot replace them once published. This ensures accusations are tamper-proof at the protocol level. Resolutions (`kind:30545`) remain addressable to allow mediator corrections before settlement.
+* **Abuse report thresholds.** Serial offender detection belongs at the application layer. Applications SHOULD only publish NIP-56 reports after verified patterns (3+ at-fault rulings, not single complaints). Publishing unverified reports undermines the system.
 
 ## Privacy
 
-Dispute events contain sensitive information — accusations, evidence, rulings, and fault determinations — that should not be visible to relay operators or passive observers. These events MUST be delivered privately using [NIP-59](https://github.com/nostr-protocol/nips/blob/master/59.md) gift wrap.
+Dispute events contain sensitive information: accusations, evidence, rulings, and fault determinations. These MUST NOT be visible to relay operators or passive observers. All dispute events MUST be delivered privately using [NIP-59](https://github.com/nostr-protocol/nips/blob/master/59.md) gift wrap.
 
 ### Gift-wrap requirements
 
 | Kind | Event | Requirement | Recipients |
 |------|-------|-------------|------------|
 | 7543 | Dispute Claim | MUST gift-wrap | Complainant, accused, mediator (if known) |
-| 7544 | Dispute Evidence | MUST gift-wrap | Complainant, accused, mediator |
+| 30578 | Dispute Evidence (NIP-EVIDENCE) | MUST gift-wrap | Complainant, accused, mediator |
 | 30545 | Dispute Resolution | MUST gift-wrap | Complainant, accused |
-| 7547 | Media Attachment | MUST gift-wrap | All `p`-tagged recipients |
 
-The inner event (the sealed rumour) retains its full tag structure — gift wrap provides the privacy layer, not tag restructuring. Recipients unwrap the NIP-59 envelope to access the original event.
+The inner event (the sealed rumour) retains its full tag structure; gift wrap provides the privacy layer, not tag restructuring. Recipients unwrap the NIP-59 envelope to access the original event.
 
-Evidence (`kind:7544`) and media (`kind:7547`) content MAY additionally be NIP-44 encrypted pairwise to each gift-wrap recipient. This provides defence in depth — even if the gift-wrap envelope is compromised, the content remains encrypted. Each gift-wrapped copy carries content encrypted to that specific recipient; NIP-44 is pairwise and a single ciphertext cannot be decrypted by multiple keys.
-
-### Events that remain public
-
-| Kind | Event | Rationale |
-|------|-------|-----------|
-| 30546 | Abuse Report | Community safety signal — published only after verified pattern detection (3+ at-fault rulings). Visibility is the point. |
+Evidence (`kind:30578`) content MAY additionally be NIP-44 encrypted pairwise to each gift-wrap recipient. This provides defence in depth: even if the gift-wrap envelope is compromised, the content remains encrypted. Each gift-wrapped copy carries content encrypted to that specific recipient; NIP-44 is pairwise and a single ciphertext cannot be decrypted by multiple keys.
 
 ### Metadata minimisation
 
-Implementations SHOULD include only the tags marked REQUIRED or RECOMMENDED in each event kind. Optional tags (`domain`, `amount_disputed`, `currency`) increase the metadata surface — omit them unless the application specifically needs them.
+Implementations SHOULD include only the tags marked REQUIRED or RECOMMENDED in each event kind. Optional tags (`domain`, `amount_disputed`, `currency`) increase the metadata surface; omit them unless the application specifically needs them.
 
-## Relationship to Existing NIPs
+## Test Vectors
 
-Extends [NIP-56](https://github.com/nostr-protocol/nips/blob/master/56.md) (Reporting) with structured bilateral dispute resolution. NIP-56 handles unilateral abuse reporting to relays; NIP-DISPUTES handles bilateral disputes between transaction parties with evidence, mediation, and binding rulings. Uses [NIP-32](https://github.com/nostr-protocol/nips/blob/master/32.md) (Labelling) for structured abuse categorisation.
+### Dispute Claim (kind 7543)
+
+```json
+{
+    "kind": 7543,
+    "pubkey": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
+    "created_at": 1698770000,
+    "tags": [
+        ["p", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3"],
+        ["e", "c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4"],
+        ["dispute_type", "quality"],
+        ["resolution_model", "mediator"],
+        ["mediator", "d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5"],
+        ["domain", "freelance"],
+        ["t", "domain:freelance"],
+        ["amount_disputed", "25000"],
+        ["currency", "SAT"]
+    ],
+    "content": "Deliverables did not match the agreed specification. Three of five requirements were not addressed."
+}
+```
+
+Expected validation:
+- `kind` is 7543 (regular event, immutable)
+- `p` tag present (accused pubkey)
+- `e` tag present (transaction reference)
+- `dispute_type` is one of the six permitted values
+- `resolution_model` is one of the three permitted values
+- `mediator` tag present when `resolution_model` is `mediator`
+
+### Dispute Resolution (kind 30545)
+
+```json
+{
+    "kind": 30545,
+    "pubkey": "d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5",
+    "created_at": 1698775000,
+    "tags": [
+        ["d", "resolution_e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6"],
+        ["e", "e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6"],
+        ["ruling", "partial_refund"],
+        ["resolution_model", "mediator"],
+        ["at_fault", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3"],
+        ["refund_amount", "15000"],
+        ["refund_currency", "SAT"],
+        ["complainant_stake_outcome", "released"],
+        ["accused_stake_outcome", "partial_forfeit"],
+        ["resolved_at", "1698775000"]
+    ],
+    "content": "After reviewing submitted evidence, the deliverables met 2 of 5 requirements. A 60% refund is awarded to the requester."
+}
+```
+
+Expected validation:
+- `kind` is 30545 (addressable event)
+- `d` tag starts with `resolution_`
+- `e` tag present (dispute claim reference)
+- `ruling` is one of the six permitted values
+- `resolution_model` matches the claim's model
+- `resolved_at` is a valid Unix timestamp
+- `pubkey` matches the mediator nominated in the claim
 
 ## Dependencies
 
 * [NIP-01](https://github.com/nostr-protocol/nips/blob/master/01.md): Basic protocol flow, regular and addressable events
-* [NIP-32](https://github.com/nostr-protocol/nips/blob/master/32.md): Labelling (abuse categorisation)
+* [NIP-32](https://github.com/nostr-protocol/nips/blob/master/32.md): Labelling (abuse categorisation via NIP-56)
 * [NIP-44](https://github.com/nostr-protocol/nips/blob/master/44.md): Versioned encrypted payloads
-* [NIP-56](https://github.com/nostr-protocol/nips/blob/master/56.md): Reporting (compatibility)
+* [NIP-56](https://github.com/nostr-protocol/nips/blob/master/56.md): Reporting (serial offender detection)
 * [NIP-59](https://github.com/nostr-protocol/nips/blob/master/59.md): Gift wrap (private delivery of dispute events)
+* [NIP-EVIDENCE](NIP-EVIDENCE.md): Timestamped evidence recording (dispute evidence submission)
 
 ## Reference Implementation
 
-The `@trott/sdk` (TypeScript SDK) provides builders and parsers for all five kinds defined in this NIP.
+The [`@trott/sdk`](https://github.com/TheCryptoDonkey/trott-sdk) TypeScript library provides builders and parsers for the two kinds defined in this NIP, plus composition helpers for submitting dispute evidence as NIP-EVIDENCE records.
 
 A minimal implementation requires:
 
-1. A Nostr client that supports regular and addressable event publishing and NIP-44 encryption.
-2. A dispute management interface for filing claims, submitting evidence, and viewing resolutions.
+1. A Nostr client that supports regular and addressable event publishing, NIP-44 encryption, and NIP-59 gift wrap.
+2. A dispute management interface for filing claims and viewing resolutions.
 3. Mediator tooling for reviewing evidence and publishing rulings.
+4. NIP-EVIDENCE integration for submitting and discovering dispute evidence (`kind:30578`).

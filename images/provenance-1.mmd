@@ -1,0 +1,11 @@
+flowchart TD
+    A["Material sourced\n(NIP-EVIDENCE kind 30578)\nevidence_type: provenance"] --> B["Product made\n(Certificate kind 30404)\nlinks materials + techniques"]
+    B --> C["Authenticated\n(NIP-VA kind 31000)\ntype: authenticity"]
+    C --> D["Sold / transferred\n(NIP-CUSTODY kind 30572)\nasset_type: product"]
+    D --> E["Resold\n(NIP-CUSTODY kind 30572)\ncustody_handoff_ref links chain"]
+
+    style A fill:#e8f4e8,stroke:#4a9
+    style B fill:#e8eef4,stroke:#49a
+    style C fill:#f4f0e8,stroke:#a94
+    style D fill:#f4e8e8,stroke:#a44
+    style E fill:#f4e8e8,stroke:#a44

@@ -6,15 +6,25 @@ Service Provider Profiles
 
 `draft` `optional`
 
-Four addressable event kinds for declaring service provider capabilities, service catalogues, portfolio items, and coordinator commitments on Nostr.
-
-> **Standalone usability:** This NIP works independently on any Nostr application. Within the [TROTT protocol](https://github.com/forgesworn/nip-drafts) (v0.9), provider profiles (`kind:30510`), service catalogues (`kind:30525`), and portfolio items (`kind:30526`) are defined in TROTT-02: Discovery, and coordinator bonds (`kind:30511`) are defined in TROTT-06: Operator Participation. TROTT extends these with domain variants (59 domain-specific profile configurations), expanded profile manifests, and operator override mechanics — but adoption of TROTT is not required.
+Two addressable event kinds for declaring service provider capabilities and coordinator commitments on Nostr. Service catalogues compose with NIP-99 (Classified Listings); portfolio items compose with NIP-EVIDENCE.
 
 ## Motivation
 
 Nostr has NIP-24 for basic user metadata (name, about, picture) and NIP-89 for application handler announcements. Neither supports structured declarations of what a service provider can do, where they operate, what credentials they hold, or what terms they offer. As Nostr expands beyond social media into marketplaces, DVMs, freelance platforms, and local services, providers need a machine-readable way to advertise their capabilities so clients can filter and match programmatically.
 
-Similarly, coordinators (entities that facilitate discovery, matching, or escrow between parties) need a way to publicly declare their financial commitment, supported categories, fee structure, and service-level agreements — enabling participants to evaluate and compare coordinators transparently.
+Similarly, coordinators (entities that facilitate discovery, matching, or escrow between parties) need a way to publicly declare their financial commitment, supported categories, fee structure, and service-level agreements. This enables participants to evaluate and compare coordinators transparently.
+
+Structured service listings and portfolio showcases use existing NIPs (NIP-99 for classified listings; NIP-EVIDENCE for evidence records) rather than introducing new kinds. This keeps the kind count minimal while composing naturally with the wider Nostr ecosystem.
+
+## Relationship to Existing NIPs
+
+* **NIP-24 (User Metadata):** Kind 0 is general identity. Provider Profiles are structured service declarations with geographic coverage, credentials, and machine-readable capabilities.
+* **NIP-89 (Application Handlers):** Application announcements, not service provider declarations.
+* **NIP-99 (Classified Listings):** Service catalogues use NIP-99. Each service offering is a classified listing (`kind:30402`) with provider-specific tags. Profile kind 30510 `featured_service` tags reference NIP-99 listing d-tags. See [Composing with NIP-99](#composing-with-nip-99) below.
+* **NIP-EVIDENCE (kind 30578):** Portfolio items use NIP-EVIDENCE with `evidence_type: portfolio`. Completed work evidence is discoverable alongside other evidence records. See [Composing with NIP-EVIDENCE](#composing-with-nip-evidence) below.
+* **NIP-58 (Badges):** Credential compatibility. Credential attestations (NIP-VA kind 31000) can reference NIP-58 badge definitions.
+* **NIP-REPUTATION (kind 30520):** Ratings reference provider profiles for cross-referencing.
+* **NIP-CRAFTS:** Practitioner skill profiles use Provider Profiles (kind 30510) with `craft:*` extension tags for proficiency levels, tradition, endangerment status, and specialism. See NIP-CRAFTS for the full tag vocabulary.
 
 ## Kinds
 
@@ -22,8 +32,6 @@ Similarly, coordinators (entities that facilitate discovery, matching, or escrow
 | ----- | ------------------------ |
 | 30510 | Service Provider Profile |
 | 30511 | Coordinator Bond         |
-| 30525 | Service Catalogue        |
-| 30526 | Portfolio Item           |
 
 ## Kind 30510: Service Provider Profile
 
@@ -71,22 +79,22 @@ An addressable event declaring a provider's capabilities, credentials, coverage 
 Tags:
 
 * `d` (REQUIRED): Unique identifier for this profile. Recommended format: `<pubkey>_profile`.
-* `t` (RECOMMENDED, one or more): Relay-indexed discovery tokens using namespaced prefixes. NIP-01 defines subscription filters for single-letter tags only — multi-letter tags are not relay-indexed. Use `t` tags for values that need relay-side filtering: `["t", "domain:plumbing"]`, `["t", "skill:gas-fitting"]`, `["t", "credential:gas_safe_registered"]`.
-* `domain` (RECOMMENDED, one or more): Service categories the provider operates in. Multiple tags for multi-domain providers. **Client-side metadata** — not relay-indexed; use `t` tags with `domain:` prefix for relay queries.
-* `skill` (RECOMMENDED, one or more): Specific capabilities within domains. **Client-side metadata** — use `t` tags with `skill:` prefix for relay queries.
-* `credential` (OPTIONAL, one or more): Qualifications, licences, or certifications held. Machine-readable identifiers (e.g. `gas_safe_registered`, `first_aid_certified`). **Client-side metadata** — use `t` tags with `credential:` prefix for relay queries.
+* `t` (RECOMMENDED, one or more): Relay-indexed discovery tokens using namespaced prefixes. NIP-01 defines subscription filters for single-letter tags only; multi-letter tags are not relay-indexed. Use `t` tags for values that need relay-side filtering: `["t", "domain:plumbing"]`, `["t", "skill:gas-fitting"]`, `["t", "credential:gas_safe_registered"]`.
+* `domain` (RECOMMENDED, one or more): Service categories the provider operates in. Multiple tags for multi-domain providers. **Client-side metadata** - not relay-indexed; use `t` tags with `domain:` prefix for relay queries.
+* `skill` (RECOMMENDED, one or more): Specific capabilities within domains. **Client-side metadata** - use `t` tags with `skill:` prefix for relay queries.
+* `credential` (OPTIONAL, one or more): Qualifications, licences, or certifications held. Machine-readable identifiers (e.g. `gas_safe_registered`, `first_aid_certified`). **Client-side metadata** - use `t` tags with `credential:` prefix for relay queries.
 * `credential_proof` (OPTIONAL): Verification URL for a credential. Format: `["credential_proof", "<credential-id>", "<verification-url>"]`.
 * `g` (RECOMMENDED, one or more): Geohash at precision 3 and 4, derived from the unique prefixes of all `coverage_geohash` tags. `g` tags are relay-indexed (single-letter Nostr tags) and enable geographic filtering via `#g` subscription filters. `coverage_geohash` tags remain the authoritative fine-grained coverage definition; `g` tags are coarse hints for relay-side narrowing.
 * `coverage_geohash` (OPTIONAL, one or more): Geohash cells (precision 4-5) where the provider operates. Enables geographic filtering.
-* `coverage_precision` (OPTIONAL): Maximum geohash precision (3–9) used when computing coverage cells from zone shapes. Editorial setting for re-computation.
-* `coverage_merge_threshold` (OPTIONAL): Merge threshold (0.1–1.0) controlling how aggressively adjacent cells are merged when computing coverage from zones.
-* `coverage_radius_km` (OPTIONAL): Maximum travel distance from coverage area in kilometers.
-* `coverage_zones` (OPTIONAL): NIP-44 encrypted `ServiceAreaDefinition` JSON (encrypted to event author). Contains original zone shapes (circles, polygons) with include/exclude modes for lossless re-editing. Not used for discovery — `coverage_geohash` tags remain the public representation.
+* `coverage_precision` (OPTIONAL): Maximum geohash precision (3-9) used when computing coverage cells from zone shapes. Editorial setting for re-computation.
+* `coverage_merge_threshold` (OPTIONAL): Merge threshold (0.1-1.0) controlling how aggressively adjacent cells are merged when computing coverage from zones.
+* `coverage_radius_km` (OPTIONAL): Maximum travel distance from coverage area in kilometres.
+* `coverage_zones` (OPTIONAL): NIP-44 encrypted `ServiceAreaDefinition` JSON (encrypted to event author). Contains original zone shapes (circles, polygons) with include/exclude modes for lossless re-editing. Not used for discovery; `coverage_geohash` tags remain the public representation.
 * `languages` (OPTIONAL): Comma-separated ISO 639-1 language codes.
 * `operating_hours` (OPTIONAL): Operating hours in 24-hour format (e.g. `08:00-22:00`).
 * `timezone` (OPTIONAL): IANA timezone identifier.
 * `emergency_available` (OPTIONAL): `true` if the provider offers emergency/out-of-hours service.
-* `rating` (OPTIONAL): Current aggregate rating (decimal, 1.0-5.0). Informational — verifiable ratings use `kind:30520` (see [NIP-REPUTATION](NIP-REPUTATION.md)).
+* `rating` (OPTIONAL): Current aggregate rating (decimal, 1.0-5.0). Informational; verifiable ratings use `kind:30520` (see [NIP-REPUTATION](NIP-REPUTATION.md)).
 * `completed_tasks` (OPTIONAL): Total completed tasks. Informational.
 * `member_since` (OPTIONAL): Unix timestamp of when the provider joined.
 * `standing_offer` (OPTIONAL): `true` if the provider operates a standing-offer service (walk-in, market stall).
@@ -94,8 +102,8 @@ Tags:
 * `resource_type` (OPTIONAL): One of `service` (default), `space` (physical space for booking), `equipment` (items for hire).
 * `hero_image` (OPTIONAL): URI of a primary image representing the provider's business or brand. Storefront summary tag.
 * `tagline` (OPTIONAL): Short marketing tagline (max 120 characters). Storefront summary tag.
-* `featured_service` (OPTIONAL, one or more): Structured tag highlighting a service from the provider's Kind 30525 catalogue. Format: `["featured_service", "<slug>", "<display_name>", "<price_indicator>"]`. The slug matches a `service` tag in Kind 30525. Multiple tags allowed.
-* `portfolio_count` (OPTIONAL): Number of portfolio items (Kind 30526) the provider has published. Informational convenience — clients MAY display this without fetching portfolio events.
+* `featured_service` (OPTIONAL, one or more): Structured tag highlighting a service from the provider's NIP-99 classified listings. Format: `["featured_service", "<slug>", "<display_name>", "<price_indicator>"]`. The slug matches the d-tag suffix of a `kind:30402` listing. Multiple tags allowed.
+* `portfolio_count` (OPTIONAL): Number of portfolio evidence records (`kind:30578` with `evidence_type: portfolio`) the provider has published. Informational convenience; clients MAY display this without fetching evidence events.
 * `expiration` (OPTIONAL): NIP-40 expiration. When set, the profile auto-expires and MUST be republished to remain discoverable.
 
 `content`: Free-text description of the provider's services.
@@ -130,13 +138,13 @@ The `coverage_zones` tag contains a NIP-44 ciphertext encrypted to the event aut
 ```
 
 **Zone modes:**
-- `include` — provider operates in this area (geohashes contribute to `coverage_geohash` tags)
-- `exclude` — provider does not operate here (geohashes subtracted from coverage)
+- `include` - provider operates in this area (geohashes contribute to `coverage_geohash` tags)
+- `exclude` - provider does not operate here (geohashes subtracted from coverage)
 - Additional modes may be defined in future (e.g. `preferred`, `surcharge`)
 
 **Zone types:**
-- `circle` — defined by `centre` ([lon, lat]) and `radiusMiles`
-- `polygon` — defined by `vertices` ([[lon, lat], ...])
+- `circle` - defined by `centre` ([lon, lat]) and `radiusMiles`
+- `polygon` - defined by `vertices` ([[lon, lat], ...])
 
 The `precision` and `mergeThreshold` fields are editorial settings used to recompute geohashes from shapes. They are not used for discovery.
 
@@ -173,7 +181,7 @@ A provider serving multiple categories includes multiple `domain` and `skill` ta
 
 ### REQ Filters
 
-NIP-01 defines subscription filters for single-letter tag names only (`#g`, `#t`, `#p`, `#e`, etc.). Multi-letter tag names (`domain`, `skill`, `credential`, `coverage_geohash`) are event metadata for client-side post-filtering — relays will not index them.
+NIP-01 defines subscription filters for single-letter tag names only (`#g`, `#t`, `#p`, `#e`, etc.). Multi-letter tag names (`domain`, `skill`, `credential`, `coverage_geohash`) are event metadata for client-side post-filtering; relays will not index them.
 
 Find providers by category and coarse location:
 
@@ -194,7 +202,7 @@ Find providers by credential:
 }
 ```
 
-Find providers by skill in a location (use precision 3–4 `g` values — profiles publish `g` tags at these precisions only):
+Find providers by skill in a location (use precision 3-4 `g` values; profiles publish `g` tags at these precisions only):
 
 ```json
 {
@@ -204,7 +212,7 @@ Find providers by skill in a location (use precision 3–4 `g` values — profil
 }
 ```
 
-For fine-grained coverage filtering, fetch events matching the coarse `#g` filter and post-filter client-side on `coverage_geohash` tags (precision 4–5).
+For fine-grained coverage filtering, fetch events matching the coarse `#g` filter and post-filter client-side on `coverage_geohash` tags (precision 4-5).
 
 ## Kind 30511: Coordinator Bond
 
@@ -254,7 +262,7 @@ Tags:
 * `trust_models` (OPTIONAL): Comma-separated supported trust models (e.g. `fiat-escrow,trustless,ecash-htlc`).
 * `payment_providers` (OPTIONAL): Comma-separated payment rails supported.
 * `min_provider_rating` (OPTIONAL): Minimum rating required for providers on this coordinator.
-* `max_response_seconds` (OPTIONAL): SLA — maximum time to respond to a request.
+* `max_response_seconds` (OPTIONAL): SLA - maximum time to respond to a request.
 * `background_checks` (OPTIONAL): `true` if the coordinator requires provider background checks.
 * `insurance_required` (OPTIONAL): `true` if the coordinator requires provider insurance.
 * `api_url` (OPTIONAL): Coordinator's API endpoint.
@@ -265,122 +273,189 @@ Tags:
 
 ### Bond Verification
 
-The `bond_txid` and `bond_address` tags enable independent verification that the coordinator has committed funds. Clients SHOULD verify the bond on-chain when available. The bond amount signals the coordinator's financial skin in the game — higher bonds indicate greater commitment and potential liability.
+The `bond_txid` and `bond_address` tags enable independent verification that the coordinator has committed funds. Clients SHOULD verify the bond on-chain when available. The bond amount signals the coordinator's financial skin in the game; higher bonds indicate greater commitment and potential liability.
 
-## Kind 30525: Service Catalogue
+## Composing with NIP-99
 
-An addressable event advertising a provider's structured service menu with descriptions and indicative pricing. Requesters discover what a provider offers before initiating a task. Each provider publishes one catalogue per domain.
+Service catalogues use [NIP-99 Classified Listings](https://github.com/nostr-protocol/nips/blob/master/99.md) (`kind:30402`). Rather than defining a separate catalogue kind, each service offering becomes an independent NIP-99 listing event. This is a natural fit: NIP-99 is listing-centric ("what's for sale") and each service is exactly that.
+
+### Service Listing Structure
+
+Each service the provider offers is published as a separate `kind:30402` event:
 
 ```json
 {
-    "kind": 30525,
+    "kind": 30402,
     "pubkey": "<provider-hex-pubkey>",
     "created_at": 1740000000,
     "tags": [
-        ["d", "<provider-hex-pubkey>:services:plumbing"],
-        ["p", "<provider-hex-pubkey>"],
-        ["domain", "plumbing"],
-        ["service", "lockout-emergency", "Lock-out emergency", "Entry for residential lock-outs", "9500", "GBP", "session"],
-        ["service", "lock-change", "Lock change", "Replace existing lock with new cylinder", "7500", "GBP", "session"],
-        ["pricing_note", "Prices include VAT. Call-out fee of £25 applies outside M25."],
+        ["d", "<provider-hex-pubkey>:service:lockout-emergency"],
+        ["title", "Lock-out Emergency Service"],
+        ["summary", "Entry for residential lock-outs"],
+        ["price", "9500", "GBP", "session"],
+        ["t", "domain:plumbing"],
+        ["location", "gcpu"],
         ["expiration", "1771536000"]
     ],
-    "content": "Professional plumbing services for residential and commercial clients across Greater London."
+    "content": "Professional lock-out service for residential properties across Greater London. Includes non-destructive entry where possible, lock assessment, and security advice. Prices include VAT. Call-out fee of £25 applies outside M25."
 }
 ```
 
-Tags:
-
-* `d` (REQUIRED): Pattern `<provider_pubkey>:services:<domain>`.
-* `p` (REQUIRED): Provider's hex pubkey.
-* `domain` (REQUIRED): Service category.
-* `service` (RECOMMENDED, one or more): Each tag describes one offering: `["service", "<slug>", "<display_name>", "<description>", "<price_from>", "<currency>", "<frequency>"]`. Slug is a stable machine-readable identifier. Price is in smallest currency unit. Frequency is one of `hour`, `day`, `session`, `project`.
-* `pricing_note` (OPTIONAL): VAT/tax information, call-out fees, or other pricing caveats.
-* `image` (OPTIONAL): Catalogue image URI.
-* `expiration` (OPTIONAL): NIP-40 timestamp.
-
-### REQ Filter
-
-Fetch catalogues by provider pubkey, then post-filter by `domain` tag client-side:
+A provider with multiple services publishes multiple `kind:30402` events:
 
 ```json
 {
-    "kinds": [30525],
+    "kind": 30402,
+    "pubkey": "<provider-hex-pubkey>",
+    "created_at": 1740000000,
+    "tags": [
+        ["d", "<provider-hex-pubkey>:service:lock-change"],
+        ["title", "Lock Change"],
+        ["summary", "Replace existing lock with new cylinder"],
+        ["price", "7500", "GBP", "session"],
+        ["t", "domain:plumbing"],
+        ["location", "gcpu"],
+        ["expiration", "1771536000"]
+    ],
+    "content": "Full lock replacement service. Includes removal of existing cylinder, fitting of new lock, and testing. All locks conform to BS 3621."
+}
+```
+
+### D-tag Convention
+
+The `d` tag SHOULD follow the pattern `<provider_pubkey>:service:<slug>`. The slug is a stable, machine-readable identifier for the service. This convention ensures uniqueness per provider and enables direct referencing from profile `featured_service` tags.
+
+### Linking Profiles to Listings
+
+The `featured_service` tag on a provider's Kind 30510 profile references NIP-99 listing d-tag slugs:
+
+```json
+["featured_service", "lockout-emergency", "Lock-out Emergency", "from £95"]
+```
+
+The first value (`lockout-emergency`) matches the slug portion of the NIP-99 listing's d-tag (`<pubkey>:service:lockout-emergency`).
+
+### REQ Filter
+
+Fetch all service listings by a provider:
+
+```json
+{
+    "kinds": [30402],
     "authors": ["<provider-hex-pubkey>"]
+}
+```
+
+Fetch service listings by domain:
+
+```json
+{
+    "kinds": [30402],
+    "#t": ["domain:plumbing"]
 }
 ```
 
 ### Behaviour Notes
 
-- One Kind 30525 per domain per provider. Republishing (same `d` tag) replaces the entire catalogue.
-- Prices are indicative only — authoritative pricing is established during task negotiation.
-- Providers MAY cross-reference catalogue entries via `featured_service` tags on their Kind 30510 profile.
+- Each service is independently publishable, updatable, and deletable.
+- Prices are indicative only; authoritative pricing is established during task negotiation.
+- Republishing with the same `d` tag replaces that service listing.
+- The `price` tag follows NIP-99 conventions: `["price", "<amount>", "<currency>", "<frequency>"]`. Amount is in the smallest currency unit (pence for GBP, cents for USD, satoshis for SAT).
 
----
+## Composing with NIP-EVIDENCE
 
-## Kind 30526: Portfolio Item
+Portfolio items use [NIP-EVIDENCE](NIP-EVIDENCE.md) (`kind:30578`). A portfolio item is evidence of completed work, which maps directly to NIP-EVIDENCE's purpose. Using `evidence_type: portfolio` distinguishes portfolio artefacts from other evidence records (inspection findings, compliance records, etc.) while keeping them discoverable in the same evidence namespace.
 
-An addressable event showcasing a piece of completed work. Portfolio items build trust with prospective requesters by demonstrating past quality. Each item is independently addressable.
+### Portfolio Evidence Structure
+
+Each portfolio item is published as a `kind:30578` evidence record:
 
 ```json
 {
-    "kind": 30526,
+    "kind": 30578,
     "pubkey": "<provider-hex-pubkey>",
     "created_at": 1740000000,
     "tags": [
         ["d", "<provider-hex-pubkey>:portfolio:1739800000"],
+        ["evidence_type", "portfolio"],
         ["p", "<provider-hex-pubkey>"],
         ["domain", "plumbing"],
-        ["title", "Emergency pipe repair — Islington"],
-        ["image", "https://example.com/portfolio/pipe-before.jpg"],
-        ["image", "https://example.com/portfolio/pipe-after.jpg"],
-        ["service_ref", "lockout-emergency"],
+        ["title", "Emergency pipe repair"],
+        ["image", "https://example.com/before.jpg"],
+        ["image", "https://example.com/after.jpg"],
         ["location", "Islington, London"],
-        ["date", "1739800000"]
+        ["captured_at", "1739800000"]
     ],
     "content": "Emergency burst pipe in a period property. Isolated the supply, replaced the damaged section, and pressure-tested before leaving."
 }
 ```
 
-Tags:
+### D-tag Convention
 
-* `d` (REQUIRED): Pattern `<provider_pubkey>:portfolio:<unix_timestamp>`. Timestamp ensures chronological ordering and uniqueness.
-* `p` (REQUIRED): Provider's hex pubkey.
-* `domain` (REQUIRED): Service category.
-* `title` (RECOMMENDED): Short human-readable title.
-* `image` (RECOMMENDED, one or more): Portfolio image URIs. Multiple tags permitted.
-* `service_ref` (OPTIONAL): Slug matching a `service` tag in the provider's Kind 30525 catalogue.
-* `location` (OPTIONAL): General area of the work (neighbourhood or city — not a precise address).
-* `date` (OPTIONAL): Unix timestamp of when the work was completed.
-* `e` (OPTIONAL): Reference to the original task event (only when the task was public and the requester consented).
+The `d` tag SHOULD follow the pattern `<provider_pubkey>:portfolio:<unix_timestamp>`. The timestamp ensures chronological ordering and uniqueness.
+
+### Linking to Service Listings
+
+Portfolio evidence MAY reference a NIP-99 service listing via a `service_ref` tag containing the listing slug:
+
+```json
+["service_ref", "lockout-emergency"]
+```
+
+This links the portfolio item to the corresponding `kind:30402` listing with d-tag `<pubkey>:service:lockout-emergency`.
 
 ### REQ Filter
 
-Fetch portfolio items by provider pubkey, then post-filter by `domain` tag client-side:
+Fetch all portfolio items by a provider:
 
 ```json
 {
-    "kinds": [30526],
-    "authors": ["<provider-hex-pubkey>"]
+    "kinds": [30578],
+    "authors": ["<provider-hex-pubkey>"],
+    "#evidence_type": ["portfolio"]
 }
 ```
+
+Since `evidence_type` is a multi-letter tag, relay support for `#evidence_type` filtering varies. Clients SHOULD fall back to fetching all `kind:30578` events by author and post-filtering on the `evidence_type` tag client-side.
 
 ### Behaviour Notes
 
 - Each portfolio item is independently publishable and deletable.
 - Location SHOULD be coarse (neighbourhood or city level) to protect client privacy.
-- The `portfolio_count` tag on Kind 30510 MAY be updated to reflect the current number of published items.
-
----
+- The `portfolio_count` tag on Kind 30510 MAY be updated to reflect the current number of published portfolio evidence records.
+- The `e` tag MAY reference the original task event (only when the task was public and the requester consented).
 
 ## Protocol Flow
 
+```mermaid
+sequenceDiagram
+    participant Provider
+    participant Relay
+    participant Coordinator
+    participant Requester
+
+    Provider->>Relay: Publish Profile (kind 30510)
+    Note right of Provider: capabilities, credentials, coverage
+    Provider->>Relay: Publish Service Listings (kind 30402, NIP-99)
+    Provider->>Relay: Publish Portfolio Items (kind 30578, NIP-EVIDENCE)
+    Coordinator->>Relay: Publish Bond (kind 30511)
+    Note right of Coordinator: financial commitment, SLA terms
+
+    Requester->>Relay: REQ {kinds:[30510], #t, #g}
+    Relay-->>Requester: Matching Provider Profiles
+    Requester->>Relay: REQ {kinds:[30402,30578], authors:[provider]}
+    Relay-->>Requester: Service Listings + Portfolio
+    Requester->>Relay: REQ {kinds:[30511]}
+    Relay-->>Requester: Coordinator Bonds
+    Note right of Requester: Compare bonds, fees, SLA terms
+```
+
 1. **Provider publishes profile:** Creates a `kind:30510` event with capabilities, credentials, and coverage area.
-2. **Provider publishes catalogue:** Optionally creates a `kind:30525` event with structured service menu and indicative pricing.
-3. **Provider publishes portfolio:** Optionally creates `kind:30526` events showcasing completed work.
+2. **Provider publishes service listings:** Optionally creates `kind:30402` (NIP-99) events for each service offered, with structured pricing and descriptions.
+3. **Provider publishes portfolio:** Optionally creates `kind:30578` (NIP-EVIDENCE) events with `evidence_type: portfolio` showcasing completed work.
 4. **Coordinator publishes bond:** Creates a `kind:30511` event with financial commitment and SLA terms.
 5. **Requester discovers providers:** Queries relays using `#g` and `#t` filters on `kind:30510` (e.g. `#t: ["domain:plumbing"]`, `#g: ["gcpu"]`). Multi-letter tags (`domain`, `skill`, `credential`, `coverage_geohash`) are post-filtered client-side.
-6. **Requester browses storefront:** Fetches `kind:30525` and `kind:30526` events by provider pubkey to review services and past work.
+6. **Requester browses storefront:** Fetches `kind:30402` (NIP-99) and `kind:30578` (NIP-EVIDENCE) events by provider pubkey to review services and past work.
 7. **Requester evaluates coordinators:** Queries `kind:30511` events to compare bond amounts, fees, and SLA terms.
 8. **Ongoing updates:** Providers and coordinators republish their addressable events to update capabilities, coverage, or terms.
 
@@ -393,10 +468,10 @@ Sellers publish structured profiles (kind:30510) with service areas, accepted pa
 Professionals publish verifiable credentials (certifications, licences) attached to their Nostr keypair. Portable across any client that reads kind:30510.
 
 ### Content Creator Portfolios
-Creators publish portfolio items (kind:30526) — writing samples, design work, code contributions — as structured events. Discoverable via relay queries.
+Creators publish portfolio evidence records (kind:30578 with `evidence_type: portfolio`): writing samples, design work, code contributions. Discoverable via relay queries alongside all other evidence records.
 
 ### Community Expert Directories
-Communities maintain directories of vetted experts. Service catalogs (kind:30525) list what each expert offers. Coordinator bonds (kind:30511) signal commitment.
+Communities maintain directories of vetted experts. NIP-99 service listings (kind:30402) describe what each expert offers. Coordinator bonds (kind:30511) signal commitment.
 
 ## Security Considerations
 
@@ -405,29 +480,17 @@ Communities maintain directories of vetted experts. Service catalogs (kind:30525
 * **Profile freshness.** Clients SHOULD check `created_at` timestamps and `expiration` tags. Stale profiles may not reflect current capabilities.
 * **Sybil resistance.** A single entity can create multiple provider profiles. Cross-referencing with reputation data (`kind:30520`) and credential attestations (`kind:31000`) helps distinguish genuine providers from Sybil accounts.
 
-## Relationship to Existing NIPs
-
-NIP-PROVIDER-PROFILES extends [NIP-99](https://github.com/nostr-protocol/nips/blob/master/99.md) (Classified Listings) for professional services where repeated interactions and trust matter. NIP-99 is listing-centric ("what's for sale"); NIP-PROVIDER-PROFILES is provider-centric ("who offers services and can they be trusted"). Compatible with [NIP-58](https://github.com/nostr-protocol/nips/blob/master/58.md) (Badges) — credential attestations (NIP-VA kind 31000) can reference NIP-58 badge definitions.
-
 ## Dependencies
 
 * [NIP-01](https://github.com/nostr-protocol/nips/blob/master/01.md): Basic protocol flow, addressable events
 * [NIP-40](https://github.com/nostr-protocol/nips/blob/master/40.md): Expiration timestamps
 * [NIP-58](https://github.com/nostr-protocol/nips/blob/master/58.md): Badges (credential compatibility)
-
-## Relationship to TROTT Domain Variants
-
-NIP-PROVIDER-PROFILES is a standalone NIP. Within the TROTT protocol, provider profiles are extended by domain variants:
-
-- **TROTT-02: Discovery** — The canonical specification for all four kinds defined in this NIP, with full tag tables, validation rules, and relay discovery patterns. Service catalogues (`kind:30525`) and portfolio items (`kind:30526`) are defined there alongside the storefront summary tags on `kind:30510`.
-- **TROTT-01: Lifecycle (§Profile Manifest)** — Defines an expanded profile manifest convention for Kind 7500 events, adding structured sections for reputation, payments, safety, verification, navigation, discovery, messaging, and P2P defaults. Each of TROTT's 59 domain profiles declares which profile fields are required or recommended for that domain.
-- **TROTT-06: Operator Participation** — Extends `kind:30511` coordinator bonds with fee models, liveness heartbeats, and three-layer architecture integration.
-
-These extensions are optional. NIP-PROVIDER-PROFILES works without any TROTT adoption.
+* [NIP-99](https://github.com/nostr-protocol/nips/blob/master/99.md): Classified Listings (service catalogues)
+* [NIP-EVIDENCE](NIP-EVIDENCE.md): Timestamped Evidence Recording (portfolio items)
 
 ## Reference Implementation
 
-The `@trott/sdk` (TypeScript SDK) provides builders and parsers for all four kinds defined in this NIP. For standalone use without TROTT, implementors SHOULD refer to the kind definitions above.
+The [`@trott/sdk`](https://github.com/TheCryptoDonkey/trott-sdk) TypeScript library provides builders and parsers for the kinds defined in this NIP. For standalone use without TROTT, implementors SHOULD refer to the kind definitions above.
 
 A minimal implementation requires:
 

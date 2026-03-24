@@ -1,0 +1,34 @@
+sequenceDiagram
+    participant Inst as Institution
+    participant Relay as Relay
+    participant Ref as Referrer
+    participant Tgt as Target Role
+    participant Per as Referred Person
+
+    Inst->>Relay: kind:30000 (NIP-51 pathway definition)
+    Note over Inst,Relay: d: referral-pathway:nhs_msk_v1
+
+    Ref->>Relay: kind:30570 (Approval Gate)
+    Note over Ref,Relay: gate_type: referral, status: pending
+
+    Relay-->>Tgt: notification
+    Relay-->>Per: notification
+
+    alt Accepted
+        Tgt->>Relay: kind:30571 (Approval Response)
+        Note over Tgt,Relay: decision: approved
+        Relay-->>Ref: notification
+        Relay-->>Per: notification
+    else Declined
+        Tgt->>Relay: kind:30571 (Approval Response)
+        Note over Tgt,Relay: decision: rejected
+        Relay-->>Ref: notification
+    else Revision requested
+        Tgt->>Relay: kind:30571 (Approval Response)
+        Note over Tgt,Relay: decision: revise
+        Relay-->>Ref: notification
+        Ref->>Relay: kind:30570 (updated gate)
+        Relay-->>Tgt: notification
+    end
+
+    Note over Ref,Tgt: On acceptance, target may create<br/>a new kind:30570 for the next<br/>step in the pathway

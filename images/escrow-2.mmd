@@ -1,0 +1,27 @@
+sequenceDiagram
+    actor R as Requester
+    actor P as Provider
+    participant EA as Escrow Agent (optional)
+
+    Note over R,P: NIP-QUOTE: Quote + Terms agreed upstream
+
+    R->>EA: kind:30532 Lock
+    Note left of R: Funds committed - hold invoice,<br/>Cashu HTLC, or similar
+
+    rect rgb(240, 248, 255)
+        Note over R,P: Work phase
+        loop Streaming receipts (if streaming payment)
+            R-->>P: kind:30535 Receipt with tick_number (gift-wrapped)
+        end
+    end
+
+    alt Happy path
+        R->>EA: kind:30533 Settlement (outcome=released)
+        Note left of R: Funds released to provider
+    else Breach of terms
+        EA-->>P: kind:30533 Settlement (outcome=forfeited, gift-wrapped)
+        Note right of EA: Funds penalised (NIP-59)
+    end
+
+    P-->>R: kind:30535 Payment Receipt (gift-wrapped)
+    Note right of P: Final settlement recorded with<br/>cryptographic proof (NIP-59)

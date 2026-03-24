@@ -1,0 +1,20 @@
+sequenceDiagram
+    participant A as Provider A (established)
+    participant B as Provider B (new)
+    participant U as User
+    participant R as Relay
+
+    Note over A,B: Endorsement builds trust bridge
+    A->>R: kind:30517 endorsement for B (skill)
+    R-->>U: User discovers endorsement
+
+    Note over U: User hires B based on endorsement
+    U->>R: kind:30000 add B to trusted providers (reason: social_proof)
+
+    Note over U,B: Later: trust breakdown
+    U->>R: kind:30515 revocation (reason: quality_decline)
+    U->>R: kind:30000 remove B from trusted providers
+    R-->>B: NIP-17 notification (reason code only)
+
+    Note over A: Endorser reviews revocation signal
+    A->>R: kind:30517 empty content (withdrawal)

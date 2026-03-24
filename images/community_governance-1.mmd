@@ -1,0 +1,14 @@
+flowchart TD
+    A[Founders publish NIP-51 list\nkind 30000 with governance tags] --> B[Members contribute to treasury\nkind 30578 evidence, direction: credit]
+    B --> C[Member creates governance proposal\nkind 30574 with collective_id]
+    C --> D[Members cast votes\nkind 30575 with collective_id]
+    D --> E{Threshold\nreached?}
+    E -->|Yes| F[Proposal approved]
+    E -->|No| G[Proposal rejected]
+    F --> H{Proposal type?}
+    H -->|treasury_allocation| I[Treasurer publishes ledger entry\nkind 30578, direction: debit]
+    H -->|membership / policy| J[Steward publishes updated collective\nkind 30000 with new members or rules]
+    I --> K[Collective continues\nNew proposals as needed]
+    J --> K
+    G --> K
+    K --> C

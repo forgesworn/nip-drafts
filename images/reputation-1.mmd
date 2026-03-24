@@ -1,0 +1,14 @@
+sequenceDiagram
+    participant R as Requester
+    participant P as Provider
+    participant Relay as Nostr Relay
+
+    Note over R,P: Transaction completes
+
+    R->>Relay: kind 30578 (Evidence Record, optional)
+    R->>Relay: kind 30520 (Rating of Provider)
+    P->>Relay: kind 30520 (Rating of Requester)
+
+    Note over P: Provider reads rating
+
+    P->>Relay: kind 1111 (NIP-22 Comment, optional)

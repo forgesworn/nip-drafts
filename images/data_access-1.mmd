@@ -1,0 +1,21 @@
+sequenceDiagram
+    participant Owner as Data Owner
+    participant Relay
+    participant Grantee
+    participant NewGrantee as New Grantee
+
+    Owner->>Relay: Publish Grant (kind 30556)<br/>permissions, entities, valid_until
+    Note right of Owner: Content Key encrypted to Grantee (NIP-44)
+    Relay-->>Grantee: Grant discoverable via p tag
+
+    Grantee->>Relay: Fetch encrypted data events
+    Grantee->>Grantee: Decrypt Content Key from grant
+    Grantee->>Grantee: Decrypt data with Content Key
+
+    Note over Owner,Grantee: Key rotation (new epoch)
+    Owner->>Relay: Republish Grant (same d tag)<br/>revoked: true
+    Owner->>Relay: Publish new Grant for remaining parties<br/>key_generation: 2, new Content Key
+
+    Owner->>Relay: Publish Grant for New Grantee<br/>key_generation: 2
+    Relay-->>NewGrantee: New grant with current Content Key
+    Note right of Grantee: Old Grantee loses access to new data

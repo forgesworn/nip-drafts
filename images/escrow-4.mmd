@@ -1,0 +1,14 @@
+flowchart LR
+    NQ["NIP-QUOTE\nkind:30531\nPayment Terms"]
+    L["kind:30532\nLock"]
+    S["kind:30533\nSettlement"]
+    Rcpt["kind:30535\nReceipt"]
+
+    NQ --> L
+    L --> S
+    S --> Rcpt
+
+    style NQ fill:#e2d5f1,stroke:#6f42c1
+    style L fill:#fff3cd,stroke:#ffc107
+    style S fill:#d4edda,stroke:#28a745
+    style Rcpt fill:#d4edda,stroke:#28a745

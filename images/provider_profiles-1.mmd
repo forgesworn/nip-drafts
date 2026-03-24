@@ -1,0 +1,20 @@
+sequenceDiagram
+    participant Provider
+    participant Relay
+    participant Coordinator
+    participant Requester
+
+    Provider->>Relay: Publish Profile (kind 30510)
+    Note right of Provider: capabilities, credentials, coverage
+    Provider->>Relay: Publish Service Listings (kind 30402, NIP-99)
+    Provider->>Relay: Publish Portfolio Items (kind 30578, NIP-EVIDENCE)
+    Coordinator->>Relay: Publish Bond (kind 30511)
+    Note right of Coordinator: financial commitment, SLA terms
+
+    Requester->>Relay: REQ {kinds:[30510], #t, #g}
+    Relay-->>Requester: Matching Provider Profiles
+    Requester->>Relay: REQ {kinds:[30402,30578], authors:[provider]}
+    Relay-->>Requester: Service Listings + Portfolio
+    Requester->>Relay: REQ {kinds:[30511]}
+    Relay-->>Requester: Coordinator Bonds
+    Note right of Requester: Compare bonds, fees, SLA terms

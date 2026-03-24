@@ -1,0 +1,38 @@
+sequenceDiagram
+    participant P as Provider
+    participant R as Relay
+    participant Q as Requester
+
+    P->>R: kind:30582 Availability Calendar
+    Note over P,R: slots: available
+
+    Q->>R: REQ filter (kind:30582)
+    R-->>Q: Calendar with available slots
+
+    Q->>R: kind:30583 Booking Slot
+    Note over Q,R: slot: Mon 09:00-12:00
+
+    R-->>P: Notification
+
+    alt Approval required
+        P->>R: kind:30570 Approval Gate
+        P->>R: kind:30571 Approval Response (approved)
+        R-->>Q: Booking confirmed
+    end
+
+    P->>R: kind:30582 Calendar (updated)
+    Note over P,R: Mon slot: booked
+
+    alt Reschedule
+        Q->>R: kind:30579 Variation Request (schedule_change)
+        R-->>P: Reschedule proposal
+        P->>R: kind:30571 Approval Response (approved)
+        R-->>Q: Reschedule confirmed
+    end
+
+    alt Cancellation
+        Q->>R: kind:30584 Booking Cancellation
+        R-->>P: Notification
+        P->>R: kind:30582 Calendar (updated)
+        Note over P,R: slot: available again
+    end

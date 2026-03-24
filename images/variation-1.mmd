@@ -1,0 +1,17 @@
+sequenceDiagram
+    actor R as Requester
+    actor P as Provider
+
+    R->>P: kind:30579 Variation Request
+    Note right of R: variation_type, estimated amount,<br/>schedule impact
+
+    P->>R: kind:30530 Quote (NIP-QUOTE)
+    Note right of P: Price delta with breakdown,<br/>valid_until deadline
+
+    P->>R: kind:30570 Approval Gate (NIP-APPROVAL)
+    Note right of P: References Variation Request<br/>and Quote via e tags
+
+    R->>P: kind:30571 Approval Response (NIP-APPROVAL)
+    Note left of R: decision: approved
+
+    Note over R,P: Optional: kind:30532 supplementary Lock<br/>(NIP-ESCROW) for the price delta

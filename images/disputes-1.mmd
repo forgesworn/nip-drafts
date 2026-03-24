@@ -1,0 +1,24 @@
+sequenceDiagram
+    actor C as Complainant
+    actor A as Accused
+    participant M as Mediator
+
+    C-->>A: kind:7543 Dispute Claim (gift-wrapped)
+    Note left of C: Filed within dispute window
+
+    rect rgb(240, 248, 255)
+        Note over C,A: Evidence phase (48-hour window)
+        C-->>M: kind:30578 Evidence (gift-wrapped)
+        A-->>M: kind:30578 Evidence (gift-wrapped)
+        Note over C,M: NIP-EVIDENCE records with e tag<br/>referencing the dispute claim
+    end
+
+    M-->>C: kind:30545 Resolution (gift-wrapped)
+    M-->>A: kind:30545 Resolution (gift-wrapped)
+    Note right of M: Ruling with reasoning
+
+    alt At-fault ruling confirmed
+        Note over C,A: Escrow released or forfeited per ruling (NIP-ESCROW)
+    else Pattern detected (3+ at-fault)
+        Note over C,A: Application publishes NIP-56 report
+    end

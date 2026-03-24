@@ -1,0 +1,21 @@
+sequenceDiagram
+    participant Practitioner
+    participant Relay
+    participant Mentor
+    participant Verifier
+    participant Client
+
+    Practitioner->>Relay: Publish Provider Profile (kind 30510)<br/>with craft:* extension tags
+    Practitioner->>Relay: Publish Technique Records (kind 30401)
+    Mentor->>Relay: Publish Mentorship Endorsement (kind 30517, NIP-TRUST)
+    Note right of Mentor: endorsement_type: mentorship
+    Verifier->>Relay: Publish Credential Attestation (kind 31000, NIP-VA)
+    Note right of Verifier: third-party verification
+
+    Client->>Relay: REQ {kinds:[30510], #t:["domain:metalwork"]}
+    Relay-->>Client: Provider Profiles with craft:* tags
+    Client->>Client: Post-filter by craft:proficiency, tradition, etc.
+    Client->>Relay: REQ {kinds:[30401], authors:[practitioner]}
+    Relay-->>Client: Technique Records
+    Client->>Relay: Fetch mentorship + credential refs
+    Relay-->>Client: Endorsements + Attestations

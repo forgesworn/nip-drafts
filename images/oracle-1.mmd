@@ -1,0 +1,9 @@
+flowchart LR
+    T{"type?"}
+    T -->|binary| B["outcome = yes / no"]
+    T -->|categorical| C["outcome = one of options tags"]
+    T -->|scalar| S["outcome = numeric value"]
+
+    style B fill:#d4edda,stroke:#28a745
+    style C fill:#fff3cd,stroke:#ffc107
+    style S fill:#cce5ff,stroke:#007bff

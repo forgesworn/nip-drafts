@@ -1,0 +1,21 @@
+sequenceDiagram
+    participant Provider
+    participant Relay
+    participant Payer
+
+    Provider->>Relay: Publish Invoice (kind 30588)
+    Note right of Provider: line items, amount, payment terms
+    Relay-->>Payer: Invoice notification
+
+    Payer->>Payer: Review line items and totals
+
+    alt Full payment
+        Payer->>Relay: Publish Receipt (kind 30535, NIP-ESCROW)
+        Relay-->>Provider: Payment confirmation
+    else Partial payment (milestone)
+        Payer->>Relay: Publish Receipt 001 (kind 30535)
+        Relay-->>Provider: Partial payment recorded
+        Note over Provider,Payer: Milestone 2 completes
+        Payer->>Relay: Publish Receipt 002 (kind 30535)
+        Relay-->>Provider: Invoice fully settled
+    end

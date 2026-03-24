@@ -1,0 +1,30 @@
+sequenceDiagram
+    actor R as Requester
+    actor P as Provider
+
+    rect rgb(240, 248, 240)
+        Note over R,P: Scenario A - Happy path
+        R->>R: kind:30532 Lock (requester stake)
+        P->>P: kind:30532 Lock (provider stake)
+        Note over R,P: Work completes successfully
+        R->>P: kind:30533 Settlement (outcome=released, requester funds to provider)
+        P->>R: kind:30533 Settlement (outcome=released, provider stake returned)
+    end
+
+    rect rgb(255, 243, 205)
+        Note over R,P: Scenario B - Provider no-show
+        R->>R: kind:30532 Lock (requester stake)
+        P->>P: kind:30532 Lock (provider stake)
+        Note over R,P: Timeout - provider fails to show
+        R->>R: kind:30533 Settlement (outcome=expired, requester stake returned)
+        R->>R: kind:30533 Settlement (outcome=forfeited, provider stake penalised)
+    end
+
+    rect rgb(248, 215, 218)
+        Note over R,P: Scenario C - Requester breach
+        R->>R: kind:30532 Lock (requester stake)
+        P->>P: kind:30532 Lock (provider stake)
+        Note over R,P: Dispute - requester breaches terms
+        P->>P: kind:30533 Settlement (outcome=released, provider stake returned)
+        P->>P: kind:30533 Settlement (outcome=forfeited, requester stake penalised)
+    end

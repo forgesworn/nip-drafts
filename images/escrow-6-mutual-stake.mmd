@@ -2,7 +2,7 @@ sequenceDiagram
     actor R as Requester
     actor P as Provider
 
-    rect rgb(6, 95, 70)
+    rect rgb(27, 61, 45)
         Note over R,P: Scenario A — Happy path
         R->>R: kind:30532 Lock (requester stake)
         P->>P: kind:30532 Lock (provider stake)
@@ -11,7 +11,7 @@ sequenceDiagram
         P->>R: kind:30533 Release (provider stake → returned)
     end
 
-    rect rgb(80, 50, 20)
+    rect rgb(45, 45, 27)
         Note over R,P: Scenario B — Provider no-show
         R->>R: kind:30532 Lock (requester stake)
         P->>P: kind:30532 Lock (provider stake)
@@ -20,7 +20,7 @@ sequenceDiagram
         R->>R: kind:30534 Forfeit (provider stake penalized)
     end
 
-    rect rgb(127, 29, 29)
+    rect rgb(61, 27, 27)
         Note over R,P: Scenario C — Requester breach
         R->>R: kind:30532 Lock (requester stake)
         P->>P: kind:30532 Lock (provider stake)

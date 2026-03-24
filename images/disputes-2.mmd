@@ -1,0 +1,17 @@
+flowchart TD
+    TC["Transaction Complete"] --> CF["Claim Filed\nkind:7543"]
+    CF --> ES["Evidence Submission\nkind:30578 (NIP-EVIDENCE)\n(48-hour window)"]
+    ES --> RU["Ruling\nkind:30545"]
+    RU --> SE["Settled"]
+    RU --> AP["Appeal\nkind:7543 (appeal variant)"]
+    AP --> ES2["Evidence Submission\n(new mediator)"]
+    ES2 --> RU2["Final Ruling\nkind:30545"]
+    RU2 --> SE
+
+    style CF fill:#fff3cd,stroke:#ffc107
+    style ES fill:#fff3cd,stroke:#ffc107
+    style RU fill:#d4edda,stroke:#28a745
+    style SE fill:#d4edda,stroke:#28a745
+    style AP fill:#cce5ff,stroke:#007bff
+    style ES2 fill:#fff3cd,stroke:#ffc107
+    style RU2 fill:#d4edda,stroke:#28a745

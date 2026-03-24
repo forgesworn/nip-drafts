@@ -1,0 +1,12 @@
+flowchart LR
+    Terms["kind:30531\nPayment Terms"] --> PT{"payment_type?"}
+
+    PT -->|simple| S_Lock["Lock"] --> S_Work["Work"] --> S_Settle["Settlement"] --> S_Receipt["Receipt"]
+
+    PT -->|streaming| ST_Lock["Lock"] --> ST_Tick["Streaming\nreceipts"] --> ST_Settle["Settlement\n(= final cumulative)"] --> ST_Receipt["Receipt"]
+
+    PT -->|milestone| M_Lock["Lock\n(milestone 1)"] --> M_Work["Work"] --> M_Settle["Settlement\n(milestone 1)"] --> M_Receipt["Receipt\n(milestone 1)"]
+    M_Receipt -.->|"repeat for each\nmilestone"| M_Lock
+
+    PT -->|split| SP_Lock["Lock\n(full amount)"] --> SP_Settle1["Settlement\n(provider A)"] --> SP_Receipt1["Receipt\n(provider A)"]
+    SP_Lock --> SP_Settle2["Settlement\n(provider B)"] --> SP_Receipt2["Receipt\n(provider B)"]

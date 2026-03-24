@@ -1,0 +1,14 @@
+sequenceDiagram
+    participant Operator as Service Operator
+    participant Relay as Nostr Relay
+    participant Client as Client / AI Agent
+
+    Operator->>Relay: 1. Publish kind 31402 (signed event)
+    Client->>Relay: 2. REQ {kinds:[31402], #t, #pmi}
+    Relay-->>Client: 3. EVENT (kind 31402)
+    Client->>Client: 4. Parse tags: url, pmi, price, capabilities
+
+    Client->>Operator: 5. HTTP request to service URL
+    Operator-->>Client: 6. HTTP 402 + payment challenge (L402/x402/Cashu)
+    Client->>Operator: 7. HTTP request + payment proof (token/receipt)
+    Operator-->>Client: 8. HTTP 200 + response body

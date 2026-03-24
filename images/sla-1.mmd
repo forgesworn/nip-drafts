@@ -1,0 +1,46 @@
+sequenceDiagram
+    participant Provider
+    participant Relay
+    participant Consumer
+    participant Monitor
+    participant Mediator
+
+    Note over Provider: Publish SLA Template
+    Provider->>Relay: kind:30578 (evidence_type: sla_template)
+
+    Note over Consumer: Propose SLA Agreement
+    Consumer->>Relay: kind:30570 (approval gate, refs template)
+    Relay->>Provider: notification
+
+    Note over Provider: Accept SLA Terms
+    Provider->>Relay: kind:30571 (decision: approved)
+    Relay->>Consumer: notification
+
+    Note over Provider,Consumer: SLA is now binding
+
+    rect rgb(240, 248, 255)
+        Note over Monitor: Continuous Monitoring
+        Monitor->>Monitor: Track metrics against thresholds
+    end
+
+    alt Threshold Violated
+        Monitor->>Relay: kind:30578 (evidence_type: sla_breach)
+        Relay->>Provider: notification
+        Relay->>Consumer: notification
+
+        alt Breach Accepted
+            Note over Provider: Provider acknowledges breach
+            Note over Provider: Penalty settled via NIP-ESCROW or NIP-INVOICING
+        else Breach Contested
+            Provider->>Relay: kind:7543 (dispute claim)
+            Relay->>Consumer: notification
+            Relay->>Mediator: notification
+
+            Provider->>Relay: kind:30578 (dispute evidence)
+            Consumer->>Relay: kind:30578 (dispute evidence)
+
+            Mediator->>Relay: kind:30545 (resolution)
+            Relay->>Provider: notification
+            Relay->>Consumer: notification
+        end
+    end
