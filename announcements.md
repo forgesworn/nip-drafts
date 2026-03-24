@@ -1,11 +1,14 @@
 # NIP Announcements
 
-Notes for Nostr (kind 1). Post the summary tonight, then one per day across the week.
+Notes for Nostr (kind 1). Post the summary tonight, then one per day.
+
+Schedule: summary > location (Mon) > nip-va (Tue) > approval (Wed) > matching (Thu) > consensus (Fri) > custody (Sat) > credentials (Sun) > evidence (Mon)
 
 ## Tonight: Summary
 
-Published 7 Nostr protocol extensions on NostrHub today. Each defines 1-2 new event kinds for problems that don't have a standard solution yet.
+Published 8 Nostr protocol extensions on NostrHub. Each defines 1-2 new event kinds for problems that don't have a standard solution yet.
 
+- NIP-VA: one generic attestation kind for credentials, endorsements, provenance, and trust (kind 31000)
 - NIP-LOCATION: privacy-preserving presence and location sharing (kinds 20500, 20501)
 - NIP-CREDENTIALS: credential requirements and revocation lifecycle (kinds 30527, 30528)
 - NIP-APPROVAL: multi-party approval gates with revision loops (kinds 30570, 30571)
@@ -24,7 +27,7 @@ Tags: #nostr #nip #protocol #nostrdev
 
 ---
 
-## Day 1: NIP-LOCATION
+## Day 1 (Mon): NIP-LOCATION
 
 Every Nostr app that touches location reinvents the same thing: how do you share where you are without broadcasting your coordinates to the world?
 
@@ -44,7 +47,25 @@ Tags: #nostr #nip #protocol #location #privacy #geohash #nostrdev
 
 ---
 
-## Day 2: NIP-APPROVAL
+## Day 2 (Tue): NIP-VA
+
+Nostr has badges (NIP-58) for "you earned this." Labels (NIP-32) for tagging. But no standard way to say "I, as a licensed authority, attest that this person holds qualification X, valid until date Y, revocable if Z."
+
+NIP-VA defines one kind (31000) for all of it. One event structure; many types. Credentials, endorsements, vouches, provenance claims, fact-checks. The type tag determines semantics; the kind stays the same. New attestation types require zero protocol changes.
+
+What makes it different from badges: addressable per publisher, type, and subject. Built-in revocation. Expiration via NIP-40. Structured content for cryptographic proofs. Self-attestation and third-party attestation in the same kind.
+
+What makes it different from labels: NIP-32 labels are regular events. You cannot revoke a specific label without deleting the entire event. NIP-VA attestations are individually replaceable, revocable, and expirable.
+
+Reference implementation with builders, parsers, validators, and 17 frozen test vectors: https://github.com/forgesworn/nostr-attestations
+
+The spec: https://github.com/forgesworn/nostr-attestations/blob/main/NIP-VA.md
+
+Tags: #nostr #nip #protocol #attestations #credentials #identity #nostrdev
+
+---
+
+## Day 3 (Wed): NIP-APPROVAL
 
 Nostr has reactions for "I like this" but nothing for "I, as the designated reviewer, officially approve this to proceed."
 
@@ -64,7 +85,7 @@ Tags: #nostr #nip #protocol #governance #workflow #review #nostrdev
 
 ---
 
-## Day 3: NIP-MATCHING
+## Day 4 (Thu): NIP-MATCHING
 
 NIP-15 and NIP-99 are great for "here's what I'm selling." But what about "here's what I need; who wants to compete for it?"
 
@@ -84,7 +105,7 @@ Tags: #nostr #nip #protocol #marketplace #matching #freelance #nostrdev
 
 ---
 
-## Day 4: NIP-CONSENSUS
+## Day 5 (Fri): NIP-CONSENSUS
 
 Nostr has no standard way to ask "do 3 out of 5 board members agree?" and get a verifiable answer.
 
@@ -106,7 +127,7 @@ Tags: #nostr #nip #protocol #governance #dao #voting #nostrdev
 
 ---
 
-## Day 5: NIP-CUSTODY
+## Day 6 (Sat): NIP-CUSTODY
 
 When a physical item changes hands, who proves it was in good condition at handoff?
 
@@ -126,7 +147,7 @@ Tags: #nostr #nip #protocol #custody #provenance #delivery #nostrdev
 
 ---
 
-## Day 6: NIP-CREDENTIALS
+## Day 7 (Sun): NIP-CREDENTIALS
 
 NIP-VA (kind 31000) lets anyone attest anything about anyone. But how does a marketplace say "providers MUST hold a Gas Safe registration" and verify that they do?
 
@@ -146,7 +167,7 @@ Tags: #nostr #nip #protocol #credentials #identity #verification #nostrdev
 
 ---
 
-## Day 7: NIP-EVIDENCE
+## Day 8 (Mon): NIP-EVIDENCE
 
 Every Nostr event is already timestamped. So why a dedicated evidence kind?
 

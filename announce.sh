@@ -4,14 +4,15 @@ set -euo pipefail
 # Post NIP announcement notes (kind 1) to Nostr via nak.
 #
 # Usage:
-#   NOSTR_SECRET_KEY=nsec1... ./announce.sh summary     # tonight's summary note
-#   NOSTR_SECRET_KEY=nsec1... ./announce.sh location     # Day 1: NIP-LOCATION
-#   NOSTR_SECRET_KEY=nsec1... ./announce.sh approval     # Day 2: NIP-APPROVAL
-#   NOSTR_SECRET_KEY=nsec1... ./announce.sh matching      # Day 3: NIP-MATCHING
-#   NOSTR_SECRET_KEY=nsec1... ./announce.sh consensus     # Day 4: NIP-CONSENSUS
-#   NOSTR_SECRET_KEY=nsec1... ./announce.sh custody       # Day 5: NIP-CUSTODY
-#   NOSTR_SECRET_KEY=nsec1... ./announce.sh credentials   # Day 6: NIP-CREDENTIALS
-#   NOSTR_SECRET_KEY=nsec1... ./announce.sh evidence      # Day 7: NIP-EVIDENCE
+#   NOSTR_SECRET_KEY=nsec1... ./announce.sh summary       # tonight: summary of all 7+VA
+#   NOSTR_SECRET_KEY=nsec1... ./announce.sh location      # Mon: strongest standalone story
+#   NOSTR_SECRET_KEY=nsec1... ./announce.sh nip-va        # Tue: attestation foundation
+#   NOSTR_SECRET_KEY=nsec1... ./announce.sh approval      # Wed: PR reviews on Nostr
+#   NOSTR_SECRET_KEY=nsec1... ./announce.sh matching      # Thu: reverse auctions
+#   NOSTR_SECRET_KEY=nsec1... ./announce.sh consensus     # Fri: threshold governance
+#   NOSTR_SECRET_KEY=nsec1... ./announce.sh custody       # Sat: chain-of-custody
+#   NOSTR_SECRET_KEY=nsec1... ./announce.sh credentials   # Sun: credential gating
+#   NOSTR_SECRET_KEY=nsec1... ./announce.sh evidence      # Mon: evidence records
 #   NOSTR_SECRET_KEY=nsec1... ./announce.sh --dry-run summary
 
 RELAYS=(
@@ -49,8 +50,9 @@ case "$NOTE" in
   summary)
     TAGS=(-t "t=nostr" -t "t=nip" -t "t=protocol" -t "t=nostrdev" -t "r=${REPO_URL}")
     read -r -d '' CONTENT << 'ENDNOTE' || true
-Published 7 Nostr protocol extensions on NostrHub today. Each defines 1-2 new event kinds for problems that don't have a standard solution yet.
+Published 8 Nostr protocol extensions on NostrHub. Each defines 1-2 new event kinds for problems that don't have a standard solution yet.
 
+- NIP-VA: one generic attestation kind for credentials, endorsements, provenance, and trust (kind 31000)
 - NIP-LOCATION: privacy-preserving presence and location sharing (kinds 20500, 20501)
 - NIP-CREDENTIALS: credential requirements and revocation lifecycle (kinds 30527, 30528)
 - NIP-APPROVAL: multi-party approval gates with revision loops (kinds 30570, 30571)
@@ -61,9 +63,10 @@ Published 7 Nostr protocol extensions on NostrHub today. Each defines 1-2 new ev
 
 All standalone. No framework lock-in. Specs, JSON examples, relay query patterns, and diagrams in each.
 
-Authorship verified with NIP-VA (kind 31000) attestations.
+Authorship of each NIP is self-attested using NIP-VA kind 31000 events. The attestation format verifies the author.
 
 https://github.com/forgesworn/nip-drafts
+https://github.com/forgesworn/nostr-attestations
 ENDNOTE
     ;;
 
@@ -83,6 +86,23 @@ The progressive reveal model means precision increases only when trust does. Pub
 Useful for delivery tracking, field service dispatch, event coordination, fleet management, or any Nostr app that needs "who is near me?" without a centralised location server.
 
 https://github.com/forgesworn/nip-drafts/blob/main/NIP-LOCATION.md
+ENDNOTE
+    ;;
+
+  nip-va)
+    TAGS=(-t "t=nostr" -t "t=nip" -t "t=protocol" -t "t=attestations" -t "t=credentials" -t "t=identity" -t "t=nostrdev" -t "r=https://github.com/forgesworn/nostr-attestations/blob/main/NIP-VA.md")
+    read -r -d '' CONTENT << 'ENDNOTE' || true
+Nostr has badges (NIP-58) for "you earned this." Labels (NIP-32) for tagging. But no standard way to say "I, as a licensed authority, attest that this person holds qualification X, valid until date Y, revocable if Z."
+
+NIP-VA defines one kind (31000) for all of it. One event structure; many types. Credentials, endorsements, vouches, provenance claims, fact-checks. The type tag determines semantics; the kind stays the same. New attestation types require zero protocol changes.
+
+What makes it different from badges: addressable per publisher, type, and subject. Built-in revocation. Expiration via NIP-40. Structured content for cryptographic proofs. Self-attestation and third-party attestation in the same kind.
+
+What makes it different from labels: NIP-32 labels are regular events. You cannot revoke a specific label without deleting the entire event. NIP-VA attestations are individually replaceable, revocable, and expirable.
+
+Reference implementation with builders, parsers, validators, and 17 frozen test vectors: https://github.com/forgesworn/nostr-attestations
+
+The spec: https://github.com/forgesworn/nostr-attestations/blob/main/NIP-VA.md
 ENDNOTE
     ;;
 
@@ -204,7 +224,7 @@ ENDNOTE
 
   *)
     echo "Unknown note: $NOTE"
-    echo "Options: summary location approval matching consensus custody credentials evidence"
+    echo "Options: summary location nip-va approval matching consensus custody credentials evidence"
     exit 1
     ;;
 esac
