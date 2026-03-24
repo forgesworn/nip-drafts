@@ -103,6 +103,8 @@ The progressive reveal model means precision increases only when trust does. Pub
 
 Useful for delivery tracking, field service dispatch, event coordination, fleet management, or any Nostr app that needs "who is near me?" without a centralised location server.
 
+Build with this: a Nostr-native delivery tracker where the customer sees the driver's live location after accepting the order. A "who's nearby" feature for Nostr meetup apps. A fleet dashboard for field service dispatch. A privacy-first find-my-friends that works without Google or Apple.
+
 https://github.com/forgesworn/nip-drafts/blob/main/NIP-LOCATION.md
 ENDNOTE
     ;;
@@ -119,6 +121,8 @@ What makes it different from badges: addressable per publisher, type, and subjec
 What makes it different from labels: NIP-32 labels are regular events. You cannot revoke a specific label without deleting the entire event. NIP-VA attestations are individually replaceable, revocable, and expirable.
 
 Reference implementation with builders, parsers, validators, and 17 frozen test vectors: https://github.com/forgesworn/nostr-attestations
+
+Build with this: a professional licensing registry where trade bodies issue verifiable credentials on Nostr. A product authenticity system where manufacturers attest provenance. A peer endorsement network where your reputation follows your keypair across clients. A fact-checking layer where journalists sign claims about sources.
 
 The spec: https://github.com/forgesworn/nostr-attestations/blob/main/NIP-VA.md
 ENDNOTE
@@ -137,7 +141,7 @@ kind 30571 (Approval Response): each named reviewer responds with approved, reje
 
 The key difference from reactions: the reviewer set is declared upfront. Only listed authorities can approve. Revision loops are built in; a reviewer requests changes, the proposer updates, the reviewer re-evaluates. Deadlines are enforced via NIP-40 expiration.
 
-Use cases: pull request reviews on Nostr-native Git tools. Grant committee decisions. Editorial sign-off before publishing. Regulatory inspections. Any workflow where "someone specific must say yes" before the next step.
+Build with this: pull request reviews for Nostr-native Git tools where merging requires sign-off. Grant committee voting where every board member must approve before funds release. Editorial workflows where an editor must approve before publishing. Construction inspection sign-off where a qualified surveyor's approval unblocks the next phase.
 
 https://github.com/forgesworn/nip-drafts/blob/main/NIP-APPROVAL.md
 ENDNOTE
@@ -157,6 +161,8 @@ kind 30577 (Matching Selection): the requester chooses a winner. Selection is a 
 This is the reverse auction pattern. One request, many providers competing. Different from NIP-90 DVMs (those are for computational jobs with machine-verifiable outputs). NIP-MATCHING is for human services where the requester evaluates offers subjectively.
 
 Useful for freelance marketplaces, procurement, RFPs, service dispatch, or any Nostr app where providers compete for work rather than buyers competing for goods.
+
+Build with this: a freelance marketplace where clients post jobs and contractors bid competitively. A procurement system for small businesses. A ride-request board where drivers compete on price and rating. An RFP platform where proposals are structured, revisable, and publicly verifiable.
 
 https://github.com/forgesworn/nip-drafts/blob/main/NIP-MATCHING.md
 ENDNOTE
@@ -179,6 +185,8 @@ With NIP-CONSENSUS: declare voters, declare threshold, collect votes, check quor
 
 Useful for DAOs, cooperatives, editorial boards, grant committees, or any multi-party decision that needs an auditable outcome.
 
+Build with this: DAO governance where proposals need 3/5 board approval within 48 hours. Cooperative decision-making for community land trusts. Editorial boards deciding which articles to publish. Budget approvals in decentralised organisations.
+
 https://github.com/forgesworn/nip-drafts/blob/main/NIP-CONSENSUS.md
 ENDNOTE
     ;;
@@ -197,6 +205,8 @@ kind 30573 (Custody Evidence): photos, documents, sensor readings linked to a sp
 A three-leg delivery (sender to courier to hub to recipient) produces three transfer events and six evidence records, all chain-linked. Any party can reconstruct the full audit trail by following the references.
 
 Useful for delivery tracking, art provenance, equipment handoff, legal evidence chains, or any workflow where "who had this, when, and in what state" matters.
+
+Build with this: a parcel tracking system where every handoff is signed and photographed. Art provenance tracking from studio to gallery to collector. Equipment checkout systems for shared workshops. Legal evidence chains that hold up because every transfer is cryptographically linked.
 
 https://github.com/forgesworn/nip-drafts/blob/main/NIP-CUSTODY.md
 ENDNOTE
@@ -217,6 +227,8 @@ The verification algorithm is six steps: discover requirements, discover credent
 
 Different from NIP-58 badges: badges celebrate ("you earned this"). Credentials gate ("you need this to participate").
 
+Build with this: a marketplace that verifies Gas Safe registration before matching plumbers to jobs. An events platform that checks DBS clearance for anyone working with children. A professional network where qualifications are verifiable, not just claimed. A hiring platform where credential checks happen at the protocol level, not in a walled garden.
+
 https://github.com/forgesworn/nip-drafts/blob/main/NIP-CREDENTIALS.md
 ENDNOTE
     ;;
@@ -235,6 +247,8 @@ Not all evidence is file-based. Sensor readings, condition assessments, verbal c
 NIP-03 (OpenTimestamps) proves an event existed at a time. NIP-EVIDENCE adds what was captured, where, when, and under what conditions. The two complement each other.
 
 Useful for inspections, insurance claims, compliance audits, dispute resolution, or any workflow where "signed facts" need to be discoverable by type, location, or related event.
+
+Build with this: an inspection app where engineers photograph defects with geolocation and timestamp. An insurance claims system where evidence is immutable from the moment of capture. A compliance audit trail that any regulator can verify independently. A citizen journalism tool where photos carry verifiable metadata about when and where they were taken.
 
 https://github.com/forgesworn/nip-drafts/blob/main/NIP-EVIDENCE.md
 ENDNOTE
