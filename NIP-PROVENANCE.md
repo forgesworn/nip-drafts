@@ -577,7 +577,7 @@ High-value products combine all three composition patterns. The maker publishes 
 
 ## Reference Implementation
 
-A reference implementation is available in the [`@trott/sdk`](https://github.com/forgesworn/trott-sdk) TypeScript library, which provides builders and parsers for kind 30404 (Product Certificate). For authenticity attestation, use the NIP-VA builders from [`nostr-attestations`](https://github.com/forgesworn/nostr-attestations). For standalone use, implementors SHOULD refer to the kind definitions above.
+A reference implementation is available in the [`@trott/sdk`](https://github.com/TheCryptoDonkey/trott-sdk) TypeScript library, which provides builders and parsers for kind 30404 (Product Certificate). For authenticity attestation, use the NIP-VA builders from [`nostr-attestations`](https://github.com/forgesworn/nostr-attestations). For standalone use, implementors SHOULD refer to the kind definitions above.
 
 A minimal implementation requires:
 

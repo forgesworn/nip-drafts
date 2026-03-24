@@ -16,7 +16,7 @@ All drafts are `draft` `optional` unless noted otherwise.
 | [NIP-SPATIAL-SIGNALS](NIP-SPATIAL-SIGNALS.md) | Spatial Signals & Corroboration | ecosystem | `draft` | 1315, 1316 | NIP-01, NIP-31, NIP-40, NIP-LOCATION |
 | [NIP-PROVIDER-PROFILES](NIP-PROVIDER-PROFILES.md) | Service Provider Profiles | upstream | `draft` | 30510, 30511 | NIP-01, NIP-40, NIP-58, NIP-99, NIP-EVIDENCE |
 | [NIP-TRUST](NIP-TRUST.md) | Portable Trust Networks | upstream | `draft` | 30515, 30517 | NIP-01, NIP-02, NIP-09, NIP-17, NIP-40, NIP-44, NIP-51 |
-| [NIP-CHANNELS](NIP-CHANNELS.md) | Context-Scoped Messaging Primitives | upstream | `draft` | 20502, 30565 | NIP-01, NIP-17, NIP-40, NIP-44, NIP-59 |
+| [NIP-CHANNELS](NIP-CHANNELS.md) | Message Status & Typing Indicators | upstream | `draft` | 20502, 30565 | NIP-01, NIP-17, NIP-40, NIP-44, NIP-59 |
 | [NIP-DATA-ACCESS](NIP-DATA-ACCESS.md) | Scoped, Revocable Data Access Grants | ecosystem | `draft` | 30556 | NIP-01, NIP-44, NIP-59 |
 | [NIP-CREDENTIALS](NIP-CREDENTIALS.md) | Credential Verification & Gating | upstream | `draft` | 30527, 30528 | NIP-01, NIP-40, NIP-44, NIP-REPUTATION |
 | [NIP-REPUTATION](NIP-REPUTATION.md) | Structured Reputation & Reviews | upstream | `draft` | 30520 | NIP-01, NIP-02, NIP-22, NIP-32, NIP-58, NIP-EVIDENCE |

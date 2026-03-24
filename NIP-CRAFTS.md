@@ -393,7 +393,7 @@ NIP-REPUTATION defines Credential Attestations for third-party verification of q
 
 ## Reference Implementation
 
-A reference implementation is available in the [`@trott/sdk`](https://github.com/forgesworn/trott-sdk) TypeScript library, which provides builders and parsers for the kinds defined in this NIP. For standalone use, implementors SHOULD refer to the kind definitions above.
+A reference implementation is available in the [`@trott/sdk`](https://github.com/TheCryptoDonkey/trott-sdk) TypeScript library, which provides builders and parsers for the kinds defined in this NIP. For standalone use, implementors SHOULD refer to the kind definitions above.
 
 A minimal implementation requires:
 
