@@ -77,7 +77,8 @@ Published by a context owner (marketplace, domain operator, community) to declar
         ["expiration", "1735689600"]
     ],
     "content": "Gas Safe registration is a legal requirement for anyone working on gas appliances in the United Kingdom. Providers without a current registration MUST NOT be matched to gas-related tasks.",
-    // other fields...
+    "id": "<32-bytes lowercase hex>",
+    "sig": "<64-bytes lowercase hex>"
 }
 ```
 
@@ -105,13 +106,17 @@ Tags:
 
 A context owner MAY publish multiple Kind 30527 events with different `d` tags to declare multiple credential requirements. For example, a gas plumbing marketplace might require both Gas Safe registration and public liability insurance:
 
+Requirement 1 (Gas Safe):
+
 ```json
-// Requirement 1: Gas Safe
 ["d", "gas_plumbing:requirement:gas_safe"]
 ["credential_type", "professional_licence"]
 ["mandatory", "true"]
+```
 
-// Requirement 2: Insurance
+Requirement 2 (Insurance):
+
+```json
 ["d", "gas_plumbing:requirement:public_liability"]
 ["credential_type", "insurance"]
 ["mandatory", "true"]
@@ -143,7 +148,8 @@ Published by an issuer, operator, or regulatory authority to explicitly revoke a
         ["revocation_details", "Registration suspended following investigation into unsafe installation practices"]
     ],
     "content": "",
-    // other fields...
+    "id": "<32-bytes lowercase hex>",
+    "sig": "<64-bytes lowercase hex>"
 }
 ```
 
@@ -247,18 +253,15 @@ flowchart TD
 ### REQ Filters
 
 ```json
-// All credential requirements for a context owner
-{"kinds": [30527], "authors": ["<context-owner-pubkey>"]}
-
-// All credentials held by a provider
-{"kinds": [31000], "#p": ["<provider-pubkey>"]}
-
-// All revocations for a provider
-{"kinds": [30528], "#p": ["<provider-pubkey>"]}
-
-// Revocations for a specific credential attestation
-{"kinds": [30528], "#e": ["<credential-attestation-event-id>"]}
+[
+    {"kinds": [30527], "authors": ["<context-owner-pubkey>"]},
+    {"kinds": [31000], "#p": ["<provider-pubkey>"]},
+    {"kinds": [30528], "#p": ["<provider-pubkey>"]},
+    {"kinds": [30528], "#e": ["<credential-attestation-event-id>"]}
+]
 ```
+
+The first filter fetches all credential requirements published by a context owner. The second discovers all credentials held by a provider. The third finds all revocations targeting a provider. The fourth checks revocations for a specific credential attestation.
 
 ## Use Cases Beyond Task Coordination
 

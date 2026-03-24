@@ -244,7 +244,7 @@ Addressable events with a physical location (e.g. NIP-52 calendar events, NIP-99
     "tags": [
         ["d", "jazz-night-march"],
         ["g", "gcpuu"],
-        ["location", "Bristol Community Center"]
+        ["location", "Bristol Community Centre"]
     ],
     "content": "...",
     "id": "<32-byte-hex>",
