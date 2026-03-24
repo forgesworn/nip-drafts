@@ -25,21 +25,35 @@ RELAYS=(
 # Format: slug|title|filename|kinds (comma-separated)|batch
 
 NIPS=(
+  # Batch 1 (published 2026-03-24)
   "nip-location|NIP-LOCATION: Privacy-Preserving Location Discovery|NIP-LOCATION.md|20500,20501|1"
   "nip-credentials|NIP-CREDENTIALS: Credential Verification & Gating|NIP-CREDENTIALS.md|30527,30528|1"
   "nip-approval|NIP-APPROVAL: Multi-Party Approval Gates|NIP-APPROVAL.md|30570,30571|1"
-  "nip-custody|NIP-CUSTODY: Chain-of-Custody Tracking|NIP-CUSTODY.md|30572,30573|1"
+  "nip-custody|NIP-CUSTODY: Chain-of-Custody Tracking|NIP-CUSTODY.md|30572|2"
   "nip-consensus|NIP-CONSENSUS: Multi-Party Consensus|NIP-CONSENSUS.md|30574,30575|1"
   "nip-matching|NIP-MATCHING: Competitive Matching & Selection|NIP-MATCHING.md|30576,30577|1"
-  "nip-evidence|NIP-EVIDENCE: Timestamped Evidence Recording|NIP-EVIDENCE.md|30578|1"
-  "nip-provider-profiles|NIP-PROVIDER-PROFILES: Service Provider Profiles|NIP-PROVIDER-PROFILES.md|30510,30511,30525,30526|2"
-  "nip-trust|NIP-TRUST: Portable Trust Networks|NIP-TRUST.md|30512,30513,30515,30517,30518,30519|2"
-  "nip-channels|NIP-CHANNELS: Multi-Party Encrypted Channels|NIP-CHANNELS.md|20502,30564,30565|2"
-  "nip-reputation|NIP-REPUTATION: Structured Reputation & Reviews|NIP-REPUTATION.md|30520,30521,31000,30523,30524|2"
-  "nip-escrow|NIP-ESCROW: Conditional Payment Coordination|NIP-ESCROW.md|30530,30531,30532,30533,30534,30535,30536,30537|2"
-  "nip-disputes|NIP-DISPUTES: Dispute Resolution Protocol|NIP-DISPUTES.md|7543,7544,30545,30546,7547|2"
-  "nip-variation|NIP-VARIATION: Scope & Price Change Management|NIP-VARIATION.md|30579,30580,30581|2"
-  "nip-booking|NIP-BOOKING: Calendar Availability & Booking|NIP-BOOKING.md|30582,30583,30584,30585,30586,30587|2"
+  "nip-evidence|NIP-EVIDENCE: Timestamped Evidence Recording|NIP-EVIDENCE.md|30578|2"
+  # Batch 2 (everything new/updated since batch 1)
+  "nip-quote|NIP-QUOTE: Structured Pricing & Payment Terms|NIP-QUOTE.md|30530,30531|2"
+  "nip-escrow|NIP-ESCROW: Conditional Payment Coordination|NIP-ESCROW.md|30532,30533,30535|2"
+  "nip-trust|NIP-TRUST: Portable Trust Networks|NIP-TRUST.md|30515,30517|2"
+  "nip-disputes|NIP-DISPUTES: Dispute Resolution Protocol|NIP-DISPUTES.md|7543,30545|2"
+  "nip-reputation|NIP-REPUTATION: Structured Reputation & Reviews|NIP-REPUTATION.md|30520|2"
+  "nip-booking|NIP-BOOKING: Calendar Availability & Booking|NIP-BOOKING.md|30582,30583,30584|2"
+  "nip-variation|NIP-VARIATION: Scope & Price Change Management|NIP-VARIATION.md|30579|2"
+  "nip-channels|NIP-CHANNELS: Context-Scoped Messaging Primitives|NIP-CHANNELS.md|20502,30565|2"
+  "nip-provider-profiles|NIP-PROVIDER-PROFILES: Service Provider Profiles|NIP-PROVIDER-PROFILES.md|30510,30511|2"
+  "nip-invoicing|NIP-INVOICING: Structured Invoicing|NIP-INVOICING.md|30588|2"
+  "nip-provenance|NIP-PROVENANCE: Product & Supply Chain Provenance|NIP-PROVENANCE.md|30404|2"
+  "nip-crafts|NIP-CRAFTS: Craft Technique Documentation|NIP-CRAFTS.md|30401|2"
+  "nip-scarcity|NIP-SCARCITY: Workforce & Resource Scarcity Signals|NIP-SCARCITY.md|30599|2"
+  "nip-spatial-signals|NIP-SPATIAL-SIGNALS: Spatial Signals & Corroboration|NIP-SPATIAL-SIGNALS.md|1315,1316|2"
+  "nip-data-access|NIP-DATA-ACCESS: Scoped, Revocable Data Access Grants|NIP-DATA-ACCESS.md|30556|2"
+  "nip-mentorship|NIP-MENTORSHIP: Mentorship Pipelines & Training Progression|NIP-MENTORSHIP.md||2"
+  "nip-sla|NIP-SLA: Service Level Agreements (Composition Guide)|NIP-SLA.md||2"
+  "nip-community-governance|NIP-COMMUNITY-GOVERNANCE: Community Governance (Composition Guide)|NIP-COMMUNITY-GOVERNANCE.md||2"
+  "nip-referral-routing|NIP-REFERRAL-ROUTING: Institutional Referral Routing (Composition Guide)|NIP-REFERRAL-ROUTING.md||2"
+  "nip-l402-services|NIP-L402-SERVICES: Paid API Service Announcements|NIP-L402-SERVICES.md|31402|2"
 )
 
 # ── Image insertion map ──────────────────────────────────────────────────────
@@ -47,16 +61,36 @@ NIPS=(
 # The marker is the first unique line after ```mermaid that identifies which block
 
 IMAGES=(
-  "NIP-LOCATION.md|sequenceDiagram|location-1-progressive-reveal|Progressive Reveal Flow"
-  "NIP-CREDENTIALS.md|flowchart TD|credentials-1-verification-decision|Credential Verification Decision Tree"
-  "NIP-APPROVAL.md|flowchart TD|approval-1-gate-state|Approval Gate State Transitions"
-  "NIP-CUSTODY.md|sequenceDiagram|custody-1-multi-leg-chain|Multi-Leg Custody Chain"
-  "NIP-CONSENSUS.md|flowchart TD|consensus-1-threshold-resolution|Threshold Resolution Logic"
-  "NIP-MATCHING.md|sequenceDiagram|matching-1-competitive-selection|Competitive Selection Flow"
-  "NIP-ESCROW.md|flowchart TD|escrow-1-trust-model-decision|Trust Model Decision Tree"
-  "NIP-ESCROW.md|sequenceDiagram|escrow-3-full-flow|Full Payment Flow"
-  "NIP-DISPUTES.md|sequenceDiagram|disputes-1-dispute-flow|Dispute Lifecycle"
-  "NIP-DISPUTES.md|flowchart TD|disputes-2-state-machine|Dispute State Machine"
+  # Batch 1
+  "NIP-LOCATION.md|sequenceDiagram|location-1|Progressive Reveal Flow"
+  "NIP-CREDENTIALS.md|flowchart TD|credentials-1|Credential Verification Decision Tree"
+  "NIP-APPROVAL.md|flowchart TD|approval-1|Approval Gate State Transitions"
+  "NIP-CUSTODY.md|sequenceDiagram|custody-1|Custody Chain with NIP-EVIDENCE Composition"
+  "NIP-CONSENSUS.md|flowchart TD|consensus-1|Threshold Resolution Logic"
+  "NIP-MATCHING.md|sequenceDiagram|matching-1|Competitive Selection Flow"
+  "NIP-EVIDENCE.md|sequenceDiagram|evidence-1|Evidence Recording Flow"
+  # Batch 2
+  "NIP-QUOTE.md|flowchart|quote-1|Trust Model Decision Tree"
+  "NIP-ESCROW.md|sequenceDiagram|escrow-1|Escrow Protocol Flow"
+  "NIP-TRUST.md|sequenceDiagram|trust-1|Trust Network Flow"
+  "NIP-DISPUTES.md|sequenceDiagram|disputes-1|Dispute Lifecycle"
+  "NIP-REPUTATION.md|sequenceDiagram|reputation-1|Rating Flow"
+  "NIP-BOOKING.md|sequenceDiagram|booking-1|Booking Lifecycle"
+  "NIP-VARIATION.md|sequenceDiagram|variation-1|Variation Flow"
+  "NIP-CHANNELS.md|sequenceDiagram|channels-1|Messaging Flow"
+  "NIP-PROVIDER-PROFILES.md|sequenceDiagram|provider_profiles-1|Provider Discovery Flow"
+  # Batch 3
+  "NIP-INVOICING.md|sequenceDiagram|invoicing-1|Invoice Lifecycle"
+  "NIP-PROVENANCE.md|flowchart|provenance-1|Product Provenance Lifecycle"
+  "NIP-CRAFTS.md|sequenceDiagram|crafts-1|Craft Skill and Technique Flow"
+  "NIP-L402-SERVICES.md|sequenceDiagram|l402_services-1|L402 Discovery and Payment Flow"
+  "NIP-SCARCITY.md|flowchart|scarcity-1|Scarcity Signal Lifecycle"
+  "NIP-MENTORSHIP.md|sequenceDiagram|mentorship-1|Mentorship Progression"
+  "NIP-DATA-ACCESS.md|sequenceDiagram|data_access-1|Data Access Grant Flow"
+  "NIP-SPATIAL-SIGNALS.md|sequenceDiagram|spatial_signals-1|Spatial Signal Report and Corroboration"
+  "NIP-SLA.md|sequenceDiagram|sla-1|SLA Monitoring Workflow"
+  "NIP-COMMUNITY-GOVERNANCE.md|sequenceDiagram|community_governance-1|Governance Workflow"
+  "NIP-REFERRAL-ROUTING.md|sequenceDiagram|referral_routing-1|Referral Flow"
 )
 
 # ── CLI parsing ──────────────────────────────────────────────────────────────
@@ -161,15 +195,21 @@ for entry in "${NIPS[@]}"; do
 
   # Build tag arguments
   tag_args=("-t" "title=${title}")
-  IFS=',' read -ra kind_arr <<< "$kinds"
-  for k in "${kind_arr[@]}"; do
-    tag_args+=("-t" "k=${k}")
-  done
+  if [[ -n "$kinds" ]]; then
+    IFS=',' read -ra kind_arr <<< "$kinds"
+    for k in "${kind_arr[@]}"; do
+      tag_args+=("-t" "k=${k}")
+    done
+    kind_count=${#kind_arr[@]}
+  else
+    kind_count=0
+    tag_args+=("-t" "k=composition-guide")
+  fi
 
   char_count=${#content}
 
   if $DRY_RUN; then
-    echo "  [DRY] ${slug} (${char_count} chars, ${#kind_arr[@]} kinds)"
+    echo "  [DRY] ${slug} (${char_count} chars, ${kind_count} kinds)"
     rm -f "$tmpfile"
     continue
   fi
