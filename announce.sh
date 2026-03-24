@@ -38,8 +38,26 @@ for arg in "$@"; do
 done
 
 if [[ -z "$NOTE" ]]; then
-  echo "Usage: ./announce.sh [--dry-run] <summary|location|approval|matching|consensus|custody|credentials|evidence>"
+  echo "Usage: ./announce.sh [--dry-run] <summary|location|nip-va|approval|matching|consensus|custody|credentials|evidence|all>"
   exit 1
+fi
+
+# ── All mode: post every note with a delay ────────────────────────────────────
+
+if [[ "$NOTE" == "all" ]]; then
+  ALL_NOTES=(summary location nip-va approval matching consensus custody credentials evidence)
+  for n in "${ALL_NOTES[@]}"; do
+    echo "=== ${n} ==="
+    if $DRY_RUN; then
+      "$0" --dry-run "$n"
+    else
+      "$0" "$n"
+      echo "  Waiting 30s before next post..."
+      sleep 30
+    fi
+    echo ""
+  done
+  exit 0
 fi
 
 # ── Notes ─────────────────────────────────────────────────────────────────────
