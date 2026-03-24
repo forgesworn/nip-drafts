@@ -44,10 +44,19 @@ This approach enables relay discovery of available pathways using standard NIP-5
         ["d", "referral-pathway:nhs_msk_pathway_v1"],
         ["t", "referral-pathway"],
         ["title", "Musculoskeletal Referral Pathway"],
-        ["referral:step", "0", "general_practitioner", "nip-credentials:medical:gp", "Patient presents with persistent MSK symptoms >6 weeks"],
-        ["referral:step", "1", "physiotherapist", "nip-credentials:medical:physiotherapy", "Initial assessment and conservative treatment"],
-        ["referral:step", "2", "orthopaedic_consultant", "nip-credentials:medical:orthopaedics", "Conservative treatment unsuccessful after 12 weeks"],
-        ["referral:step", "3", "surgical_review", "nip-credentials:medical:surgery", "Consultant recommends surgical opinion"],
+        ["alt", "Referral pathway: Musculoskeletal Referral Pathway"],
+        ["referral:step", "0", "general_practitioner"],
+        ["referral:step_credential", "0", "nip-credentials:medical:gp"],
+        ["referral:step_condition", "0", "Patient presents with persistent MSK symptoms >6 weeks"],
+        ["referral:step", "1", "physiotherapist"],
+        ["referral:step_credential", "1", "nip-credentials:medical:physiotherapy"],
+        ["referral:step_condition", "1", "Initial assessment and conservative treatment"],
+        ["referral:step", "2", "orthopaedic_consultant"],
+        ["referral:step_credential", "2", "nip-credentials:medical:orthopaedics"],
+        ["referral:step_condition", "2", "Conservative treatment unsuccessful after 12 weeks"],
+        ["referral:step", "3", "surgical_review"],
+        ["referral:step_credential", "3", "nip-credentials:medical:surgery"],
+        ["referral:step_condition", "3", "Consultant recommends surgical opinion"],
         ["referral:escalation", "1", "2", "timeout_weeks:8", "Escalate to consultant if physiotherapy produces no improvement within 8 weeks"],
         ["referral:escalation", "0", "2", "flag:urgent", "Direct consultant referral for suspected fracture or red flag symptoms"],
         ["referral:jurisdiction", "GB", "NHS England"],
@@ -66,7 +75,9 @@ This approach enables relay discovery of available pathways using standard NIP-5
 | `d` | Yes | `referral-pathway:<identifier>`. The `referral-pathway:` prefix namespaces these lists so they are discoverable by convention. The identifier SHOULD be descriptive and versioned (e.g. `nhs_msk_pathway_v1`). |
 | `t` | Yes | Protocol family marker. MUST be `"referral-pathway"`. |
 | `title` | Yes | Human-readable name for the pathway. |
-| `referral:step` | Yes (repeatable) | Step definition. Format: `["referral:step", "<step_index>", "<role_identifier>", "<credential_requirement>", "<routing_condition>"]`. Steps are ordered by `step_index` (zero-based). The `credential_requirement` references a NIP-CREDENTIALS credential type that the referrer at this step must hold. |
+| `referral:step` | Yes (repeatable) | Step definition. Format: `["referral:step", "<step_index>", "<role_identifier>"]`. Steps are ordered by `step_index` (zero-based). |
+| `referral:step_credential` | Optional (repeatable) | Credential requirement for a step. Format: `["referral:step_credential", "<step_index>", "<credential_requirement>"]`. References a NIP-CREDENTIALS credential type that the referrer at this step must hold. |
+| `referral:step_condition` | Optional (repeatable) | Routing condition for a step. Format: `["referral:step_condition", "<step_index>", "<routing_condition>"]`. Describes when a referral to this step is appropriate. |
 | `referral:escalation` | Optional (repeatable) | Escalation rule. Format: `["referral:escalation", "<from_step>", "<to_step>", "<trigger>", "<description>"]`. Defines conditions under which a step may be skipped: timeout, urgency flags, or clinical triggers. |
 | `referral:jurisdiction` | Optional | Geographic or institutional scope. Format: `["referral:jurisdiction", "<country_code>", "<institution_or_region>"]`. |
 | `expiration` | Optional | NIP-40 expiry. Pathway definitions MAY expire to force periodic review and republication. |
@@ -89,6 +100,7 @@ A referral is fundamentally "I am sending this person to you; please accept or r
     "tags": [
         ["d", "referral:ref_2024_msk_00347:gate:physio_referral"],
         ["t", "approval-gate"],
+        ["alt", "Referral gate: GP refers patient to physiotherapist"],
         ["gate_type", "referral"],
         ["gate_authority", "<physiotherapist-hex-pubkey>"],
         ["gate_status", "pending"],
@@ -120,7 +132,7 @@ All standard NIP-APPROVAL tags apply (`d`, `t`, `gate_type`, `gate_authority`, `
 | `referral:step` | Yes | Which step in the pathway this referral targets (zero-based index matching the pathway's `referral:step` tags). |
 | `referral:referrer_role` | Yes | The referrer's role in the pathway. MUST match a role defined in a preceding step of the referenced pathway. |
 | `referral:target_role` | Yes | The target role for the referral. MUST match the role defined at the specified step in the referenced pathway. |
-| `referral:reason` | Yes | Structured reason for the referral. MUST be NIP-44 encrypted to both the referred individual's pubkey and the target role holder's pubkey. Referral reasons are sensitive (medical, legal, personal) and MUST NOT be transmitted in plaintext. |
+| `referral:reason` | Yes | Structured reason for the referral. The value MUST be a NIP-44 encrypted string, base64-encoded, encrypted to both the referred individual's pubkey and the target role holder's pubkey. Referral reasons are sensitive (medical, legal, personal) and MUST NOT be transmitted in plaintext. |
 | `referral:urgency` | Optional | One of `"routine"`, `"urgent"`, or `"emergency"`. Defaults to `"routine"` if omitted. |
 | `expiration` | Yes | NIP-40 expiry. Referrals MUST expire. A referral without an expiration tag is invalid. |
 
@@ -142,6 +154,7 @@ The receiving institution or practitioner responds using a standard **Approval R
     "tags": [
         ["d", "referral:ref_2024_msk_00347:gate:physio_referral:response:<physiotherapist-hex-pubkey>"],
         ["t", "approval-response"],
+        ["alt", "Referral response: physiotherapist accepts referral"],
         ["e", "<referral-gate-event-id>", "wss://relay.example.com"],
         ["decision", "approved"],
         ["p", "<referrer-hex-pubkey>"],
@@ -163,6 +176,7 @@ The receiving institution or practitioner responds using a standard **Approval R
     "tags": [
         ["d", "referral:ref_2024_msk_00347:gate:physio_referral:response:<physiotherapist-hex-pubkey>"],
         ["t", "approval-response"],
+        ["alt", "Referral response: physiotherapist declines referral"],
         ["e", "<referral-gate-event-id>", "wss://relay.example.com"],
         ["decision", "rejected"],
         ["p", "<referrer-hex-pubkey>"],

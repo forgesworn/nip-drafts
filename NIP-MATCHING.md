@@ -63,6 +63,7 @@ Published by a provider to offer their services in response to a request or anno
     "tags": [
         ["d", "bounty_fix_login_bug:offer:<provider-hex-pubkey>"],
         ["t", "matching-offer"],
+        ["alt", "Matching offer: 50000 SAT to fix login bug"],
         ["p", "<requester-hex-pubkey>"],
         ["amount", "50000"],
         ["currency", "SAT"],
@@ -106,6 +107,7 @@ Published by the requester to select one of the received offers. One selection p
     "tags": [
         ["d", "bounty_fix_login_bug:selection"],
         ["t", "matching-selection"],
+        ["alt", "Matching selection: provider selected for login bug fix"],
         ["e", "<selected-offer-event-id>", "wss://relay.example.com"],
         ["p", "<selected-provider-hex-pubkey>"]
     ],
@@ -235,6 +237,7 @@ A provider offering a logo design service at a quoted price in response to a req
   "tags": [
     ["d", "logo_design_req_42:offer:b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3"],
     ["t", "matching-offer"],
+    ["alt", "Matching offer: 75000 SAT for logo design package"],
     ["p", "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"],
     ["amount", "75000"],
     ["currency", "SAT"],
@@ -260,6 +263,7 @@ The requester selects the winning offer from the above provider.
   "tags": [
     ["d", "logo_design_req_42:selection"],
     ["t", "matching-selection"],
+    ["alt", "Matching selection: provider selected for logo design"],
     ["e", "aaaa1111bbbb2222cccc3333dddd4444eeee5555ffff6666aaaa1111bbbb2222", "wss://relay.example.com"],
     ["p", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3"],
     ["reason", "Best portfolio and competitive pricing"]

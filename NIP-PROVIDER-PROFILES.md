@@ -46,6 +46,7 @@ An addressable event declaring a provider's capabilities, credentials, coverage 
     "created_at": 1698700000,
     "tags": [
         ["d", "<provider-hex-pubkey>_profile"],
+        ["alt", "Provider profile: licensed plumber in Greater London"],
         ["t", "domain:plumbing"],
         ["t", "domain:emergency-repairs"],
         ["t", "skill:plumber"],
@@ -227,6 +228,7 @@ An addressable event declaring a coordinator's financial commitment, supported c
     "created_at": 1698700000,
     "tags": [
         ["d", "<coordinator-hex-pubkey>_bond"],
+        ["alt", "Coordinator bond: 5000000 GBP for Greater London services"],
         ["domain", "plumbing"],
         ["domain", "electrical"],
         ["amount", "5000000"],

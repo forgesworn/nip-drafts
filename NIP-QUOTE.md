@@ -53,6 +53,7 @@ A provider proposes a price. Multiple providers MAY quote the same job. Addressa
     ["d", "<tx-id>:quote"],
     ["e", "<originating-event-id>"],
     ["p", "<requester-pubkey>"],
+    ["alt", "Quote: 15000 SAT for logo design"],
     ["amount", "15000"],
     ["currency", "SAT"],
     ["breakdown", "base_price", "12000", "SAT"],
@@ -113,6 +114,7 @@ Agreed payment structure between parties. Published after quote acceptance. Defi
   "tags": [
     ["d", "<tx-id>:terms"],
     ["e", "<quote-event-id>"],
+    ["alt", "Payment terms: milestone-based, 50000 SAT"],
     ["payment_type", "milestone"],
     ["amount", "50000"],
     ["currency", "SAT"],
@@ -284,6 +286,7 @@ All examples use timestamp `1709740800` (2024-03-06T12:00:00Z) and placeholder h
     ["d", "tx_abc123:quote"],
     ["e", "dddd4444eeee5555ffff6666aaaa1111bbbb2222cccc3333dddd4444eeee5555"],
     ["p", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"],
+    ["alt", "Quote: 15000 SAT for logo design"],
     ["amount", "15000"],
     ["currency", "SAT"],
     ["breakdown", "base_price", "12000", "SAT"],
@@ -310,6 +313,7 @@ All examples use timestamp `1709740800` (2024-03-06T12:00:00Z) and placeholder h
   "tags": [
     ["d", "tx_abc123:terms"],
     ["e", "aaaa1111bbbb2222cccc3333dddd4444eeee5555ffff6666aaaa1111bbbb2222"],
+    ["alt", "Payment terms: milestone-based, 50000 SAT"],
     ["payment_type", "milestone"],
     ["amount", "50000"],
     ["currency", "SAT"],

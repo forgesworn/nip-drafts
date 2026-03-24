@@ -52,6 +52,7 @@ Published by a proposer to create a gate requiring one or more reviewers to sign
     "tags": [
         ["d", "pr_review_42:gate:code_review"],
         ["t", "approval-gate"],
+        ["alt", "Approval gate: code review for PR #42"],
         ["gate_type", "review"],
         ["gate_authority", "<reviewer-hex-pubkey>"],
         ["gate_status", "pending"],
@@ -92,6 +93,7 @@ Published by a reviewer to approve, reject, or request revision of a gated propo
     "tags": [
         ["d", "pr_review_42:gate:code_review:response:<reviewer-hex-pubkey>"],
         ["t", "approval-response"],
+        ["alt", "Approval response: approved for code review"],
         ["e", "<gate-event-id>", "wss://relay.example.com"],
         ["decision", "approved"],
         ["p", "<proposer-hex-pubkey>"],
@@ -213,6 +215,7 @@ A regulatory inspection gate requiring sign-off from 2 authorities before work c
   "tags": [
     ["d", "site_inspection_007:gate:structural_review"],
     ["t", "approval-gate"],
+    ["alt", "Approval gate: structural inspection requiring two reviewers"],
     ["gate_type", "inspection"],
     ["gate_authority", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3"],
     ["gate_authority", "c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4"],
@@ -238,6 +241,7 @@ An "approved" response from one of the gate authorities.
   "tags": [
     ["d", "site_inspection_007:gate:structural_review:response:b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3"],
     ["t", "approval-response"],
+    ["alt", "Approval response: structural inspection approved"],
     ["e", "aaaa1111bbbb2222cccc3333dddd4444eeee5555ffff6666aaaa1111bbbb2222", "wss://relay.example.com"],
     ["decision", "approved"],
     ["p", "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"],

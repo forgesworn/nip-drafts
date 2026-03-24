@@ -102,23 +102,19 @@ Each template defines one or more service level objectives via repeatable `sla_m
 
 ### SLA Metric Tag Format
 
-Each `sla_metric` tag value is a JSON string:
+Each `sla_metric` tag uses a structured multi-value format:
 
-```json
-{
-  "sla_type": "response_time",
-  "threshold_value": "240",
-  "threshold_unit": "minutes",
-  "penalty_amount": "5000",
-  "penalty_type": "credit"
-}
+```
+["sla_metric", "<sla_type>", "<threshold_value>", "<threshold_unit>", "<penalty_amount>", "<penalty_type>"]
 ```
 
-- `sla_type` (string, required): Metric type (see SLA Metric Types table above)
-- `threshold_value` (string, required): Numeric threshold as a string
-- `threshold_unit` (string, required): Unit of measurement
-- `penalty_amount` (string, required): Penalty amount in smallest currency unit (pence for GBP, cents for USD, satoshis for SAT)
-- `penalty_type` (string, required): One of `refund`, `credit`, or `stake_forfeit`
+| Position | Field | Description |
+|----------|-------|-------------|
+| 1 | `sla_type` | Metric type (see SLA Metric Types table above) |
+| 2 | `threshold_value` | Numeric threshold as a string |
+| 3 | `threshold_unit` | Unit of measurement |
+| 4 | `penalty_amount` | Penalty amount in smallest currency unit (pence for GBP, cents for USD, satoshis for SAT) |
+| 5 | `penalty_type` | One of `refund`, `credit`, or `stake_forfeit` |
 
 ### Example: API Hosting SLA Template
 
@@ -130,9 +126,10 @@ Each `sla_metric` tag value is a JSON string:
   "tags": [
     ["d", "api-hosting:sla_template:premium"],
     ["t", "evidence-record"],
+    ["alt", "SLA template: API hosting premium tier"],
     ["evidence_type", "sla_template"],
-    ["sla_metric", "{\"sla_type\":\"availability\",\"threshold_value\":\"99.9\",\"threshold_unit\":\"percentage\",\"penalty_amount\":\"10000\",\"penalty_type\":\"credit\"}"],
-    ["sla_metric", "{\"sla_type\":\"response_time\",\"threshold_value\":\"200\",\"threshold_unit\":\"minutes\",\"penalty_amount\":\"5000\",\"penalty_type\":\"refund\"}"],
+    ["sla_metric", "availability", "99.9", "percentage", "10000", "credit"],
+    ["sla_metric", "response_time", "200", "minutes", "5000", "refund"],
     ["sla_threshold", "availability", "99.9", "percentage"],
     ["sla_threshold", "response_time", "200", "minutes"],
     ["sla_penalty", "availability", "10000", "credit"],
@@ -155,7 +152,7 @@ Each `sla_metric` tag value is a JSON string:
 | `d`                        | MUST     | No       | Addressable event identifier                         |
 | `t`                        | MUST     | No       | MUST be `"evidence-record"`                          |
 | `evidence_type`            | MUST     | No       | MUST be `"sla_template"`                             |
-| `sla_metric`               | MUST     | Yes      | Service level objective (JSON string)                |
+| `sla_metric`               | MUST     | Yes      | Service level objective: `["sla_metric", "<type>", "<threshold>", "<unit>", "<penalty_amount>", "<penalty_type>"]` |
 | `sla_threshold`            | SHOULD   | Yes      | Machine-parseable threshold: metric, value, unit     |
 | `sla_penalty`              | SHOULD   | Yes      | Machine-parseable penalty: metric, amount, type      |
 | `sla_measurement_window`   | SHOULD   | No       | Measurement period (`monthly`, `quarterly`, `yearly`)|
@@ -185,6 +182,7 @@ The consumer (or provider) publishes an approval gate referencing the SLA templa
   "tags": [
     ["d", "engagement_api_hosting_007:gate:sla_agreement"],
     ["t", "approval-gate"],
+    ["alt", "SLA agreement gate: API hosting engagement"],
     ["gate_type", "approval"],
     ["gate_authority", "<provider-hex-pubkey>"],
     ["gate_authority", "<consumer-hex-pubkey>"],
@@ -217,6 +215,7 @@ Each listed `gate_authority` publishes an approval response. The SLA is consider
   "tags": [
     ["d", "engagement_api_hosting_007:gate:sla_agreement:response:<provider-hex-pubkey>"],
     ["t", "approval-response"],
+    ["alt", "SLA agreement response: provider accepts terms"],
     ["e", "<gate-event-id>", "wss://relay.example.com"],
     ["decision", "approved"],
     ["p", "<consumer-hex-pubkey>"]
@@ -239,9 +238,10 @@ If a party wants to negotiate different thresholds, they respond with `decision:
   "tags": [
     ["d", "engagement_api_hosting_007:gate:sla_agreement:response:<provider-hex-pubkey>"],
     ["t", "approval-response"],
+    ["alt", "SLA agreement response: provider requests revision"],
     ["e", "<gate-event-id>", "wss://relay.example.com"],
     ["decision", "revise"],
-    ["sla_metric", "{\"sla_type\":\"resolution_time\",\"threshold_value\":\"72\",\"threshold_unit\":\"hours\",\"penalty_amount\":\"25000\",\"penalty_type\":\"refund\"}"],
+    ["sla_metric", "resolution_time", "72", "hours", "25000", "refund"],
     ["revision_notes", "Requesting extended resolution time of 72 hours per scope adjustment"],
     ["p", "<consumer-hex-pubkey>"]
   ],
@@ -283,6 +283,7 @@ An SLA breach is evidence of a threshold violation. When a metric is breached, e
   "tags": [
     ["d", "engagement_api_hosting_007:evidence:sla_breach_001"],
     ["t", "evidence-record"],
+    ["alt", "SLA breach: availability dropped to 99.2%"],
     ["evidence_type", "sla_breach"],
     ["sla_metric", "availability"],
     ["sla_threshold", "availability", "99.9", "percentage"],
@@ -311,6 +312,7 @@ An SLA breach is evidence of a threshold violation. When a metric is breached, e
   "tags": [
     ["d", "engagement_consulting_001:evidence:sla_breach_001"],
     ["t", "evidence-record"],
+    ["alt", "SLA breach: response time exceeded by 23 minutes"],
     ["evidence_type", "sla_breach"],
     ["sla_metric", "response_time"],
     ["sla_threshold", "response_time", "240", "minutes"],
@@ -374,6 +376,7 @@ When a breach report is contested, either party can escalate by filing a Dispute
   "tags": [
     ["p", "<consumer-hex-pubkey>"],
     ["e", "<breach-evidence-event-id>"],
+    ["alt", "Dispute claim: contesting SLA availability breach"],
     ["dispute_type", "quality"],
     ["resolution_model", "mediator"],
     ["mediator", "<mediator-pubkey>"],
@@ -397,6 +400,7 @@ Both parties submit additional evidence as `kind:30578` records referencing the 
   "tags": [
     ["d", "engagement_api_hosting_007:evidence:dispute_support_001"],
     ["t", "evidence-record"],
+    ["alt", "Dispute evidence: scheduled maintenance notification"],
     ["evidence_type", "document"],
     ["e", "<dispute-claim-event-id>"],
     ["file_hash", "sha256:a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"],
@@ -559,7 +563,7 @@ Implementations MUST enforce these rules when processing SLA-composed events.
 | Rule      | Requirement                                                                                    |
 |-----------|------------------------------------------------------------------------------------------------|
 | V-SLA-01  | MUST include at least one `sla_metric` tag                                                     |
-| V-SLA-02  | Each `sla_metric` value MUST be valid JSON containing `sla_type`, `threshold_value`, `threshold_unit`, `penalty_amount`, and `penalty_type` |
+| V-SLA-02  | Each `sla_metric` tag MUST contain six elements: tag name, `sla_type`, `threshold_value`, `threshold_unit`, `penalty_amount`, and `penalty_type` |
 | V-SLA-03  | `sla_type` MUST be one of the defined metric types                                             |
 | V-SLA-04  | `threshold_unit` MUST be one of `minutes`, `hours`, `days`, or `percentage`                    |
 | V-SLA-05  | `penalty_type` MUST be one of `refund`, `credit`, or `stake_forfeit`                           |

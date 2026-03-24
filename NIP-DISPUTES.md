@@ -70,6 +70,7 @@ Filed by a complainant against an accused party. Immutable: as a regular event, 
     "tags": [
         ["p", "<accused-pubkey>"],
         ["e", "<transaction-event-id>"],
+        ["alt", "Dispute claim: quality issue in freelance engagement"],
         ["dispute_type", "quality"],
         ["resolution_model", "mediator"],
         ["mediator", "<mediator-pubkey>"],
@@ -137,6 +138,7 @@ Appeals MUST be filed within 48 hours of the original resolution, MUST be assign
     "tags": [
         ["p", "<accused-pubkey>"],
         ["e", "<original-resolution-event-id>"],
+        ["alt", "Dispute appeal: requesting review of quality ruling"],
         ["dispute_type", "quality"],
         ["resolution_model", "mediator"],
         ["mediator", "<different-mediator-pubkey>"],
@@ -162,6 +164,7 @@ The mediator's ruling. Addressable: can be updated if the mediator corrects an e
     "tags": [
         ["d", "resolution_<dispute-claim-event-id>"],
         ["e", "<dispute-claim-event-id>"],
+        ["alt", "Dispute resolution: partial refund of 15000 SAT"],
         ["ruling", "partial_refund"],
         ["resolution_model", "mediator"],
         ["at_fault", "<accused-pubkey>"],
@@ -437,6 +440,7 @@ Implementations SHOULD include only the tags marked REQUIRED or RECOMMENDED in e
     "tags": [
         ["p", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3"],
         ["e", "c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4"],
+        ["alt", "Dispute claim: quality issue in freelance engagement"],
         ["dispute_type", "quality"],
         ["resolution_model", "mediator"],
         ["mediator", "d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5"],
@@ -467,6 +471,7 @@ Expected validation:
     "tags": [
         ["d", "resolution_e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6"],
         ["e", "e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6"],
+        ["alt", "Dispute resolution: partial refund of 15000 SAT"],
         ["ruling", "partial_refund"],
         ["resolution_model", "mediator"],
         ["at_fault", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3"],

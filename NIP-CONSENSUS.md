@@ -53,6 +53,7 @@ Published by a proposer to initiate a multi-party decision. Lists all required v
     "tags": [
         ["d", "dao_budget_2026:consensus:q1_allocation"],
         ["t", "consensus-proposal"],
+        ["alt", "Consensus proposal: allocate 500000 sats to relay infrastructure"],
         ["p", "<member_a-hex-pubkey>"],
         ["p", "<member_b-hex-pubkey>"],
         ["p", "<member_c-hex-pubkey>"],
@@ -94,6 +95,7 @@ Published by a voter to cast their vote on a consensus proposal. The `d` tag for
     "tags": [
         ["d", "dao_budget_2026:consensus:q1_allocation:vote:<member_a-hex-pubkey>"],
         ["t", "consensus-vote"],
+        ["alt", "Consensus vote: agree on Q1 budget allocation"],
         ["e", "<consensus-proposal-event-id>", "wss://relay.example.com"],
         ["vote", "agree"],
         ["p", "<proposer-hex-pubkey>"]
@@ -217,6 +219,7 @@ A budget approval proposal listing 3 voters with a threshold of 2.
   "tags": [
     ["d", "treasury_2026:consensus:q1_budget"],
     ["t", "consensus-proposal"],
+    ["alt", "Consensus proposal: allocate 250000 sats to relay hosting"],
     ["p", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3"],
     ["p", "c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4"],
     ["p", "d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5"],
@@ -242,6 +245,7 @@ An "agree" vote from one of the listed voters on the above proposal.
   "tags": [
     ["d", "treasury_2026:consensus:q1_budget:vote:b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3"],
     ["t", "consensus-vote"],
+    ["alt", "Consensus vote: agree on Q1 budget"],
     ["e", "aaaa1111bbbb2222cccc3333dddd4444eeee5555ffff6666aaaa1111bbbb2222", "wss://relay.example.com"],
     ["vote", "agree"],
     ["p", "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"]

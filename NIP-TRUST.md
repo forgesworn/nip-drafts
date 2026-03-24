@@ -68,6 +68,7 @@ Explicit trust removal with reason-tiered visibility. Provides an audit trail an
     "tags": [
         ["d", "<revoker-pubkey>:<revoked-pubkey>:plumbing:1708300800"],
         ["p", "<revoked-pubkey>"],
+        ["alt", "Trust revocation: quality decline in plumbing"],
         ["domain", "plumbing"],
         ["t", "domain:plumbing"],
         ["reason_code", "quality_decline"],
@@ -134,6 +135,7 @@ Provider-to-provider vouching. Experienced providers endorse newer providers, so
     "tags": [
         ["d", "<endorser-pubkey>:<endorsed-pubkey>:plumbing"],
         ["p", "<endorsed-pubkey>"],
+        ["alt", "Provider endorsement: skill in plumbing"],
         ["domain", "plumbing"],
         ["t", "domain:plumbing"],
         ["endorsement_type", "skill"],
@@ -544,6 +546,7 @@ Researchers form collectives (NIP-51 lists) for peer review groups. Trust lists 
   "tags": [
     ["d", "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2:b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3:plumbing:1709740800"],
     ["p", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3"],
+    ["alt", "Trust revocation: quality decline in plumbing"],
     ["domain", "plumbing"],
     ["t", "domain:plumbing"],
     ["reason_code", "quality_decline"],
@@ -565,6 +568,7 @@ Researchers form collectives (NIP-51 lists) for peer review groups. Trust lists 
   "tags": [
     ["d", "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2:b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3:plumbing"],
     ["p", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3"],
+    ["alt", "Provider endorsement: skill in plumbing"],
     ["domain", "plumbing"],
     ["t", "domain:plumbing"],
     ["endorsement_type", "skill"],

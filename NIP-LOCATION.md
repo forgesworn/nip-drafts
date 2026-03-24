@@ -124,6 +124,7 @@ Ephemeral event declaring presence in a geographic area. Publishers SHOULD publi
         ["g", "gcpuu"],
         ["g", "gcpu"],
         ["status", "available"],
+        ["alt", "Presence beacon: available in gcpuu"],
         ["expiration", "1698767232"]
     ],
     "content": "",
@@ -167,6 +168,7 @@ Ephemeral event sharing precise coordinates with specific recipients. ALL locati
         ["g", "gcpuu"],
         ["context", "<shared-context-id>"],
         ["consent", "explicit"],
+        ["alt", "Encrypted location update for shared context"],
         ["expiration", "1698765462"]
     ],
     "content": "<NIP-44 encrypted JSON>",
@@ -244,7 +246,8 @@ Addressable events with a physical location (e.g. NIP-52 calendar events, NIP-99
     "tags": [
         ["d", "jazz-night-march"],
         ["g", "gcpuu"],
-        ["location", "Bristol Community Center"]
+        ["location", "Bristol Community Center"],
+        ["alt", "Calendar event: Jazz Night at Bristol Community Center"]
     ],
     "content": "...",
     "id": "<32-byte-hex>",
@@ -274,7 +277,8 @@ Example:
     "tags": [
         ["d", "home-education-meetup"],
         ["g", "gcpu"],
-        ["venue-visibility", "private"]
+        ["venue-visibility", "private"],
+        ["alt", "Private venue event: home education meetup"]
     ],
     "content": "<NIP-44 self-encrypted JSON containing precise location>",
     "id": "<32-byte-hex>",
@@ -367,6 +371,7 @@ Vehicles broadcast coarse location to a fleet relay. Dispatchers receive fine lo
     ["g", "gcpuu"],
     ["g", "gcpu"],
     ["status", "available"],
+    ["alt", "Presence beacon: available in gcpuu"],
     ["expiration", "1709742600"]
   ],
   "content": "",
@@ -387,6 +392,7 @@ Vehicles broadcast coarse location to a fleet relay. Dispatchers receive fine lo
     ["g", "gcpuu"],
     ["context", "delivery_order_42"],
     ["consent", "explicit"],
+    ["alt", "Encrypted location update for delivery order 42"],
     ["expiration", "1709740830"]
   ],
   "content": "<NIP-44 encrypted JSON>",

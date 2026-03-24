@@ -64,6 +64,7 @@ Published by any participant (industry body, operator, platform, individual) to 
     "tags": [
         ["d", "heritage_crafts:thatching_long_straw:gb"],
         ["t", "scarcity-signal"],
+        ["alt", "Scarcity signal: long straw thatching critically endangered in GB"],
         ["scarcity_type", "workforce"],
         ["skill", "thatching"],
         ["specialism", "long_straw"],
@@ -216,6 +217,7 @@ Training providers can discover scarcity signals and publish responsive offering
   "tags": [
     ["d", "heritage_crafts:thatching_long_straw:gb"],
     ["t", "scarcity-signal"],
+    ["alt", "Scarcity signal: long straw thatching critically endangered in GB"],
     ["scarcity_type", "workforce"],
     ["skill", "thatching"],
     ["specialism", "long_straw"],

@@ -124,6 +124,19 @@ A profile adopting this NIP MUST define:
 
 TROTT domains can define profiles without changing the two core kinds. Other applications can do the same.
 
+### Default Profile
+
+Standalone implementors who do not want to define a full profile MAY use the following minimal defaults:
+
+- **Default TTL:** 24 hours (86400 seconds). The base effective lifetime for any report category not otherwise specified.
+- **Default categories (`t` values):** `hazard`, `closure`, `condition`, `event`.
+- **Default severity values:** `info`, `warning`, `danger` (carried via a `severity` extension tag; see the example below).
+- **Default `g` tag precision ladder:** precision 4, 5, and 6.
+- **Default publication mode:** precise public (public `lat` and `lon` tags included).
+- **Relay-side `expiration`:** `created_at + 1209600` (14 days).
+
+Applications defining domain-specific profiles SHOULD extend or override these defaults.
+
 ### Publication Modes
 
 This NIP supports two common publication modes:

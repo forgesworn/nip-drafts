@@ -60,6 +60,7 @@ Published by a maker to declare what they made and how. A product certificate is
     "tags": [
         ["d", "wrought_iron_gate_001"],
         ["t", "product-certificate"],
+        ["alt", "Product certificate: Victorian scroll-top driveway gate"],
         ["provenance:item_type", "wrought_iron_gate"],
         ["provenance:item_name", "Victorian scroll-top driveway gate"],
         ["provenance:description", "Hand-forged wrought iron gate, 2.4m wide, scroll-top design with dog bars"],
@@ -166,6 +167,7 @@ A guild assessor, certification body, or independent expert publishes a kind 310
     "tags": [
         ["d", "authenticity:<product-certificate-event-id>"],
         ["type", "authenticity"],
+        ["alt", "Authenticity attestation: guild verification of wrought iron gate"],
         ["p", "<maker-hex-pubkey>"],
         ["a", "30404:<maker-hex-pubkey>:wrought_iron_gate_001", "", "assertion"],
         ["summary", "Guild verification of wrought iron gate authenticity"],
@@ -215,6 +217,7 @@ The outgoing owner publishes a kind 30572 event with `asset_type: product` and a
     "tags": [
         ["d", "wrought_iron_gate_001:custody:001"],
         ["t", "custody-transfer"],
+        ["alt", "Ownership transfer: wrought iron gate from maker to buyer"],
         ["custody_from", "<maker-hex-pubkey>"],
         ["custody_to", "<buyer-hex-pubkey>"],
         ["asset_id", "wrought_iron_gate_001"],
@@ -264,6 +267,7 @@ Any participant publishes a kind 30578 event with `evidence_type: provenance` an
     "tags": [
         ["d", "conservation_project_42:evidence:material_01"],
         ["t", "evidence-record"],
+        ["alt", "Material provenance: Hydraulic lime mortar NHL 3.5"],
         ["evidence_type", "provenance"],
         ["material_name", "Hydraulic lime mortar NHL 3.5"],
         ["material_category", "mortar"],
@@ -446,6 +450,7 @@ High-value products combine all three composition patterns. The maker publishes 
   "tags": [
     ["d", "wrought_iron_gate_001"],
     ["t", "product-certificate"],
+    ["alt", "Product certificate: Victorian scroll-top driveway gate"],
     ["provenance:item_type", "wrought_iron_gate"],
     ["provenance:item_name", "Victorian scroll-top driveway gate"],
     ["provenance:description", "Hand-forged wrought iron gate, 2.4m wide, scroll-top design with dog bars"],
@@ -485,6 +490,7 @@ High-value products combine all three composition patterns. The maker publishes 
   "tags": [
     ["d", "authenticity:wrought_iron_gate_001"],
     ["type", "authenticity"],
+    ["alt", "Authenticity attestation: guild verification of wrought iron gate"],
     ["p", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3"],
     ["a", "30404:b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3:wrought_iron_gate_001", "", "assertion"],
     ["summary", "Guild verification of wrought iron gate authenticity"],
@@ -510,6 +516,7 @@ High-value products combine all three composition patterns. The maker publishes 
   "tags": [
     ["d", "wrought_iron_gate_001:custody:001"],
     ["t", "custody-transfer"],
+    ["alt", "Ownership transfer: wrought iron gate from maker to buyer"],
     ["custody_from", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3"],
     ["custody_to", "1a2b3c4d5e6f1a2b3c4d5e6f1a2b3c4d5e6f1a2b3c4d5e6f1a2b3c4d5e6f1a2b"],
     ["asset_id", "wrought_iron_gate_001"],
@@ -534,6 +541,7 @@ High-value products combine all three composition patterns. The maker publishes 
   "tags": [
     ["d", "conservation_project_42:evidence:material_01"],
     ["t", "evidence-record"],
+    ["alt", "Material provenance: Hydraulic lime mortar NHL 3.5"],
     ["evidence_type", "provenance"],
     ["material_name", "Hydraulic lime mortar NHL 3.5"],
     ["material_category", "mortar"],

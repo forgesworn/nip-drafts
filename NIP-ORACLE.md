@@ -65,6 +65,7 @@ An oracle asserts what happened in the real world. Assumed correct unless challe
   "created_at": 1698765000,
   "tags": [
     ["d", "outcome_<random-id>"],
+    ["alt", "Oracle outcome report: BTC exceeded $100k on 2025-12-01"],
     ["type", "binary"],
     ["outcome", "yes"],
     ["challenge_window", "7200"],
@@ -127,6 +128,7 @@ A challenger disputes the oracle's reported outcome. MUST be filed within the `c
   "created_at": 1698766000,
   "tags": [
     ["d", "challenge_<random-id>"],
+    ["alt", "Oracle outcome challenge: BTC did not exceed $100k"],
     ["e", "<outcome-report-event-id>"],
     ["proposed_outcome", "no"],
     ["stake", "10000"],
@@ -168,6 +170,7 @@ A stake-weighted vote on a disputed outcome. Only used during Level 2 escalation
   "created_at": 1698770000,
   "tags": [
     ["d", "vote_<random-id>"],
+    ["alt", "Oracle outcome vote: no, with 5000 SAT stake"],
     ["e", "<outcome-challenge-event-id>"],
     ["vote", "no"],
     ["stake", "5000"],
@@ -228,6 +231,7 @@ The final authoritative resolution of a challenged outcome. Non-appealable. The 
   "created_at": 1698775000,
   "tags": [
     ["d", "ruling_<random-id>"],
+    ["alt", "Oracle ruling: outcome is no, level 3 arbiter decision"],
     ["e", "<outcome-challenge-event-id>"],
     ["outcome", "no"],
     ["level", "3"],
@@ -465,6 +469,7 @@ This NIP uses several multi-letter tags (`type`, `outcome`, `challenge_window`, 
   "created_at": 1698765000,
   "tags": [
     ["d", "outcome_btc100k_20251201"],
+    ["alt", "Oracle outcome report: BTC exceeded $100k on 2025-12-01"],
     ["type", "binary"],
     ["outcome", "yes"],
     ["challenge_window", "7200"],
@@ -487,6 +492,7 @@ This NIP uses several multi-letter tags (`type`, `outcome`, `challenge_window`, 
   "created_at": 1698766000,
   "tags": [
     ["d", "challenge_btc100k_20251201"],
+    ["alt", "Oracle outcome challenge: BTC did not exceed $100k"],
     ["e", "<outcome-report-event-id>"],
     ["proposed_outcome", "no"],
     ["stake", "10000"],
@@ -508,6 +514,7 @@ This NIP uses several multi-letter tags (`type`, `outcome`, `challenge_window`, 
   "created_at": 1698770000,
   "tags": [
     ["d", "vote_btc100k_20251201_01"],
+    ["alt", "Oracle outcome vote: no, with 5000 SAT stake"],
     ["e", "<outcome-challenge-event-id>"],
     ["vote", "no"],
     ["stake", "5000"],
@@ -530,6 +537,7 @@ This NIP uses several multi-letter tags (`type`, `outcome`, `challenge_window`, 
   "created_at": 1698775000,
   "tags": [
     ["d", "ruling_btc100k_20251201"],
+    ["alt", "Oracle ruling: outcome is no, level 3 arbiter decision"],
     ["e", "<outcome-challenge-event-id>"],
     ["outcome", "no"],
     ["level", "3"]

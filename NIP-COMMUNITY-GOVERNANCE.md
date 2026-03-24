@@ -41,6 +41,8 @@ NIP-02 contact lists are flat. NIP-51 lists provide flexible grouping but no gov
 
 ## Collectives with NIP-51
 
+> **NIP-51 extension note:** This guide extends NIP-51 lists with governance-specific tags (`governance_model`, `voting_threshold`, `charter`, `rotation_period`, `treasury_pubkey`). These tags are application-level conventions; NIP-51 lists without governance tags continue to function normally.
+
 A collective IS a NIP-51 list (`kind:30000`) of members with governance metadata tags. The list's `p` tags carry role positions; additional tags declare the governance model, quorum threshold, charter, and treasury key.
 
 ```json
@@ -50,6 +52,7 @@ A collective IS a NIP-51 list (`kind:30000`) of members with governance metadata
     "created_at": 1709280000,
     "tags": [
         ["d", "collective:southwark-mutual-aid"],
+        ["alt", "Collective: Southwark Mutual Aid Network"],
         ["title", "Southwark Mutual Aid Network"],
         ["governance_model", "direct_democracy"],
         ["voting_threshold", "0.6"],
@@ -125,6 +128,7 @@ A governance proposal IS a NIP-CONSENSUS proposal (`kind:30574`) scoped to a col
     "tags": [
         ["d", "southwark-mutual-aid:governance:emergency-fund-allocation"],
         ["t", "consensus-proposal"],
+        ["alt", "Governance proposal: emergency fund allocation"],
         ["collective_id", "collective:southwark-mutual-aid"],
         ["proposal_type", "treasury_allocation"],
         ["p", "<member-2-hex-pubkey>"],
@@ -188,6 +192,7 @@ A governance vote IS a NIP-CONSENSUS vote (`kind:30575`) with a `collective_id` 
     "tags": [
         ["d", "southwark-mutual-aid:governance:emergency-fund-allocation:vote:voter1"],
         ["t", "consensus-vote"],
+        ["alt", "Governance vote: agree on emergency fund allocation"],
         ["a", "30574:<proposer-pubkey>:southwark-mutual-aid:governance:emergency-fund-allocation", "wss://relay.example.com"],
         ["collective_id", "collective:southwark-mutual-aid"],
         ["vote", "agree"]
@@ -233,6 +238,7 @@ A treasury ledger entry IS a NIP-EVIDENCE record (`kind:30578`) with `evidence_t
     "tags": [
         ["d", "southwark-mutual-aid:treasury:2026-03-emergency-fund"],
         ["t", "evidence-record"],
+        ["alt", "Treasury ledger: 50000 SAT debit for emergency fund"],
         ["evidence_type", "treasury_movement"],
         ["collective_id", "collective:southwark-mutual-aid"],
         ["amount", "50000"],

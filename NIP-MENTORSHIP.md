@@ -65,6 +65,7 @@ When a Kind 30517 endorsement represents a mentorship relationship, the followin
     "tags": [
         ["d", "<mentor-pubkey>:<mentee-pubkey>:stonemasonry"],
         ["p", "<mentee-hex-pubkey>"],
+        ["alt", "Mentorship endorsement: stonemasonry apprenticeship, stage 3"],
         ["domain", "heritage-skills"],
         ["endorsement_type", "mentorship"],
         ["mentorship_type", "apprenticeship"],
@@ -264,6 +265,7 @@ Guild masters, CITB assessors, and trade mentors can publish progression records
   "tags": [
     ["d", "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2:b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3:stonemasonry"],
     ["p", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3"],
+    ["alt", "Mentorship endorsement: stonemasonry apprenticeship, stage 3"],
     ["domain", "heritage-skills"],
     ["endorsement_type", "mentorship"],
     ["mentorship_type", "apprenticeship"],

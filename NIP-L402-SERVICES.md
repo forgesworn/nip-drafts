@@ -137,6 +137,7 @@ Future payment rails MAY be added by convention. Implementations SHOULD NOT reje
   "tags": [
     ["d", "llm-inference-v1"],
     ["name", "LLM Inference API"],
+    ["alt", "Paid API: LLM Inference API via L402 and Cashu"],
     ["url", "https://inference.example.com/v1"],
     ["url", "http://inferencexyz123.onion/v1"],
     ["about", "GPT-4 class inference behind an L402 paywall. Supports chat completions and embeddings."],
@@ -162,6 +163,7 @@ Future payment rails MAY be added by convention. Implementations SHOULD NOT reje
   "tags": [
     ["d", "market-data-feed"],
     ["name", "Real-Time Market Data"],
+    ["alt", "Paid API: Real-Time Market Data via x402 stablecoin"],
     ["url", "https://data.example.com/api"],
     ["about", "Live and historical market data for equities and crypto. REST and WebSocket."],
     ["pmi", "x402", "base", "usdc", "0x1234567890abcdef1234567890abcdef12345678"],
@@ -186,6 +188,7 @@ Future payment rails MAY be added by convention. Implementations SHOULD NOT reje
   "tags": [
     ["d", "gpu-compute"],
     ["name", "GPU Compute on Demand"],
+    ["alt", "Paid API: GPU Compute on Demand via Lightning and X-Cashu"],
     ["url", "https://compute.example.com"],
     ["url", "https://compute.example.hns"],
     ["about", "On-demand GPU compute for ML training and rendering. A100 instances."],
@@ -342,6 +345,7 @@ Tags only (no content capabilities):
   "tags": [
     ["d", "test-service"],
     ["name", "Test Service"],
+    ["alt", "Paid API: Test Service via L402"],
     ["url", "https://test.example.com"],
     ["about", "A test service for validation."],
     ["pmi", "l402", "lightning"],
