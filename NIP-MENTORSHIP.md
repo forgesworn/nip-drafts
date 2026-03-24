@@ -304,7 +304,7 @@ The relationship:
 
 ## Reference Implementation
 
-The [`@trott/sdk`](https://github.com/TheCryptoDonkey/trott-sdk) TypeScript library provides builders and parsers for mentorship endorsements as an extension of the NIP-TRUST endorsement kind. For standalone use without TROTT, implementors SHOULD refer to the tag definitions above.
+Implementors SHOULD refer to the tag definitions and JSON examples above.
 
 A minimal implementation requires:
 

@@ -243,7 +243,7 @@ Training providers can discover scarcity signals and publish responsive offering
 
 ## Reference Implementation
 
-The [`@trott/sdk`](https://github.com/TheCryptoDonkey/trott-sdk) TypeScript library provides builders and parsers for the scarcity signal kind defined in this NIP. For standalone use without TROTT, implementors SHOULD refer to the kind definitions above.
+Implementors SHOULD refer to the kind definitions and JSON examples above.
 
 A minimal implementation requires:
 

@@ -330,7 +330,7 @@ All examples use timestamp `1709740800` (2024-03-06T12:00:00Z) and placeholder h
 
 ## Reference Implementations
 
-The [`@trott/sdk`](https://github.com/TheCryptoDonkey/trott-sdk) TypeScript library provides builders and parsers for the Variation Request kind defined in this NIP, along with composition helpers for the NIP-QUOTE and NIP-APPROVAL flows. For standalone use without TROTT, implementors SHOULD refer to the kind definitions above.
+Implementors SHOULD refer to the kind definitions and JSON examples above.
 
 A minimal implementation requires:
 

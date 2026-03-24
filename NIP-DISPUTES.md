@@ -498,7 +498,7 @@ Expected validation:
 
 ## Reference Implementation
 
-The [`@trott/sdk`](https://github.com/TheCryptoDonkey/trott-sdk) TypeScript library provides builders and parsers for the two kinds defined in this NIP, plus composition helpers for submitting dispute evidence as NIP-EVIDENCE records.
+Implementors SHOULD refer to the kind definitions and JSON examples above.
 
 A minimal implementation requires:
 

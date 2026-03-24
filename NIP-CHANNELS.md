@@ -373,7 +373,7 @@ Typing indicators expose `context_id` and participant pubkeys but are ephemeral 
 
 ## Reference Implementation
 
-The [`@trott/sdk`](https://github.com/TheCryptoDonkey/trott-sdk) TypeScript library provides builders and parsers for the kinds defined in this NIP. For standalone use without TROTT, implementers SHOULD refer to the kind definitions above.
+Implementors SHOULD refer to the kind definitions and JSON examples above.
 
 A minimal implementation requires:
 

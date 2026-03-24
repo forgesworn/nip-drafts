@@ -684,7 +684,7 @@ Implementations MAY deploy automated monitoring systems that:
 
 ## Reference Implementation
 
-The [`@trott/sdk`](https://github.com/TheCryptoDonkey/trott-sdk) TypeScript library provides builders and parsers for the composed SLA workflow. For standalone use, implementers SHOULD refer to the kind definitions and tag conventions above.
+Implementors SHOULD refer to the kind definitions and tag conventions above.
 
 A minimal implementation requires:
 

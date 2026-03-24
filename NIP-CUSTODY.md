@@ -332,7 +332,7 @@ Each handoff can reference NIP-LOCATION for GPS verification of the transfer loc
 
 ## Reference Implementation
 
-The [`@trott/sdk`](https://github.com/TheCryptoDonkey/trott-sdk) TypeScript library provides builders and parsers for the custody transfer kind defined in this NIP, as well as custody evidence composition with NIP-EVIDENCE. For standalone use without TROTT, implementors SHOULD refer to the kind definitions above.
+Implementors SHOULD refer to the kind definitions and JSON examples above.
 
 A minimal implementation requires:
 

@@ -857,7 +857,7 @@ Any service provider who works by appointment (plumbers, electricians, dog walke
 
 ## Reference Implementation
 
-The [`@trott/sdk`](https://github.com/TheCryptoDonkey/trott-sdk) TypeScript library provides builders and parsers for all three kinds defined in this NIP, plus composition helpers for NIP-APPROVAL and NIP-VARIATION flows. For standalone use without TROTT, implementors SHOULD refer to the kind definitions above.
+Implementors SHOULD refer to the kind definitions and JSON examples above.
 
 A minimal implementation requires:
 

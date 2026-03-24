@@ -660,7 +660,7 @@ A freelance photographer travelling for a commissioned shoot publishes NIP-EVIDE
 
 ## Reference Implementation
 
-The [`@trott/sdk`](https://github.com/TheCryptoDonkey/trott-sdk) TypeScript library provides builders and parsers for the Invoice kind defined in this NIP, as well as the composed NIP-ESCROW, NIP-APPROVAL, and NIP-EVIDENCE kinds. For standalone use, implementors SHOULD refer to the kind definitions above.
+Implementors SHOULD refer to the kind definitions and JSON examples above.
 
 A minimal implementation requires:
 

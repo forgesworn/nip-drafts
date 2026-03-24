@@ -619,7 +619,7 @@ Researchers form collectives (NIP-51 lists) for peer review groups. Trust lists 
 
 ## Reference Implementation
 
-The [`@trott/sdk`](https://github.com/TheCryptoDonkey/trott-sdk) TypeScript library provides builders and parsers for both kinds defined in this NIP, along with helpers for composing NIP-51 trust lists. For standalone use without TROTT, implementors SHOULD refer to the kind definitions and NIP-51 composition examples above.
+Implementors SHOULD refer to the kind definitions and NIP-51 composition examples above.
 
 A minimal implementation requires:
 

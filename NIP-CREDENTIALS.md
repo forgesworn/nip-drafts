@@ -440,7 +440,7 @@ These compositions are optional. NIP-CREDENTIALS works without any TROTT-00 patt
 
 ## Reference Implementation
 
-The `@trott/sdk` (TypeScript SDK) provides builders and parsers for the credential kinds defined in this NIP. For standalone use without TROTT, implementors SHOULD refer to the kind definitions above.
+Implementors SHOULD refer to the kind definitions and JSON examples above.
 
 A minimal implementation requires:
 

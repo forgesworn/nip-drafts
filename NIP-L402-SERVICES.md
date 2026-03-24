@@ -403,4 +403,4 @@ Validation rules for this event:
 | [402-mcp](https://github.com/forgesworn/402-mcp) | TypeScript | MCP server: AI agents discover, pay, and consume 402 APIs |
 | [402-indexer](https://github.com/forgesworn/402-indexer) | TypeScript | Nostr-native crawler for L402/x402 service discovery |
 | [toll-booth-dvm](https://github.com/forgesworn/toll-booth-dvm) | TypeScript | Bridge: expose toll-booth L402 APIs as NIP-90 DVMs (proves L402/DVM interop) |
-| [satgate](https://github.com/forgesworn/satgate) | TypeScript | Production L402 gateway with Lightning and Cashu support |
+| [satgate](https://github.com/TheCryptoDonkey/satgate) | TypeScript | Production L402 gateway with Lightning and Cashu support |

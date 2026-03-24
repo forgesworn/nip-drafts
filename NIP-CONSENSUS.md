@@ -261,7 +261,7 @@ The first filter discovers proposals where a pubkey is an invited voter. The sec
 
 ## Reference Implementation
 
-The `@trott/sdk` (TypeScript SDK) provides builders and parsers for both kinds defined in this NIP. For standalone use without TROTT, implementors SHOULD refer to the kind definitions above.
+Implementors SHOULD refer to the kind definitions and JSON examples above.
 
 A minimal implementation requires:
 
