@@ -26,7 +26,7 @@ Without a standard, every application invents its own approval scheme with incom
 
 ## Relationship to Existing NIPs
 
-- **NIP-25 (Reactions):** Reactions express lightweight sentiment (`+`/`-`) with no named reviewer set, no quorum or threshold semantics, no revision loop, and no deadline enforcement. A reaction does not encode who is required to approve; approval gates name the required reviewers upfront and track structured decisions (approved, rejected, revision requested) with mandatory reasoning.
+- **NIP-25 (Reactions):** Reactions express lightweight sentiment (`+`/`-`) with no named reviewer set, no quorum or threshold semantics, no revision loop, and no deadline enforcement. A reaction does not encode who is required to approve; approval gates name the required reviewers upfront and track structured decisions (approved, rejected, revision requested) with mandatory reasoning. A `+` reaction from a designated pubkey could approximate approval, but reactions lack: (a) structured decision values (approved/rejected/revise), (b) mandatory reasoning for rejections, (c) one-response-per-reviewer addressable semantics preventing duplicate votes, and (d) deadline enforcement via the gate's expiration tag. Approval gates provide accountability that lightweight reactions cannot.
 - **NIP-22 (Comments):** Comments carry unstructured text with no decision semantics, no gate status tracking, and no distinction between "I have thoughts" and "I formally approve." Approval responses are structured decisions, not discussion.
 
 ## Kinds
@@ -69,7 +69,7 @@ Tags:
 * `t` (REQUIRED): Protocol family marker. MUST be `"approval-gate"`.
 * `gate_type` (REQUIRED): Type of gate. One of `regulatory`, `inspection`, `approval`, `review`. These are RECOMMENDED values; applications MAY define additional gate types as needed.
 * `gate_authority` (REQUIRED, one or more): Hex pubkey of a required reviewer. Multiple `gate_authority` tags indicate that all listed reviewers must respond (see Multi-Reviewer Gates below).
-* `gate_status` (REQUIRED): MUST be `"pending"` on creation.
+* `gate_status` (REQUIRED): MUST be `"pending"` on creation. The `gate_status` tag reflects the proposer's view of the gate state. Clients SHOULD derive the authoritative status from the set of kind 30571 responses rather than trusting the proposer's self-reported status. The proposer MAY update the gate event to reflect `approved` or `rejected` after responses are received, but this is informational; the responses are the source of truth.
 * `expiration` (RECOMMENDED): Unix timestamp — deadline for the review. Clients SHOULD use NIP-40 `expiration` for relay-level enforcement.
 * `p` (RECOMMENDED): Additional parties to notify.
 * `gate_reference` (OPTIONAL): External reference (certificate number, permit ID, PR URL).
@@ -170,7 +170,7 @@ A Nostr publishing platform can gate article publication behind editorial approv
 
 ### Grant & Funding Applications
 
-A decentralized grant program can use approval gates for application review. Applicants publish `kind:30570` with the grant committee members as `gate_authority` tags. Committee members independently review and vote. The multi-reviewer gate model ensures all required approvals are recorded before funds are released.
+A decentralised grant program can use approval gates for application review. Applicants publish `kind:30570` with the grant committee members as `gate_authority` tags. Committee members independently review and vote. The multi-reviewer gate model ensures all required approvals are recorded before funds are released.
 
 ### Regulatory & Compliance Sign-offs
 
@@ -227,6 +227,19 @@ An "approved" response from one of the gate authorities.
   "sig": "<64-byte-hex>"
 }
 ```
+
+### REQ Filters
+
+```json
+[
+    {"kinds": [30570], "authors": ["<proposer-pubkey>"]},
+    {"kinds": [30570], "#gate_authority": ["<my-pubkey>"]},
+    {"kinds": [30571], "#e": ["<gate-event-id>"]},
+    {"kinds": [30571], "authors": ["<reviewer-pubkey>"]}
+]
+```
+
+The second filter discovers all gates where a specific pubkey is a required reviewer. The third filter fetches all responses to a specific gate.
 
 ## Security Considerations
 

@@ -206,7 +206,19 @@ Chain-of-custody tracking maps naturally to package delivery:
 3. At each relay point, a new custody transfer + evidence pair records the handoff
 4. **Recipient** signs final custody evidence confirming delivery
 
-Each handoff can reference NIP-LOCATION for GPS verification of the transfer location, providing cryptographic proof that the handoff occurred at the expected coordinates.
+Each handoff can include a `g` tag for geohash verification of the transfer location, providing a verifiable record that the handoff occurred in the expected geographic area.
+
+### REQ Filters
+
+```json
+[
+    {"kinds": [30572], "#asset_id": ["<asset-identifier>"]},
+    {"kinds": [30573], "#e": ["<custody-transfer-event-id>"]},
+    {"kinds": [30572, 30573], "authors": ["<custodian-pubkey>"]}
+]
+```
+
+The first filter reconstructs the full custody chain for an asset. The second fetches all evidence for a specific transfer. The third discovers all custody activity by a specific custodian.
 
 ## Security Considerations
 
@@ -271,7 +283,7 @@ Each handoff can reference NIP-LOCATION for GPS verification of the transfer loc
 
 * [NIP-01](https://github.com/nostr-protocol/nips/blob/master/01.md): Basic protocol flow, addressable events
 * [NIP-44](https://github.com/nostr-protocol/nips/blob/master/44.md): Versioned encrypted payloads (sensitive custody details, evidence URLs)
-* [NIP-LOCATION](./NIP-LOCATION.md): Handoff location verification via progressive location reveal
+The `g` tag is used for geohash indexing per Nostr convention (see NIP-01 and the geohash tag standard).
 
 ## Reference Implementation
 

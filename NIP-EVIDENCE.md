@@ -30,7 +30,7 @@ NIP-01 events provide signatures and timestamps, but applications need a dedicat
 
 - **"Every Nostr event is already timestamped evidence."** True, but NIP-EVIDENCE adds structured metadata (evidence type, file hash, capture timestamp, geolocation, condition grade) that enables interoperable evidence systems. A kind 1 note with a SHA-256 hash in the text is human-readable but not machine-parseable. A kind 30578 evidence record with `evidence_type`, `file_hash`, `captured_at`, and `g` tags is filterable, verifiable, and composable with other NIPs.
 - **NIP-03 (OpenTimestamps):** NIP-03 proves that an event existed at a given time. NIP-EVIDENCE adds structured metadata about what was captured, where, when, and under what conditions. NIP-03 could complement NIP-EVIDENCE (timestamp an evidence record for additional assurance) but does not replace it.
-- **NIP-94 (File Metadata):** NIP-94 covers file hashing and media metadata but not evidence context: capture conditions, geolocation at time of capture, evidence type classification, or chain linkage to related events.
+- **NIP-94 (File Metadata):** NIP-94 covers file hashing and media metadata but not evidence context (capture conditions, geolocation, evidence type, chain linkage). Critically, not all evidence is file-based. Sensor readings, condition assessments, verbal confirmations, and witnessed observations have no associated file. NIP-94 requires a file URL; NIP-EVIDENCE does not.
 
 ## Kinds
 
@@ -108,7 +108,7 @@ Professionals (inspectors, surveyors, auditors, medical practitioners) can publi
 
 ### Environmental & IoT Readings
 
-IoT devices and environmental sensors can publish `kind:30578` events with `evidence_type: reading` to record measurements (temperature, humidity, air quality, noise levels). The `g` tag provides location context, and `captured_at` records the precise measurement time. This creates a decentralized, signed sensor data log.
+IoT devices and environmental sensors can publish `kind:30578` events with `evidence_type: reading` to record measurements (temperature, humidity, air quality, noise levels). The `g` tag provides location context, and `captured_at` records the precise measurement time. This creates a decentralised, signed sensor data log.
 
 ### Progress Photography
 
@@ -118,12 +118,25 @@ Any project requiring photographic documentation (construction progress, restora
 
 Individuals, institutions, or AI systems can publish `kind:30578` events with `evidence_type: accomplishment` or `evidence_type: portfolio` to record achievements — certifications earned, courses completed, projects finished, skills demonstrated. The `file_hash` tag can reference a certificate image, project output, or portfolio artefact. When combined with NIP-58 badges, evidence records provide the underlying proof that a badge attestation is based on.
 
+### REQ Filters
+
+```json
+[
+    {"kinds": [30578], "#e": ["<related-event-id>"]},
+    {"kinds": [30578], "#evidence_type": ["inspection"]},
+    {"kinds": [30578], "authors": ["<inspector-pubkey>"], "#g": ["gcpuuz"]}
+]
+```
+
+The first filter fetches all evidence linked to a specific event. The second discovers all inspection-type evidence. The third finds evidence from a specific author in a geographic area.
+
 ## Security Considerations
 
 * **Evidence integrity.** All evidence records SHOULD include a `file_hash` tag with the SHA-256 hash of any attached file. Consumers MUST verify the hash before trusting the evidence content. Mismatched hashes indicate tampering or corruption.
 * **Timestamp verification.** Clients SHOULD cross-reference `created_at` timestamps with `captured_at` on evidence events. Large discrepancies MAY indicate fabricated or backdated evidence. For high-integrity use cases, clients MAY cross-reference with relay receipt timestamps.
 * **Append-only enforcement.** Although relays cannot enforce append-only semantics for addressable events, clients MUST treat each unique `d` tag as an immutable record. Applications SHOULD warn users if a record with a previously-seen `d` tag appears with different content.
 * **Content encryption.** When evidence contains sensitive information (medical findings, security vulnerabilities, personal details), the `content` field SHOULD be NIP-44 encrypted to relevant parties.
+* **Sensitive evidence delivery.** Evidence containing sensitive content (medical records, security footage, personal identification) SHOULD be delivered via NIP-59 gift wrap to protect both the author and the subject.
 * **File availability.** Evidence records reference external files via URLs in the content. File availability is not guaranteed by the Nostr event. High-integrity applications SHOULD use content-addressed storage or mirror files across multiple hosts.
 * **Non-repudiation.** The combination of Nostr event signature, `created_at` timestamp, and relay storage provides non-repudiation — the author cannot deny having published the record. Applications SHOULD archive evidence events on multiple relays for durability.
 
