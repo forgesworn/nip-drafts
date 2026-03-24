@@ -10,25 +10,37 @@ All drafts are `draft` `optional` unless noted otherwise.
 
 ## NIPs
 
-| NIP | Title | Kinds | Status |
-| --- | ----- | ----- | ------ |
-| [NIP-LOCATION](NIP-LOCATION.md) | Privacy-Preserving Location Discovery | 20500, 20501 | Ready |
+| NIP | Title | Kinds | NostrHub |
+| --- | ----- | ----- | -------- |
+| [NIP-LOCATION](NIP-LOCATION.md) | Privacy-Preserving Location Discovery | 20500, 20501 | [Published](https://nostrhub.io) |
+| [NIP-CREDENTIALS](NIP-CREDENTIALS.md) | Credential Verification & Gating | 30527, 30528 | [Published](https://nostrhub.io) |
+| [NIP-APPROVAL](NIP-APPROVAL.md) | Multi-Party Approval Gates | 30570, 30571 | [Published](https://nostrhub.io) |
+| [NIP-CUSTODY](NIP-CUSTODY.md) | Chain-of-Custody Tracking | 30572, 30573 | [Published](https://nostrhub.io) |
+| [NIP-CONSENSUS](NIP-CONSENSUS.md) | Multi-Party Consensus | 30574, 30575 | [Published](https://nostrhub.io) |
+| [NIP-MATCHING](NIP-MATCHING.md) | Competitive Matching & Selection | 30576, 30577 | [Published](https://nostrhub.io) |
+| [NIP-EVIDENCE](NIP-EVIDENCE.md) | Timestamped Evidence Recording | 30578 | [Published](https://nostrhub.io) |
 | [NIP-PROVIDER-PROFILES](NIP-PROVIDER-PROFILES.md) | Service Provider Profiles | 30510, 30511, 30525, 30526 | Needs consolidation |
 | [NIP-TRUST](NIP-TRUST.md) | Portable Trust Networks | 30512, 30513, 30515, 30517, 30518, 30519 | Needs consolidation |
 | [NIP-CHANNELS](NIP-CHANNELS.md) | Multi-Party Encrypted Channels | 20502, 30564, 30565 | Needs consolidation |
-| [NIP-CREDENTIALS](NIP-CREDENTIALS.md) | Credential Verification & Gating | 30527, 30528 | Ready |
 | [NIP-REPUTATION](NIP-REPUTATION.md) | Structured Reputation & Reviews | 30520, 30521, 31000, 30523, 30524 | Needs consolidation |
 | [NIP-ESCROW](NIP-ESCROW.md) | Conditional Payment Coordination | 30530-30537 | Needs consolidation |
 | [NIP-DISPUTES](NIP-DISPUTES.md) | Dispute Resolution Protocol | 7543, 7544, 30545, 30546, 7547 | Needs consolidation |
-| [NIP-APPROVAL](NIP-APPROVAL.md) | Multi-Party Approval Gates | 30570, 30571 | Ready |
-| [NIP-CUSTODY](NIP-CUSTODY.md) | Chain-of-Custody Tracking | 30572, 30573 | Ready |
-| [NIP-CONSENSUS](NIP-CONSENSUS.md) | Multi-Party Consensus | 30574, 30575 | Ready |
-| [NIP-MATCHING](NIP-MATCHING.md) | Competitive Matching & Selection | 30576, 30577 | Ready |
-| [NIP-EVIDENCE](NIP-EVIDENCE.md) | Timestamped Evidence Recording | 30578 | Ready |
 | [NIP-VARIATION](NIP-VARIATION.md) | Scope & Price Change Management | 30579, 30580, 30581 | Needs consolidation |
 | [NIP-BOOKING](NIP-BOOKING.md) | Calendar Availability & Booking | 30582-30587 | Needs consolidation |
 
-**Ready** NIPs have survived internal review and are published on [NostrHub](https://nostrhub.io). **Needs consolidation** NIPs require kind-count reduction and better reuse of existing NIPs before publishing.
+**Published** NIPs are live on [NostrHub](https://nostrhub.io) as kind 30817 custom NIPs. **Needs consolidation** NIPs require kind-count reduction and better reuse of existing NIPs before publishing.
+
+## Authorship Attestations
+
+Each published NIP has a corresponding [NIP-VA](https://github.com/forgesworn/nostr-attestations/blob/main/NIP-VA.md) authorship attestation (kind 31000) on Nostr, signed by the author's key. To verify:
+
+```json
+{"kinds": [31000], "#type": ["authorship"], "authors": ["da19f1cd34beca44be74da4b306d9d1dd86b6343cef94ce22c49c6f59816e5bd"]}
+```
+
+This returns one attestation per NIP, each with an `a` tag referencing the kind 30817 event. Authorship is cryptographically verifiable without trusting any centralised registry.
+
+NIP-VA's own authorship is self-attested: the same keypair publishes both the specification and the attestation. The trust anchor is the Nostr keypair, not the attestation format. Third-party attestations from independent reviewers can layer additional trust over time.
 
 ## Related
 
