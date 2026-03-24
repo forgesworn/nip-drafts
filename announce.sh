@@ -141,7 +141,7 @@ kind 30571 (Approval Response): each named reviewer responds with approved, reje
 
 The key difference from reactions: the reviewer set is declared upfront. Only listed authorities can approve. Revision loops are built in; a reviewer requests changes, the proposer updates, the reviewer re-evaluates. Deadlines are enforced via NIP-40 expiration.
 
-Build with this: a grant platform where every committee member must approve before funds release. An editorial workflow where a senior editor signs off before an article goes live. A construction project where a qualified surveyor's approval unblocks the next phase. A bounty board where the payer must approve deliverables before payment.
+Build with this: an editorial workflow where a senior editor signs off before an article goes live. A Nostr relay that requires admin approval before accepting new writers. A group buy organiser where all participants must confirm before the order is placed. A recipe book where community moderators approve submissions before they appear in the collection.
 
 https://github.com/forgesworn/nip-drafts/blob/main/NIP-APPROVAL.md
 ENDNOTE
@@ -162,7 +162,7 @@ This is the reverse auction pattern. One request, many providers competing. Diff
 
 Useful for freelance marketplaces, procurement, RFPs, service dispatch, or any Nostr app where providers compete for work rather than buyers competing for goods.
 
-Build with this: a freelance marketplace where clients post jobs and contractors bid competitively. A community noticeboard where neighbours request help and local tradespeople offer quotes. A music venue booking system where bands bid for gig slots. An open-source bounty platform where developers compete on timeline and approach.
+Build with this: a community noticeboard where neighbours request help and locals offer to assist. A music venue booking system where bands bid for gig slots. An open-source bounty platform where developers compete on timeline and approach. A dog walking app where pet owners post walks and sitters make offers.
 
 https://github.com/forgesworn/nip-drafts/blob/main/NIP-MATCHING.md
 ENDNOTE
