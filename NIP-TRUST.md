@@ -48,6 +48,10 @@ NIP-TRUST provides the two event types NIP-51 cannot model: revocations (which m
 
 NIP-56 flags content for relay-level moderation. Trust revocation signals relationship termination between known parties; different semantics entirely. A revocation says "I no longer trust this entity" while a report says "this content violates relay policy."
 
+### Community NIPs
+
+- **TSM Trust Service Machines (kinds 37570–37572):** The TSM framework defines a request/response pattern for trust computation services: service announcements (37570), output standards (37571), and service requests (37572). TSM provides infrastructure for computing and querying trust metrics algorithmically. NIP-TRUST provides the primitive events that TSM could consume — trust revocations are first-party signed records ("I no longer trust this entity and here is why"), and provider endorsements are directional attestations ("I endorse this provider for plumbing"). These human-authored trust signals are the raw data that a TSM provider would ingest to compute aggregate trust scores. TSM computes; NIP-TRUST records.
+
 ## Kinds
 
 | kind  | description          |

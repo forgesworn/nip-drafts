@@ -32,6 +32,12 @@ This NIP defines one event kind where ratings are cryptographically signed, tied
 
 Uses [NIP-02](https://github.com/nostr-protocol/nips/blob/master/02.md) (Contact Lists) for social-graph-weighted reputation scoring.
 
+### Relationship to Community NIPs
+
+- **NIP-85 Trusted Assertions (kinds 30382–30385):** NIP-85 providers compute aggregate metrics (follower counts, WoT rankings, engagement scores) and publish them as addressable events. NIP-REPUTATION provides first-party, completion-verified ratings tied to specific transactions — the raw input data that NIP-85 providers could ingest and aggregate. NIP-85 computes; NIP-REPUTATION records.
+- **TSM Ranking Services (kind 37573):** The Trust Service Machines framework provides a request/response pattern for trust computation services, including ranking. TSM ranks subjects algorithmically from network data; NIP-REPUTATION records individual human ratings with structured criteria and stake weighting. TSM could consume NIP-REPUTATION events as input for its ranking algorithms.
+- **Service Attestations (kinds 38383/38384):** Service Attestations define a fixed schema for bilateral service ratings with `service` categories, `rating` scores, and optional Namecoin identity anchoring. NIP-REPUTATION differs in three ways: ratings are tied to verified completion events (not self-reported), support multi-criterion scoring (not single-score), and include stake weighting. Service Attestations are better suited for simple marketplace reviews; NIP-REPUTATION is designed for high-assurance contexts where the rating must be backed by verifiable evidence of the transaction.
+
 ## Kinds
 
 | kind  | description             |

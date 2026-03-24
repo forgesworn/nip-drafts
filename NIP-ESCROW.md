@@ -31,6 +31,10 @@ NIP-ESCROW is payment-rail agnostic. The Lock event references (via `e` tag) the
 - **NIP-47 (Wallet Connect):** Can compose for automated wallet interactions during lock and settlement.
 - **NIP-69 (Peer-to-Peer Order Events):** NIP-69 defines order events for P2P fiat-bitcoin trading with a simple escrow lifecycle. NIP-ESCROW is a general-purpose conditional payment coordination protocol supporting arbitrary payment rails, mutual staking, streaming payments, and multi-party settlement. NIP-69 trades could compose with NIP-ESCROW for the payment hold.
 
+### Community NIPs
+
+- **Catallax (kinds 33400/33401/3402):** Catallax defines a complete escrow-backed contract work system with three roles: patrons (who need work), free agents (who perform work), and arbiters (who judge and release payment). It bundles task proposals, arbiter announcements, and task conclusions into a single protocol. NIP-ESCROW differs fundamentally: it is a **payment coordination primitive**, not a contract work system. NIP-ESCROW events communicate about conditional payments (locks, settlements, receipts) but do not define task proposals, arbiter roles, or work status. A contract work platform could compose NIP-ESCROW for the payment hold alongside its own task management events, or it could use Catallax if the bundled approach fits. The two occupy different layers: Catallax is an application protocol for gig marketplaces; NIP-ESCROW is a composable building block for conditional payments in any context.
+
 ## Kinds
 
 | kind  | description      |

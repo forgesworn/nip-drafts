@@ -28,6 +28,10 @@ Without a standard, each application invents its own offer/selection scheme. NIP
 - **NIP-15 (Marketplace) and NIP-99 (Classified Listings):** These NIPs model buyer-seeks-seller: one merchant publishes a listing, many buyers browse. NIP-MATCHING models the reverse: one requester publishes a need, many providers compete with offers. The offer author is the provider (not the requester), offers are addressable for revision, and the selection event records which provider was chosen. This reverse-auction pattern has distinct relay filter requirements (discover all offers for a given context) that listings do not serve.
 - **"Why not kind 1 replies?":** Kind 1 replies are not addressable (a provider cannot revise their offer by republishing with the same `d` tag), not relay-filterable by originating context, and carry no structured pricing, timeline, or qualification tags. Competitive bidding requires structured, revisable, filterable offers.
 
+### Community NIPs
+
+- **Catallax (kinds 33400/33401/3402):** Catallax defines a complete escrow-backed gig system where patrons publish task proposals (kind 33401), workers are assigned, and arbiters conclude tasks (kind 3402). The matching in Catallax is implicit — workers are assigned to tasks, but there is no competitive offer/selection phase. NIP-MATCHING provides the missing competitive bidding primitive: multiple providers publish structured, revisable offers in response to a need, and the requester selects the best match. A Catallax-style gig platform could compose NIP-MATCHING for the provider selection step before creating a Catallax task proposal with the selected worker.
+
 ## Relationship to State Machine Protocols
 
 NIP-MATCHING is a **standalone** competitive matching primitive. It works independently of any lifecycle or state machine protocol.
