@@ -33,7 +33,7 @@ NIPS=(
   "nip-consensus|NIP-CONSENSUS: Multi-Party Consensus|NIP-CONSENSUS.md|30574,30575|1"
   "nip-matching|NIP-MATCHING: Competitive Matching & Selection|NIP-MATCHING.md|30576,30577|1"
   "nip-evidence|NIP-EVIDENCE: Timestamped Evidence Recording|NIP-EVIDENCE.md|30578|2"
-  # Batch 2 (everything new/updated since batch 1)
+  # Batch 2 (reviewed via nostr-nip-review, fixes applied)
   "nip-quote|NIP-QUOTE: Structured Pricing & Payment Terms|NIP-QUOTE.md|30530,30531|2"
   "nip-escrow|NIP-ESCROW: Conditional Payment Coordination|NIP-ESCROW.md|30532,30533,30535|2"
   "nip-trust|NIP-TRUST: Portable Trust Networks|NIP-TRUST.md|30515,30517|2"
@@ -43,18 +43,19 @@ NIPS=(
   "nip-variation|NIP-VARIATION: Scope & Price Change Management|NIP-VARIATION.md|30579|2"
   "nip-channels|NIP-CHANNELS: Context-Scoped Messaging Primitives|NIP-CHANNELS.md|20502,30565|2"
   "nip-provider-profiles|NIP-PROVIDER-PROFILES: Service Provider Profiles|NIP-PROVIDER-PROFILES.md|30510,30511|2"
-  "nip-invoicing|NIP-INVOICING: Structured Invoicing|NIP-INVOICING.md|30588|2"
-  "nip-provenance|NIP-PROVENANCE: Product & Supply Chain Provenance|NIP-PROVENANCE.md|30404|2"
-  "nip-crafts|NIP-CRAFTS: Craft Technique Documentation|NIP-CRAFTS.md|30401|2"
-  "nip-scarcity|NIP-SCARCITY: Workforce & Resource Scarcity Signals|NIP-SCARCITY.md|30599|2"
-  "nip-spatial-signals|NIP-SPATIAL-SIGNALS: Spatial Signals & Corroboration|NIP-SPATIAL-SIGNALS.md|1315,1316|2"
-  "nip-data-access|NIP-DATA-ACCESS: Scoped, Revocable Data Access Grants|NIP-DATA-ACCESS.md|30556|2"
-  "nip-mentorship|NIP-MENTORSHIP: Mentorship Pipelines & Training Progression|NIP-MENTORSHIP.md||2"
-  "nip-sla|NIP-SLA: Service Level Agreements (Composition Guide)|NIP-SLA.md||2"
-  "nip-community-governance|NIP-COMMUNITY-GOVERNANCE: Community Governance (Composition Guide)|NIP-COMMUNITY-GOVERNANCE.md||2"
-  "nip-referral-routing|NIP-REFERRAL-ROUTING: Institutional Referral Routing (Composition Guide)|NIP-REFERRAL-ROUTING.md||2"
-  "nip-oracle|NIP-ORACLE: Oracle Dispute Resolution|NIP-ORACLE.md|30543,30547,30548,30549|2"
   "nip-l402-services|NIP-L402-SERVICES: Paid API Service Announcements|NIP-L402-SERVICES.md|31402|2"
+  # Batch 3 (pending nostr-nip-review)
+  "nip-invoicing|NIP-INVOICING: Structured Invoicing|NIP-INVOICING.md|30588|3"
+  "nip-provenance|NIP-PROVENANCE: Product & Supply Chain Provenance|NIP-PROVENANCE.md|30404|3"
+  "nip-crafts|NIP-CRAFTS: Craft Technique Documentation|NIP-CRAFTS.md|30401|3"
+  "nip-scarcity|NIP-SCARCITY: Workforce & Resource Scarcity Signals|NIP-SCARCITY.md|30599|3"
+  "nip-spatial-signals|NIP-SPATIAL-SIGNALS: Spatial Signals & Corroboration|NIP-SPATIAL-SIGNALS.md|1315,1316|3"
+  "nip-data-access|NIP-DATA-ACCESS: Scoped, Revocable Data Access Grants|NIP-DATA-ACCESS.md|30556|3"
+  "nip-mentorship|NIP-MENTORSHIP: Mentorship Pipelines & Training Progression|NIP-MENTORSHIP.md||3"
+  "nip-sla|NIP-SLA: Service Level Agreements (Composition Guide)|NIP-SLA.md||3"
+  "nip-community-governance|NIP-COMMUNITY-GOVERNANCE: Community Governance (Composition Guide)|NIP-COMMUNITY-GOVERNANCE.md||3"
+  "nip-referral-routing|NIP-REFERRAL-ROUTING: Institutional Referral Routing (Composition Guide)|NIP-REFERRAL-ROUTING.md||3"
+  "nip-oracle|NIP-ORACLE: Oracle Dispute Resolution|NIP-ORACLE.md|30543,30547,30548,30549|3"
 )
 
 # ── Image insertion map ──────────────────────────────────────────────────────
