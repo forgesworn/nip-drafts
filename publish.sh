@@ -85,11 +85,11 @@ IMAGES=(
   "NIP-INVOICING.md|sequenceDiagram|invoicing-1|Invoice Lifecycle"
   "NIP-PROVENANCE.md|flowchart|provenance-1|Product Provenance Lifecycle"
   "NIP-CRAFTS.md|sequenceDiagram|crafts-1|Craft Skill and Technique Flow"
-  "NIP-L402-SERVICES.md|sequenceDiagram|l402_services-1|L402 Discovery and Payment Flow"
+  "NIP-PAID-SERVICES.md|sequenceDiagram|paid_services-1|Paid API Discovery and Payment Flow"
   "NIP-SCARCITY.md|flowchart|scarcity-1|Scarcity Signal Lifecycle"
   "NIP-MENTORSHIP.md|sequenceDiagram|mentorship-1|Mentorship Progression"
   "NIP-DATA-ACCESS.md|sequenceDiagram|data_access-1|Data Access Grant Flow"
-  "NIP-SPATIAL-SIGNALS.md|sequenceDiagram|spatial_signals-1|Spatial Signal Report and Corroboration"
+
   "NIP-SLA.md|sequenceDiagram|sla-1|SLA Monitoring Workflow"
   "NIP-COMMUNITY-GOVERNANCE.md|sequenceDiagram|community_governance-1|Governance Workflow"
   "NIP-REFERRAL-ROUTING.md|sequenceDiagram|referral_routing-1|Referral Flow"

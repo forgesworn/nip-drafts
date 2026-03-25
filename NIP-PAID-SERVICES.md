@@ -19,7 +19,7 @@ NIP-PAID-SERVICES adds a decentralised discovery layer. Service operators publis
 ## Relationship to Existing NIPs
 
 - **NIP-89 (Application Handlers):** App handlers announce Nostr-native applications that process specific event kinds. Paid service announcements declare HTTP API capabilities gated by payment. Different scope; no overlap.
-- **NIP-105 (PR #780, open since 2023):** Also proposes kind 31402 for API service listings. Not merged, no known implementations. This NIP was developed independently with a different tag schema; see [Kind Allocation](#kind-allocation).
+- **NIP-105 (PR #780, open since September 2023):** Also proposes kind 31402 for API service listings. Not merged. This NIP was developed independently with a different tag schema; see [Kind Allocation](#kind-allocation).
 - **NIP-90 (Data Vending Machines):** DVMs are Nostr-native; jobs and results flow through relays as kind 5xxx/6xxx events. Paid services are HTTP-native; Nostr handles discovery only, consumption uses standard REST. DVMs are intent-based ("I want X done"); paid services are offer-based ("I provide X at Y price"). DVMs keep computation on-relay for composability (job chaining); paid services keep computation off-relay for efficiency and privacy. They complement each other: a DVM MAY delegate to a paid service for the actual computation, publishing the result back to the relay.
 - **NIP-57 (Zaps):** Zaps are tips and donations. Paid service announcements declare static price listings for API capabilities. No overlap.
 
@@ -66,6 +66,7 @@ Kind 31402 is an addressable event (NIP-01). The combination of `pubkey` + `d` t
 | `s`         | OPTIONAL    | no         | Underlying API endpoint URL that this service proxies. Enables clients to discover all providers proxying the same API (e.g. all proxies for `https://api.openai.com/v1/chat/completions`). When present, the `d` tag SHOULD match the `s` tag value. Max 2048 characters. |
 | `t`         | OPTIONAL    | yes (1-50) | Topic tag for discovery filtering. Max 64 characters each.       |
 | `picture`   | OPTIONAL    | no         | Icon URL (`http://` or `https://`). Max 2048 characters.         |
+| `alt`       | RECOMMENDED | no         | Short human-readable plaintext description of the event for clients that do not support kind 31402. |
 | `expiration`| OPTIONAL    | no         | NIP-40 expiration timestamp. Relays MAY discard the event after this time. |
 
 **Tag formats:**
@@ -79,6 +80,7 @@ Kind 31402 is an addressable event (NIP-01). The combination of `pubkey` + `d` t
 ["price", "<capability_name>", "<amount>", "<currency>"]
 ["s", "<upstream-api-url>"]
 ["t", "<topic>"]
+["alt", "<human-readable-description>"]
 ["picture", "<icon-url>"]
 ["expiration", "<unix-timestamp>"]
 ```
@@ -89,7 +91,7 @@ Kind 31402 is an addressable event (NIP-01). The combination of `pubkey` + `d` t
 
 **`pmi` tag:** A multi-element tag. The first element after the tag name identifies the payment rail. Additional elements carry rail-specific parameters. See [Canonical PMI Values](#canonical-pmi-values).
 
-**`price` tag:** Amount MUST be a non-negative number in the smallest unit of the specified currency (satoshis for `sats`, cents for `usd`, pence for `gbp`). Capability names MUST NOT exceed 64 characters. Currency codes MUST NOT exceed 32 characters.
+**`price` tag:** Amount MUST be a non-negative integer in the smallest unit of the specified currency (satoshis for `sats`, cents for `usd`, pence for `gbp`). Capability names MUST NOT exceed 64 characters. Currency codes MUST NOT exceed 32 characters.
 
 ### Content
 
@@ -104,7 +106,7 @@ Each capability object:
 
 | Field          | Type   | Required | Description                                                  |
 | -------------- | ------ | -------- | ------------------------------------------------------------ |
-| `name`         | string | REQUIRED | Capability name (max 128 characters). MUST match a `price` tag capability name if pricing is declared. |
+| `name`         | string | REQUIRED | Capability name (max 64 characters). MUST match a `price` tag capability name if pricing is declared. |
 | `description`  | string | REQUIRED | Human-readable description (max 4096 characters).            |
 | `endpoint`     | string | OPTIONAL | Endpoint path or full URL (e.g. `/api/joke` or `https://api.example.com/v1/chat`). Max 2048 characters. |
 | `schema`       | object | OPTIONAL | JSON Schema (draft 2020-12) for the POST request body. Enables AI agents to auto-generate type-safe API calls without documentation. |
@@ -186,9 +188,9 @@ Future payment rails MAY be added by convention. Implementations SHOULD NOT reje
     ["url", "https://data.example.com/api"],
     ["summary", "Live and historical market data for equities and crypto. REST and WebSocket."],
     ["pmi", "x402", "base", "usdc", "0x1234567890abcdef1234567890abcdef12345678"],
-    ["price", "snapshot", "5", "cents"],
-    ["price", "historical_range", "50", "cents"],
-    ["price", "websocket_stream", "200", "cents"],
+    ["price", "snapshot", "5", "usd"],
+    ["price", "historical_range", "50", "usd"],
+    ["price", "websocket_stream", "200", "usd"],
     ["t", "data"],
     ["t", "finance"],
     ["t", "market-data"]
@@ -348,7 +350,7 @@ Kind 31402 is an addressable event in the 30000-39999 range. The number is the n
 
 This NIP formalises a kind that has been in production use across 8 implementations (all from the same developer; see Reference Implementations). Independent implementations are encouraged.
 
-Two other proposals also use kind 31402: NIP-105 (nostr-protocol/nips PR #780, open since September 2023, not merged, no known implementations) proposes API service marketplace listings; SARA (NostrHub, February 2026) proposes a revenue share offering registry. The intent is compatible; the tag schemas differ. This NIP stores pricing and endpoints as tags for relay-side filterability, supports multi-transport URLs, and defines structured payment method identifiers. We welcome collaboration with the NIP-105 author on a merged specification.
+Two other proposals also use kind 31402: NIP-105 (nostr-protocol/nips PR #780, open since September 2023, not merged) proposes API service marketplace listings; SARA (NostrHub, February 2026) proposes a revenue share offering registry. The intent is compatible; the tag schemas differ. This NIP stores pricing and endpoints as tags for relay-side filterability, supports multi-transport URLs, and defines structured payment method identifiers. We welcome collaboration with the NIP-105 author on a merged specification.
 
 ---
 
@@ -356,7 +358,7 @@ Two other proposals also use kind 31402: NIP-105 (nostr-protocol/nips PR #780, o
 
 ### Minimal Valid Event
 
-Tags only (no content capabilities):
+REQUIRED tags only:
 
 ```json
 {
@@ -366,11 +368,8 @@ Tags only (no content capabilities):
   "tags": [
     ["d", "test-service"],
     ["name", "Test Service"],
-    ["alt", "Paid API: Test Service via Lightning"],
     ["url", "https://test.example.com"],
-    ["summary", "A test service for validation."],
-    ["pmi", "l402", "lightning"],
-    ["price", "ping", "1", "sats"]
+    ["pmi", "l402", "lightning"]
   ],
   "content": "{}"
 }
@@ -424,8 +423,8 @@ Validation rules for this event:
 | [402-announce](https://github.com/forgesworn/402-announce) | TypeScript | Build and publish kind 31402 events |
 | [toll-booth-announce](https://github.com/forgesworn/toll-booth-announce) | TypeScript | Bridge: toll-booth config to kind 31402 announcements |
 | [aperture-announce](https://github.com/forgesworn/aperture-announce) | Go | Aperture YAML config to kind 31402 announcements |
-| [402-pub](https://402.pub) | TypeScript | Live service directory (streams kind 31402 from relays) |
+| [402-pub](https://402.pub) | JavaScript | Live service directory (streams kind 31402 from relays) |
 | [402-mcp](https://github.com/forgesworn/402-mcp) | TypeScript | MCP server: AI agents discover, pay, and consume 402 APIs |
 | [402-indexer](https://github.com/forgesworn/402-indexer) | TypeScript | Nostr-native crawler for L402/x402 service discovery |
 | [toll-booth-dvm](https://github.com/forgesworn/toll-booth-dvm) | TypeScript | Bridge: expose toll-booth L402 APIs as NIP-90 DVMs (proves L402/DVM interop) |
-| [satgate](https://github.com/forgesworn/satgate) | TypeScript | Production L402 gateway with Lightning and Cashu support |
+| [satgate](https://github.com/TheCryptoDonkey/satgate) | TypeScript | Production L402 gateway with Lightning and Cashu support |
