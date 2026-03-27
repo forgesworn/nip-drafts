@@ -31,20 +31,25 @@ Content is encrypted once with an epoch-based Content Key. Only the lightweight 
 
 ## Overview
 
-```
-Author                                    Recipient
-  │                                          │
-  ├─ Derive epoch CK from private key        │
-  ├─ Encrypt content with CK (AES-GCM)       │
-  ├─ Publish encrypted event to relay         │
-  ├─ Gift-wrap CK to each recipient ─────────┤
-  │                                          ├─ Unwrap gift → get CK
-  │                                          ├─ Fetch encrypted event
-  │                                          └─ Decrypt with CK
-  │
-  ├─ Next epoch: derive new CK
-  ├─ Distribute to current recipients
-  └─ Skip revoked recipients
+```mermaid
+sequenceDiagram
+    participant A as Author
+    participant R as Relay
+    participant Rec as Recipient
+
+    note over A: Current Epoch
+    A->>A: Derive epoch CK from private key (HKDF)
+    A->>A: Encrypt content with CK (AES-GCM)
+    A->>R: Publish encrypted event
+    A->>Rec: Gift-wrap CK to each recipient (NIP-59)
+    Rec->>Rec: Unwrap gift, obtain CK
+    Rec->>R: Fetch encrypted event
+    Rec->>Rec: Decrypt content with CK
+
+    note over A: Next Epoch
+    A->>A: Derive new CK from private key
+    A->>Rec: Distribute new CK to current recipients
+    note over A: Revoked recipients are skipped
 ```
 
 ### Terminology
@@ -65,13 +70,13 @@ CKs are derived deterministically using HKDF-SHA256:
 ```
 CK = HKDF-SHA256(
     ikm  = author's 32-byte private key,
-    salt = "vaulstr-ck-v1",
+    salt = "dominion-ck-v1",
     info = "epoch:{epoch_id}:tier:{tier_name}",
     len  = 32
 )
 ```
 
-The salt string `vaulstr-ck-v1` is a fixed protocol constant retained from the original design. Implementations MUST use this exact value to ensure interoperability.
+The salt string `dominion-ck-v1` is a fixed protocol constant. Implementations MUST use this exact value to ensure interoperability.
 
 The `info` string includes both epoch ID and tier name, ensuring that each epoch/tier combination produces a unique key. Authors can always re-derive any CK from their private key material — no key database is needed.
 
@@ -124,7 +129,7 @@ The tier name in the `vault` tag is visible to relay operators. For privacy-sens
 
 ### Kind 30480 — Vault Share
 
-A parameterized replaceable event containing an epoch CK for a specific recipient. This event MUST be NIP-44 encrypted to the recipient's pubkey, sealed in a kind 13 event, and gift-wrapped in a kind 1059 event (NIP-59) before publishing.
+A parameterised replaceable event containing an epoch CK for a specific recipient. This event MUST be NIP-44 encrypted to the recipient's pubkey, sealed in a kind 13 event, and gift-wrapped in a kind 1059 event (NIP-59) before publishing.
 
 Inner event (before gift-wrapping):
 
@@ -149,7 +154,7 @@ Inner event (before gift-wrapping):
 
 | Tag | Status | Description |
 |-----|--------|-------------|
-| `d` | REQUIRED | `{epoch_id}:{tier}` — parameterized replaceable identifier |
+| `d` | REQUIRED | `{epoch_id}:{tier}` — parameterised replaceable identifier |
 | `p` | REQUIRED | Recipient pubkey |
 | `tier` | REQUIRED | Audience tier name |
 | `algo` | REQUIRED | Asymmetric algorithm used (`secp256k1`) |
@@ -160,7 +165,7 @@ The `content` field contains the CK as a 64-character lowercase hex string.
 
 **Why a dedicated kind?** The kind 30480 event is always gift-wrapped (kind 1059) on the wire, so relays never see it directly. However, a registered kind is needed because:
 
-1. **Parameterized replaceability** — the `d` tag (`epoch:tier`) enables newer vault shares to replace older ones for the same epoch/tier/recipient, preventing stale key accumulation
+1. **Parameterised replaceability** — the `d` tag (`epoch:tier`) enables newer vault shares to replace older ones for the same epoch/tier/recipient, preventing stale key accumulation
 2. **Client-side filtering** — after unwrapping, clients need to distinguish vault shares from other gift-wrapped content (DMs, sealed events) by kind number
 3. **Algorithm tagging** — the `algo` tag on kind 30480 enables future migration to post-quantum algorithms without breaking backward compatibility
 
@@ -319,7 +324,15 @@ PR #2258 defines publisher-level and recipient-level encryption tiers using ECDH
 
 ### Why Not PR #2207 (Friends-Only Notes)?
 
-PR #2207 encrypts notes with a symmetric ViewKey distributed via gift wrap, with named circles for audience segmentation. It is a simpler model that lacks epoch-based rotation (a compromised ViewKey exposes all past and future content), HKDF derivation (keys are random, not deterministic), per-tier key isolation, and revocation semantics. This NIP adds time-bounded keys and deterministic derivation on top of a similar distribution model.
+PR #2207 encrypts notes with a symmetric ViewKey distributed via gift wrap, with named circles for audience segmentation. The critical difference is that PR #2207's ViewKey is static: if a single ViewKey is compromised, all past and future content encrypted with that ViewKey is exposed. Dominion's epoch CKs are time-bounded -- a compromised CK exposes only that epoch's content. Beyond that, PR #2207 lacks HKDF derivation (keys are random, not deterministic), per-tier key isolation, and revocation semantics. This NIP adds time-bounded keys and deterministic derivation on top of a similar distribution model.
+
+### Why Not nip4e (PR #1647)?
+
+nip4e proposes decoupling encryption keys from identity keys. Dominion intentionally derives CKs from the author's private key via HKDF so that derivation is stateless -- no separate key management infrastructure is needed. If nip4e merges, Dominion could derive CKs from a nip4e encryption key instead of the Nostr identity key, with no structural changes to the epoch or distribution model.
+
+### Why Not NIP-112 (PR #580)?
+
+NIP-112 (Encrypted Group Events) uses shared-secret group encryption with key rotation, targeting group chat where all members are equal participants. Dominion targets a different problem shape: content access control with audience tiers, one-to-many broadcast, and per-tier key isolation. Group chat requires bidirectional communication between equal peers; content access control requires unidirectional broadcast from an author to tiered audiences.
 
 ## New Event Kinds and Tags
 
@@ -329,6 +342,126 @@ PR #2207 encrypts notes with a symmetric ViewKey distributed via gift wrap, with
 | `["vault", "<epoch_id>", "<tier>"]` | Content event tag | Signals Dominion encryption on any event kind |
 | `["algo", "<algorithm>"]` | Protocol event tag | Asymmetric algorithm identifier (default: `secp256k1`) |
 | `["L", "dominion"]` / `["l", "...", "dominion"]` | Label tags (NIP-32) | Protocol namespace |
+
+## Validation Rules
+
+| ID | Rule |
+|----|------|
+| V-DM-01 | The `vault` tag on encrypted events MUST have exactly 3 elements: tag name, epoch_id, tier. |
+| V-DM-02 | Epoch IDs MUST match ISO 8601 week format `YYYY-Www`. |
+| V-DM-03 | Kind 30480 MUST include tags: `d` (format `{epoch_id}:{tier}`), `p` (recipient pubkey), `tier`, `algo`. |
+| V-DM-04 | Kind 30480 `content` MUST be a 64-character lowercase hex string (32-byte CK). |
+| V-DM-05 | Kind 30480 MUST be NIP-44 encrypted and NIP-59 gift-wrapped before publishing. Implementations MUST NOT publish kind 30480 events in plaintext. |
+| V-DM-06 | Vault config (kind 30078 with `d` = `dominion:vault-config`) `content` MUST be NIP-44 self-encrypted. |
+| V-DM-07 | Encrypted content MUST be `base64(iv \|\| ciphertext \|\| tag)` where IV is 12 bytes and tag is 16 bytes. |
+| V-DM-08 | CK derivation MUST use HKDF-SHA256 with salt `dominion-ck-v1` and info `epoch:{epoch_id}:tier:{tier_name}`. |
+| V-DM-09 | Revoked pubkeys in vault config MUST be skipped during epoch CK distribution. Implementations MUST NOT distribute CKs to revoked pubkeys. |
+| V-DM-10 | The `d` tag on kind 30480 MUST match the format `{epoch_id}:{tier}`. Both components are REQUIRED. |
+
+## Security Considerations
+
+### No forward secrecy
+
+CKs are derived from the author's private key via HKDF. If the private key is compromised, all past and future CKs for all epochs and tiers are derivable. This is a conscious trade-off for stateless derivation. High-security applications SHOULD use short epoch lengths (daily) and consider MLS-based alternatives (NIP-EE/Marmot) for forward secrecy.
+
+### Epoch granularity vs revocation speed
+
+Weekly epochs mean a revoked recipient can decrypt up to 7 days of content after revocation. Daily epochs reduce this window but increase distribution overhead. Applications SHOULD choose epoch length based on their threat model.
+
+### CK caching by recipients
+
+Recipients cache CKs locally. Once a CK is distributed, it cannot be revoked -- only future epoch CKs can be withheld. Content already decrypted cannot be "un-shown."
+
+### Vault config as high-value target
+
+The NIP-78 vault config contains the complete social graph (tier memberships, individual grants, revoked pubkeys). Compromise of this event reveals who is in which audience tier. It is self-encrypted but stored on relays.
+
+### Gift-wrap relay metadata
+
+While content relays see no recipient information, gift-wrap relays see outer envelope metadata (sender timestamp, recipient pubkey). Use multiple relays and consider timing decorrelation.
+
+### NIP-46 signer implications
+
+CK derivation requires access to the author's private key. NIP-46 remote signing implementations must handle HKDF derivation at the signer, not the client. The private key MUST NOT be sent to the client for local derivation.
+
+### Key zeroisation
+
+Implementations MUST zeroise CK byte buffers after use. JavaScript string values are immutable and cannot be erased; implementations SHOULD minimise CK string lifetimes.
+
+## Test Vectors
+
+### HKDF-SHA256 Derivation
+
+| Parameter | Value |
+|-----------|-------|
+| IKM (private key) | `0101010101010101010101010101010101010101010101010101010101010101` (32 bytes of `0x01`) |
+| Salt | `dominion-ck-v1` |
+| Info | `epoch:2026-W10:tier:family` |
+| Output length | 32 bytes |
+| Expected CK | `<computed-hex-ck>` |
+
+Implementations SHOULD verify their HKDF library output against this vector. The expected CK value depends on the HKDF-SHA256 implementation; compute it with a known-good library and use as a regression test.
+
+### AES-256-GCM Round-Trip
+
+| Parameter | Value |
+|-----------|-------|
+| CK | `0101010101010101010101010101010101010101010101010101010101010101` |
+| Plaintext | `Hello, Dominion!` |
+| IV | `000102030405060708090a0b` (12 bytes) |
+
+Encrypt the plaintext with the CK and IV using AES-256-GCM. The output is `base64(iv \|\| ciphertext \|\| tag)`. Decrypt with the same CK and verify the plaintext round-trips.
+
+### Invalid Event Examples
+
+The following events MUST be rejected by conforming implementations:
+
+**Missing `vault` tag on encrypted content:**
+
+```json
+{
+  "kind": 1,
+  "content": "<base64-encrypted-content>",
+  "tags": []
+}
+```
+
+Encrypted content with no `vault` tag is indistinguishable from plaintext. Implementations MUST NOT attempt Dominion decryption on events without a `vault` tag.
+
+**Kind 30480 with non-hex CK content:**
+
+```json
+{
+  "kind": 30480,
+  "content": "not-a-hex-string",
+  "tags": [["d", "2026-W10:family"], ["p", "<pubkey>"], ["tier", "family"], ["algo", "secp256k1"]]
+}
+```
+
+The `content` field MUST be a 64-character lowercase hex string. Implementations MUST reject non-hex or wrong-length values.
+
+**Kind 30480 published without gift wrap:**
+
+```json
+{
+  "kind": 30480,
+  "content": "<hex-ck>",
+  "tags": [["d", "2026-W10:family"], ["p", "<pubkey>"], ["tier", "family"], ["algo", "secp256k1"]]
+}
+```
+
+Kind 30480 events MUST NOT be published in plaintext. Implementations MUST reject any kind 30480 event received outside a NIP-59 gift wrap.
+
+## Dependencies
+
+| NIP | Usage |
+|-----|-------|
+| NIP-01 | Basic protocol flow, addressable events |
+| NIP-32 | Labelling (protocol namespace tags) |
+| NIP-40 | Expiration timestamps (gift-wrap cleanup) |
+| NIP-44 | Versioned encrypted payloads (CK encryption, vault config self-encryption) |
+| NIP-59 | Gift wrap (CK distribution privacy) |
+| NIP-78 | App-specific data (vault config storage) |
 
 ## Interoperability
 
