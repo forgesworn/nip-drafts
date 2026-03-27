@@ -42,13 +42,48 @@ NIP-02 follow lists are binary (follow/unfollow). NIP-SIGNET vouches are structu
 
 NIP-05 proves domain ownership. NIP-SIGNET proves identity claims at varying confidence levels. They are complementary: a Tier 3 verified account may also have a NIP-05 identifier.
 
+### Community Attestations (Kind 31871)
+
+The community Attestations proposal (kind 31871) defines truthfulness claims about Nostr events -- "this event is accurate", "this claim is false." NIP-VA (kind 31000) consolidates this functionality into a single generic attestation kind with two modes: direct attestations (about pubkeys) and event attestations (about events). NIP-SIGNET builds on NIP-VA's direct attestation mode for identity verification specifically.
+
+### NIP-91 (Service Attestations)
+
+NIP-91 defines attestations of service completion between identities. It was redirected to NIP-32 labelling during review. NIP-SIGNET credentials are not service completion records -- they are identity verification attestations with tiers, professional accountability, and community policies. The concerns do not overlap.
+
+### TSM (Trust Service Machines)
+
+TSM (kinds 37570-37572) defines infrastructure for trust computation services -- service announcements, output standards, and service requests. NIP-SIGNET provides the raw trust signals (credentials, vouches) that a TSM service could consume to compute aggregate scores. TSM computes; NIP-SIGNET records.
+
 ### NIP-VEIL (Anonymous Trust Assertions)
 
 NIP-VEIL provides ring-signature-backed anonymous endorsements on NIP-85 events. NIP-SIGNET's professional credentials can optionally use ring signatures for issuer anonymity (proving "one of N professionals signed this" without revealing which one). The ring signature format is defined by NIP-VEIL; NIP-SIGNET references it.
 
 ### NIP-32 (Labelling)
 
-NIP-32 labels are lightweight content annotations. NIP-SIGNET credentials are identity attestations with cryptographic structure, tiers, and expiration. Different concerns: labelling content vs verifying people.
+NIP-32 defines kind 1985 labels -- lightweight, ephemeral annotations on events or pubkeys. Labels are fire-and-forget: no `d` tag, no addressability, no expiration, no replacement semantics. NIP-91 (agent reputation) was redirected to NIP-32 on this basis.
+
+NIP-SIGNET credentials are fundamentally different:
+
+- **Addressable** (kind 31000 with `d` tag) -- a credential can be queried by subject, replaced by the issuer, and superseded by a newer credential. Labels cannot.
+- **Expirable** -- credentials carry `expiration` tags and clients MUST check them. Labels have no lifecycle.
+- **Structured** -- tiers, verification types, methods, professional metadata. Labels carry a namespace and a label string.
+- **Tiered trust** -- a Tier 3 credential from a registered professional carries different weight than a Tier 1 self-declaration. Labels have no weight hierarchy.
+- **Policy-gated** -- communities can require minimum tiers for participation. There is no equivalent mechanism for labels.
+
+NIP-32 labels are the right tool for "this content is NSFW" or "this post is about #bitcoin." NIP-SIGNET credentials are the right tool for "a solicitor in London verified this person's identity."
+
+### NIP-58 (Badges)
+
+NIP-58 defines display-oriented badges awarded by communities (kind 30009 badge definition, kind 8 badge award, kind 30008 profile badges). Badges are achievements: "attended conference X", "top contributor", "founding member."
+
+NIP-SIGNET credentials are identity attestations, not achievements:
+
+- **Progressive tiers** with clear trust semantics (self-declared through professionally verified). Badges have no tier hierarchy.
+- **Professional accountability** -- Tier 3-4 credentials are issued by licensed professionals whose livelihoods depend on honest attestation. Badge issuers have no such constraint.
+- **Community policies** -- communities can require minimum verification tiers. There is no equivalent policy mechanism for badges.
+- **Verifier network** -- registered verifiers with cross-profession validation. Badges have no issuer qualification system.
+
+NIP-58 and NIP-SIGNET are complementary. A community could award badges AND require verification tiers. They serve different purposes: badges celebrate participation, credentials verify identity.
 
 ## Kinds
 
@@ -92,6 +127,7 @@ A verification credential attests that a subject has been verified at a specific
     ["profession", "solicitor"],
     ["jurisdiction", "GB"],
     ["expiration", "1743076800"],
+    ["L", "signet"],
     ["alt", "Signet Tier 3 credential for <subject-pubkey>"]
   ],
   "content": "",
@@ -107,6 +143,7 @@ A verification credential attests that a subject has been verified at a specific
 | `d` | REQUIRED | `credential:<subject-hex-pubkey>` |
 | `p` | REQUIRED | Subject's hex pubkey |
 | `type` | REQUIRED | `credential` |
+| `L` | RECOMMENDED | `signet` -- namespace label for filtering |
 | `tier` | REQUIRED | `1`, `2`, `3`, or `4` |
 | `verification-type` | REQUIRED | `self`, `peer`, or `professional` |
 | `scope` | REQUIRED | `adult` or `adult+child` |
@@ -150,6 +187,7 @@ A vouch is a peer attestation: "I have met this person and I attest they are who
     ["method", "in-person"],
     ["voucher-tier", "2"],
     ["voucher-score", "85"],
+    ["L", "signet"],
     ["alt", "Signet vouch for <subject-pubkey>"]
   ],
   "content": "Met at London Bitcoin meetup, March 2026",
@@ -198,6 +236,7 @@ A verifier registration declares that a professional is available to perform ide
     ["jurisdiction", "GB"],
     ["licence", "a1b2c3d4e5f6..."],
     ["body", "Law Society"],
+    ["L", "signet"],
     ["alt", "Signet verifier: solicitor in GB"]
   ],
   "content": "Available for identity verification appointments in London.",
@@ -242,6 +281,7 @@ A challenge flags a verifier for suspicious behaviour.
     ["p", "<verifier-pubkey>"],
     ["type", "challenge"],
     ["reason", "anomalous-volume"],
+    ["L", "signet"],
     ["alt", "Signet challenge against <verifier-pubkey>"]
   ],
   "content": "Issued 50 credentials in one hour from a single IP.",
@@ -373,7 +413,7 @@ sequenceDiagram
 {"kinds": [31000], "#type": ["verifier"], "#jurisdiction": ["GB"]}
 ```
 
-Note: `jurisdiction` is a multi-letter tag. Relays that do not support generic tag filtering will return all `type:verifier` events; clients MUST post-filter by jurisdiction.
+Note: `jurisdiction` and `type` are multi-letter tags. Relays that do not support generic tag filtering will return all kind 31000 events; clients MUST post-filter. As a fallback, clients can filter by `d` tag prefix (e.g. `#d: ["credential:"]` to fetch credentials) since `d` is a single-letter tag with universal relay support.
 
 ### Fetch community policy
 
