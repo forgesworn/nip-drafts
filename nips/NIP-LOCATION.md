@@ -8,7 +8,7 @@ Privacy-Preserving Location Discovery
 
 Two ephemeral event kinds for privacy-preserving geospatial presence and location sharing on Nostr. Publishers broadcast coarse-grained presence beacons for public discovery, then share precise coordinates only with specific recipients via NIP-44 encryption after consent is established. The same primitives support both real-time mobile tracking and static venue privacy for addressable events.
 
-> **Standalone usability:** This NIP works independently on any Nostr application. Within the TROTT protocol (v0.9), presence beacons (`kind:20500`) are defined in TROTT-02: Discovery and location updates (`kind:20501`) are defined in TROTT-07: Navigation. TROTT extends these with route planning, ETA estimation, route deviation alerts, and trusted follower location (`kind:20503` in TROTT-10) — but adoption of TROTT is not required.
+> **Standalone.** This NIP works independently on any Nostr application.
 
 ## Motivation
 
@@ -314,7 +314,7 @@ Applications MAY implement automatic `kind:20501` grants based on context:
 
 - **Group membership:** If the event is linked to a group and the recipient is a verified group member, the publisher's client auto-publishes the grant on RSVP or booking confirmation.
 - **Booking confirmation:** If the event uses a booking system, the publisher's client auto-publishes the grant when the booking is confirmed.
-- **Operator mediation:** If an operator coordinates the interaction, the operator MAY trigger the grant on behalf of the publisher after verifying the recipient.
+- **Coordinator mediation:** If a coordinator facilitates the interaction, the coordinator MAY trigger the grant on behalf of the publisher after verifying the recipient.
 
 Auto-grant logic is application-defined. This NIP provides the transport (`kind:20501`); the trigger policy is above the protocol layer.
 
@@ -324,7 +324,7 @@ The three-tier privacy model maps to specific geohash precisions:
 
 | Tier | Precision | Approximate Area | Use Case |
 |------|-----------|-----------------|----------|
-| **Coarse** (public relay) | 4–5 characters | ~20km × 20km to ~5km × 5km | Discovery — "providers near me" |
+| **Coarse** (public relay) | 4–5 characters | ~20km × 20km to ~5km × 5km | Discovery — "nearby participants" |
 | **Fine** (matched parties) | 7–8 characters | ~150m × 150m to ~40m × 40m | Coordination — "heading to your area" |
 | **Exact** (NIP-44 encrypted) | Full coordinates | Point location | Meetup — "I'm at the front door" |
 
@@ -333,7 +333,7 @@ The three-tier privacy model maps to specific geohash precisions:
 - **Rural areas:** Coarse=4, Fine=6 (wider areas, fewer participants)
 - **High-security:** Coarse=4, Fine=8, Exact only after mutual NIP-44 key exchange
 
-## Use Cases Beyond Task Coordination
+## Example Applications
 
 ### Social Meetups
 Users share coarse location on a relay to signal "I'm in this neighborhood." Matched friends receive fine location. Exact coordinates shared only when ready to meet.
@@ -420,16 +420,6 @@ Decrypted `content` for the above:
 * [NIP-01](https://github.com/nostr-protocol/nips/blob/master/01.md): Basic protocol flow, event format
 * [NIP-40](https://github.com/nostr-protocol/nips/blob/master/40.md): Expiration timestamps
 * [NIP-44](https://github.com/nostr-protocol/nips/blob/master/44.md): Versioned encrypted payloads
-
-## Relationship to TROTT Navigation
-
-NIP-LOCATION is a standalone NIP. Within the TROTT protocol, location sharing integrates with the broader navigation stack:
-
-- **TROTT-07: Navigation** — Extends `kind:20501` with route planning (`kind:30560`), ETA estimates (`kind:30561`), live trip tracking (`kind:30562`), and route deviation alerts (`kind:30563`). TROTT-07 validation rule V-NAV-05 makes the `g` tag REQUIRED on `kind:20501` (or `location_status: gps_lost` when GPS is unavailable).
-- **TROTT-10: Trusted Networks** — Adds `kind:20503` (Trusted Follower Location) for sharing location with trusted followers outside a task context.
-- **TROTT-02: Discovery** — Uses `kind:20500` presence beacons for geohash-based provider discovery.
-
-These extensions are optional. NIP-LOCATION works without any TROTT adoption.
 
 ## Reference Implementation
 

@@ -10,7 +10,7 @@ One event kind for recording signed, timestamped facts on Nostr — any particip
 
 > **Design principle:** Evidence records are append-only facts. Each record is independently verifiable via its cryptographic signature and optional file hash. They do not enforce truth — they record claims with provable authorship and timing.
 
-> **Standalone usability:** This NIP works independently on any Nostr application. Within the TROTT protocol (v0.9), it is pattern P5 in TROTT-00: Core Patterns. TROTT composes evidence recording with inspection sign-offs, dispute evidence, credential verification, and compliance records — but adoption of TROTT is not required.
+> **Standalone.** This NIP works independently on any Nostr application.
 
 ## Motivation
 
@@ -77,7 +77,7 @@ Tags:
 
 * `d` (REQUIRED): Format `<context_id>:evidence:<sequence>`. Unique per record (append-only).
 * `t` (REQUIRED): Protocol family marker. MUST be `"evidence-record"`.
-* `evidence_type` (REQUIRED): Category of evidence. Core values: `inspection`, `measurement`, `observation`, `certification`, `photo`, `document`, `video`. Applications MAY define additional evidence types for domain-specific needs (e.g. `accomplishment`, `portfolio`, `reading`). The core values above are RECOMMENDED for interoperability.
+* `evidence_type` (REQUIRED): Category of evidence. The value is application-defined. Core examples: `photo`, `document`, `video`. Applications MAY define domain-specific evidence types such as `inspection`, `measurement`, `observation`, `certification`, `accomplishment`, `portfolio`, `reading`.
 * `captured_at` (RECOMMENDED): Unix timestamp when the evidence was captured. May differ from `created_at` if the record is published later.
 * `g` (RECOMMENDED): Geohash of the location where the evidence was captured.
 * `file_hash` (RECOMMENDED): `sha256:<hex>` hash of any attached file. Consumers MUST verify the hash before trusting the evidence content.
@@ -138,7 +138,7 @@ Evidence records are semantically append-only. Although Kind 30578 is an address
 
 > **Note:** Filters on multi-letter tags (e.g. `#evidence_type`, `#condition_grade`) are not supported by relay-side `REQ` filtering. Clients MUST apply these filters locally after fetching events via the single-letter tag filters shown above.
 
-## Use Cases Beyond TROTT
+## Use Cases
 
 ### Proof-of-Existence for Documents
 
@@ -160,7 +160,9 @@ Any project requiring photographic documentation (construction progress, restora
 
 Individuals, institutions, or AI systems can publish `kind:30578` events with `evidence_type: accomplishment` or `evidence_type: portfolio` to record achievements — certifications earned, courses completed, projects finished, skills demonstrated. The `file_hash` tag can reference a certificate image, project output, or portfolio artefact. When combined with NIP-58 badges, evidence records provide the underlying proof that a badge attestation is based on.
 
-### Custody Evidence Composition
+### Custody Evidence Composition (OPTIONAL)
+
+This section describes OPTIONAL composition with NIP-CUSTODY. Applications not using NIP-CUSTODY can ignore these tags.
 
 NIP-CUSTODY uses kind 30578 to record asset condition at each handoff point. Custody evidence events add `custody_handoff_ref` (linking to a specific transfer in the chain), `condition_grade`, and `asset_id` tags. This enables multi-leg audit trails without a dedicated evidence kind.
 

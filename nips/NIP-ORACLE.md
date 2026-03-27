@@ -4,7 +4,7 @@ NIP-ORACLE
 Oracle Dispute Resolution
 ----------------------------
 
-`draft` `optional` `incubating`
+`draft` `optional`
 
 Four addressable event kinds for challenging and resolving oracle-reported outcomes on Nostr: outcome reporting, challenges, stake-weighted voting, and authoritative rulings.
 
@@ -46,7 +46,7 @@ This protocol adapts proven patterns from Ethereum-based oracle systems to the N
 | 30549 | Outcome Vote       |
 | 30543 | Outcome Ruling     |
 
-All four kinds are addressable events (NIP-01), allocated from the TROTT-05 safety/dispute range (30540–30549).
+All four kinds are addressable events (NIP-01) in the replaceable event range (30000–39999).
 
 > **Kind allocation note:** Kind numbers 30543 and 30547 were previously allocated to addressable dispute events which moved to regular event kinds (7543, 7547) for immutability guarantees. See NIP-DISPUTES.
 
@@ -210,7 +210,7 @@ The Ruling event (`level: 2`) MUST include these additional tags:
 * `outcome_stake` (REQUIRED, one per outcome): `["outcome_stake", "<outcome_value>", "<total_stake_for_this_outcome>"]`. Enables independent verification that the winning outcome met the 67% threshold.
 * `vote_count` (REQUIRED): Total number of votes cast.
 
-> **Open problem:** The aggregate tally proves the *margin* but not that individual votes were counted correctly. Verifying that requires either a public vote reveal after the window closes or a cryptographic tally proof (e.g. homomorphic commitments). This NIP is marked `incubating` until a practical verification mechanism is specified.
+> **Open problem:** The aggregate tally proves the *margin* but not that individual votes were counted correctly. Verifying that requires either a public vote reveal after the window closes or a cryptographic tally proof (e.g. homomorphic commitments). A practical verification mechanism is not yet specified.
 
 > **Privacy:** This event MUST be delivered via NIP-59 gift wrap. See [Privacy](#privacy).
 
@@ -440,17 +440,19 @@ Implementations SHOULD include only the tags marked REQUIRED in each event kind.
 * [NIP-44](https://github.com/nostr-protocol/nips/blob/master/44.md): Versioned encrypted payloads (defence in depth for challenges and votes)
 * [NIP-59](https://github.com/nostr-protocol/nips/blob/master/59.md): Gift wrap (private delivery of challenges and votes)
 
-## Relationship to Existing NIPs
+## Potential Compositions with Draft NIPs
 
-### NIP-DISPUTES
+The following compositions are OPTIONAL. NIP-ORACLE works independently without any of these draft NIPs.
 
-[NIP-DISPUTES](NIP-DISPUTES.md) handles *subjective* service disputes ("was the work acceptable?"). NIP-ORACLE handles *objective* outcome disputes ("did event X happen?"). They are complementary: a platform might use NIP-ORACLE for outcome verification and NIP-DISPUTES for service quality complaints. Both compose with NIP-ESCROW for staking and settlement, but serve different dispute categories.
+### NIP-DISPUTES (OPTIONAL)
 
-### NIP-CONSENSUS
+[NIP-DISPUTES](NIP-DISPUTES.md) handles *subjective* service disputes ("was the work acceptable?"). NIP-ORACLE handles *objective* outcome disputes ("did event X happen?"). They are complementary: a platform might use NIP-ORACLE for outcome verification and NIP-DISPUTES for service quality complaints. Both MAY compose with NIP-ESCROW for staking and settlement, but serve different dispute categories.
 
-[NIP-CONSENSUS](NIP-CONSENSUS.md) defines threshold-based group decision-making with identified voters. NIP-ORACLE's Level 2 community vote is a specialised form of group decision-making, but differs in three key ways: (1) votes are stake-weighted rather than equal-weight, (2) votes are gift-wrapped for privacy during the voting window, and (3) outcomes are constrained to match the original oracle report's `type` (binary/categorical/scalar). Applications that need general-purpose group consensus SHOULD use NIP-CONSENSUS; applications that need oracle-specific dispute resolution SHOULD use NIP-ORACLE.
+### NIP-CONSENSUS (OPTIONAL)
 
-### NIP-EVIDENCE
+[NIP-CONSENSUS](NIP-CONSENSUS.md) defines threshold-based group decision-making with identified voters. NIP-ORACLE's Level 2 community vote is a specialised form of group decision-making, but differs in three key ways: (1) votes are stake-weighted rather than equal-weight, (2) votes are gift-wrapped for privacy during the voting window, and (3) outcomes are constrained to match the original oracle report's `type` (binary/categorical/scalar). Applications that need general-purpose group consensus MAY use NIP-CONSENSUS; applications that need oracle-specific dispute resolution SHOULD use NIP-ORACLE.
+
+### NIP-EVIDENCE (OPTIONAL)
 
 [NIP-EVIDENCE](NIP-EVIDENCE.md) provides a standardised evidence record kind. NIP-ORACLE challenges include evidence in the `content` field of the Outcome Challenge event. For complex disputes with multiple evidence items, implementations MAY publish separate NIP-EVIDENCE records and reference them from the challenge via `e` tags.
 

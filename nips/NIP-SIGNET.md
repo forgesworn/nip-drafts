@@ -11,7 +11,7 @@ Authors: [forgesworn](https://github.com/forgesworn)
 Tag conventions on kind 31000 ([NIP-VA](https://github.com/nostr-protocol/nips/blob/master/va.md)) for progressive identity verification, plus a community policy format on kind 30078 ([NIP-78](https://github.com/nostr-protocol/nips/blob/master/78.md)). No new event kinds.
 
 > **Design principle:** Identity verification should be progressive (start low, build over time), privacy-preserving (no PII in events), and decentralised (no single authority). Nostr's censorship resistance is meaningless if every feed is 40% spam bots.
-> **Standalone usability:** This NIP works independently on any Nostr application. It builds on NIP-VA's generic attestation format and NIP-78's app-specific data storage. The reference implementation is [`signet-protocol`](https://github.com/forgesworn/signet) (TypeScript).
+> **Standalone.** This NIP works independently on any Nostr application. It builds on NIP-VA's generic attestation format and NIP-78's app-specific data storage. The reference implementation is [`signet-protocol`](https://github.com/forgesworn/signet) (TypeScript).
 
 ## Motivation
 
@@ -54,9 +54,9 @@ NIP-91 defines attestations of service completion between identities. It was red
 
 TSM (kinds 37570-37572) defines infrastructure for trust computation services -- service announcements, output standards, and service requests. NIP-SIGNET provides the raw trust signals (credentials, vouches) that a TSM service could consume to compute aggregate scores. TSM computes; NIP-SIGNET records.
 
-### NIP-VEIL (Anonymous Trust Assertions)
+### NIP-VEIL (Anonymous Trust Assertions) -- OPTIONAL Composition
 
-NIP-VEIL provides ring-signature-backed anonymous endorsements on NIP-85 events. NIP-SIGNET's professional credentials can optionally use ring signatures for issuer anonymity (proving "one of N professionals signed this" without revealing which one). The ring signature format is defined by NIP-VEIL; NIP-SIGNET references it.
+NIP-VEIL provides ring-signature-backed anonymous endorsements on NIP-85 events. NIP-SIGNET's professional credentials MAY optionally use ring signatures for issuer anonymity (proving "one of N professionals signed this" without revealing which one). The ring signature format is defined by NIP-VEIL; NIP-SIGNET MAY reference it. Composition with NIP-VEIL is OPTIONAL.
 
 ### NIP-32 (Labelling)
 
@@ -100,7 +100,7 @@ No new event kinds are introduced.
 |------|------|---------------|-----|
 | 1 | Self-declared | "I claim I am an adult" | Self-signed credential |
 | 2 | Peer-vouched | "N people who met me confirm I exist" | 3+ vouches from Tier 2+ accounts |
-| 3 | Professionally verified | "A licensed professional checked my ID" | In-person verification by solicitor, notary, doctor, etc. |
+| 3 | Professionally verified | "A licensed professional checked my ID" | In-person verification by solicitor, attorney, notary, doctor, pharmacist, chartered accountant, etc. |
 | 4 | Professionally verified (child) | "A professional confirmed adult + child" | Tier 3 + child evidence (birth certificate, school record) |
 
 Tiers are progressive: each tier subsumes the trust of lower tiers. A Tier 3 account implicitly satisfies Tier 2 and Tier 1 requirements.
@@ -148,7 +148,7 @@ A verification credential attests that a subject has been verified at a specific
 | `verification-type` | REQUIRED | `self`, `peer`, or `professional` |
 | `scope` | REQUIRED | `adult` or `adult+child` |
 | `method` | REQUIRED | `self-declaration`, `in-person`, `online`, or `in-person-id` |
-| `profession` | RECOMMENDED (Tier 3-4) | Verifier's profession (e.g. `solicitor`, `notary`, `doctor`) |
+| `profession` | RECOMMENDED (Tier 3-4) | Verifier's profession (e.g. `solicitor`, `attorney`, `notary`, `doctor`, `pharmacist`, `chartered_accountant`) |
 | `jurisdiction` | RECOMMENDED (Tier 3-4) | ISO 3166-1 alpha-2 country code (e.g. `GB`, `US`, `IE`) |
 | `age-range` | OPTIONAL | Age range string (e.g. `18+`, `8-12`). Tier 4 SHOULD include this. |
 | `expiration` | RECOMMENDED | Unix timestamp. Credentials SHOULD expire. |
@@ -251,10 +251,10 @@ A verifier registration declares that a professional is available to perform ide
 |-----|--------|-------------|
 | `d` | REQUIRED | `verifier:<verifier-hex-pubkey>` |
 | `type` | REQUIRED | `verifier` |
-| `profession` | REQUIRED | Professional title (e.g. `solicitor`, `notary`, `doctor`) |
+| `profession` | REQUIRED | Professional title (e.g. `solicitor`, `notary`, `doctor`, `attorney`, `pharmacist`, `chartered_accountant`) |
 | `jurisdiction` | REQUIRED | ISO 3166-1 alpha-2 country code |
 | `licence` | REQUIRED | Hash of licence/registration number (not the raw number) |
-| `body` | REQUIRED | Professional body name (e.g. `Law Society`, `GMC`, `Notary Commission`) |
+| `body` | REQUIRED | Professional body name (e.g. `Law Society`, `GMC`, `Notary Commission`, `American Bar Association`, `Ordre des Médecins`, `CPA Australia`) |
 | `alt` | RECOMMENDED | Human-readable summary |
 
 ### `content`

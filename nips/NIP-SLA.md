@@ -6,21 +6,37 @@ Service Level Agreements (Composition Guide)
 
 `draft` `optional` `composition-guide`
 
-This document shows how to model Service Level Agreements on Nostr using existing NIPs. No new event kinds are required. SLA templates, agreements, breach reports, and dispute escalation are all composed from NIP-EVIDENCE, NIP-APPROVAL, and NIP-DISPUTES.
+> **Standalone.** This NIP works independently on any Nostr application. It does not depend on any particular protocol ecosystem or application framework.
 
-> **Design principle:** SLA functionality is a composition of existing primitives: evidence records capture templates and breach reports, approval gates formalise multi-party agreement, and dispute claims handle contested breaches. This avoids allocating dedicated kinds for a pattern that maps cleanly onto general-purpose building blocks.
+> **Composition guide, not a new kind.** This document describes how [NIP-EVIDENCE](NIP-EVIDENCE.md), [NIP-APPROVAL](NIP-APPROVAL.md), and [NIP-DISPUTES](NIP-DISPUTES.md) can be combined to model Service Level Agreements on Nostr. No new event kinds are defined. These three NIPs are currently drafts. This guide will be most useful once its component NIPs are accepted, but it is written so that each component contributes independently -- you do not need all three to get value from this pattern.
 
-> **Standalone usability:** This guide works independently on any Nostr application that supports NIP-EVIDENCE, NIP-APPROVAL, and NIP-DISPUTES. No additional protocol adoption is required.
+---
+
+## How to Read This Guide
+
+Each section of this guide maps to one component NIP. You can adopt them incrementally:
+
+| If you only adopt...   | You get...                                                                 |
+|------------------------|----------------------------------------------------------------------------|
+| **NIP-EVIDENCE alone** | Publishable SLA templates and machine-readable breach reports              |
+| **+ NIP-APPROVAL**     | Multi-party agreement workflows binding templates to specific engagements  |
+| **+ NIP-DISPUTES**     | Formal escalation and mediation when breach reports are contested          |
+
+The full pattern uses all three, but a team that only needs to publish SLA terms (templates) or record threshold violations (breach reports) can start with NIP-EVIDENCE alone and layer in agreement and dispute workflows later.
+
+---
 
 ## Motivation
 
-Nostr has NIP-ESCROW for conditional payment coordination and NIP-INVOICING for structured billing, but no standard mechanism for **declaring and enforcing performance commitments**. Many service relationships require measurable quality guarantees:
+Nostr has mechanisms for conditional payment coordination (NIP-ESCROW) and structured billing (NIP-INVOICING), but no standard pattern for **declaring and enforcing performance commitments**. Many service relationships benefit from measurable quality guarantees:
 
-- **API hosting** -- a provider commits to 99.9% uptime with penalty credits for downtime exceeding the threshold
-- **SaaS services** -- response time guarantees (< 200ms p95) with automated breach detection
-- **Consulting engagements** -- first-contact response within 4 hours, resolution within 48 hours, with refunds for missed deadlines
-- **Freelance contracts** -- milestone delivery deadlines with penalty clauses for late completion
-- **Managed infrastructure** -- availability guarantees with tiered severity levels and escalating penalties
+- **API providers** commit to 99.9% uptime with penalty credits for downtime exceeding the threshold
+- **SaaS platforms** guarantee response time targets (e.g. < 200ms p95) with automated breach detection
+- **Consultants** promise first-contact response within 4 hours and resolution within 48 hours, with refunds for missed deadlines
+- **Freelancers** agree to milestone delivery deadlines with penalty clauses for late completion
+- **Managed infrastructure providers** offer availability guarantees with tiered severity levels and escalating penalties
+
+These are all variations of the same pattern: a provider publishes commitments, both parties agree, measurements are taken, and breaches are resolved. This guide shows how to model that pattern using existing Nostr primitives.
 
 ### Why composition over dedicated kinds?
 
@@ -33,6 +49,14 @@ SLA management decomposes into three operations that already have NIP support:
 
 Dedicated SLA kinds would duplicate semantics already available in these NIPs. Composition keeps the kind space lean and lets implementers reuse existing parsers, builders, and relay filters.
 
+### Why not NIP-78 (Arbitrary Custom App Data)?
+
+NIP-78 (`kind:30078`) provides generic application-specific data storage. While you could encode SLA terms in a `kind:30078` event, you would lose the structured semantics that NIP-EVIDENCE provides: evidence typing, captured-at timestamps, file hashes for supporting documents, and integration with relay filters that already understand evidence records. SLA templates are a specific category of evidence, not arbitrary app data.
+
+### Why not plain kind:1 notes?
+
+You could announce SLA terms in a regular note, but notes lack addressable event semantics (no `d` tag for updates), no structured tag format for machine parsing, and no integration with approval or dispute workflows. An SLA that cannot be programmatically queried, agreed to, or enforced is just a promise in a timeline.
+
 ---
 
 ## Terminology
@@ -40,7 +64,7 @@ Dedicated SLA kinds would duplicate semantics already available in these NIPs. C
 | Term                    | Description                                                                                     |
 |-------------------------|-------------------------------------------------------------------------------------------------|
 | **SLA template**        | A `kind:30578` evidence record declaring a provider's standard performance commitments           |
-| **SLA agreement**       | A `kind:30570` approval gate + `kind:30571` responses binding SLA terms to an engagement        |
+| **SLA agreement**       | A `kind:30570` approval gate + `kind:30571` responses binding SLA terms to a specific engagement |
 | **SLA breach**          | A `kind:30578` evidence record documenting that an SLA threshold was violated                    |
 | **Response time**       | The maximum permitted time between engagement start and first provider action                    |
 | **Resolution time**     | The maximum permitted time between engagement start and completion                              |
@@ -48,16 +72,18 @@ Dedicated SLA kinds would duplicate semantics already available in these NIPs. C
 | **First contact**       | The maximum permitted time between request creation and first provider response                  |
 | **On-time rate**        | The minimum percentage of engagements completed by their agreed deadline                        |
 | **Threshold**           | The numeric limit that defines SLA compliance (e.g. 240 minutes, 99.5 percent)                  |
-| **Penalty**             | The financial consequence triggered by an SLA breach (refund, credit, or stake forfeit)         |
+| **Penalty**             | The consequence triggered by an SLA breach -- applications define their own penalty structures   |
 | **Severity**            | The classification of a breach: `minor`, `major`, or `critical`                                 |
 
 ---
 
 ## SLA Metric Conventions
 
-All SLA events in this guide use consistent tag conventions for metrics, thresholds, and penalties.
+All SLA events in this guide use consistent tag conventions for metrics, thresholds, and penalties. Applications MAY extend these conventions with additional metric types, units, or penalty structures to suit their needs.
 
 ### SLA Metric Types
+
+These are the standard metric types. Applications MAY define additional types using the same tag format.
 
 | Type              | Description                                                                      |
 |-------------------|----------------------------------------------------------------------------------|
@@ -78,6 +104,8 @@ All SLA events in this guide use consistent tag conventions for metrics, thresho
 
 ### Penalty Types
 
+Applications define their own penalty structures. The following types are suggested starting points:
+
 | Type              | Description                                                          |
 |-------------------|----------------------------------------------------------------------|
 | `refund`          | Direct payment from provider to consumer                             |
@@ -94,7 +122,9 @@ All SLA events in this guide use consistent tag conventions for metrics, thresho
 
 ---
 
-## SLA Templates with NIP-EVIDENCE
+## Component 1: SLA Templates with NIP-EVIDENCE
+
+> **Independent value.** Even without NIP-APPROVAL or NIP-DISPUTES, publishing SLA templates as evidence records gives providers a verifiable, timestamped, machine-readable way to advertise their service commitments. Clients can query relay filters to discover and compare SLA offerings across providers.
 
 An SLA template is a published reference document declaring a provider's standard performance commitments. Because templates are signed, timestamped records of fact, they map directly to NIP-EVIDENCE (`kind:30578`) with `evidence_type: sla_template`.
 
@@ -113,10 +143,12 @@ Each `sla_metric` tag uses a structured multi-value format:
 | 1 | `sla_type` | Metric type (see SLA Metric Types table above) |
 | 2 | `threshold_value` | Numeric threshold as a string |
 | 3 | `threshold_unit` | Unit of measurement |
-| 4 | `penalty_amount` | Penalty amount in smallest currency unit (pence for GBP, cents for USD, satoshis for SAT) |
-| 5 | `penalty_type` | One of `refund`, `credit`, or `stake_forfeit` |
+| 4 | `penalty_amount` | Penalty amount in smallest currency unit (cents for USD, satoshis for SAT, etc.) |
+| 5 | `penalty_type` | Penalty category (e.g. `refund`, `credit`, or `stake_forfeit`) |
 
 ### Example: API Hosting SLA Template
+
+A cloud API provider advertising availability and response time guarantees:
 
 ```json
 {
@@ -145,6 +177,67 @@ Each `sla_metric` tag uses a structured multi-value format:
 }
 ```
 
+### Example: Freelance Project SLA Template
+
+A freelance developer advertising milestone delivery and revision guarantees:
+
+```json
+{
+  "kind": 30578,
+  "pubkey": "<freelancer-hex-pubkey>",
+  "created_at": 1698780000,
+  "tags": [
+    ["d", "freelance-dev:sla_template:standard"],
+    ["t", "evidence-record"],
+    ["alt", "SLA template: freelance development standard tier"],
+    ["evidence_type", "sla_template"],
+    ["sla_metric", "resolution_time", "14", "days", "50000", "refund"],
+    ["sla_metric", "first_contact", "24", "hours", "0", "credit"],
+    ["sla_threshold", "resolution_time", "14", "days"],
+    ["sla_threshold", "first_contact", "24", "hours"],
+    ["sla_penalty", "resolution_time", "50000", "refund"],
+    ["sla_measurement_window", "monthly"],
+    ["p", "<freelancer-hex-pubkey>"],
+    ["currency", "USD"],
+    ["captured_at", "1698780000"]
+  ],
+  "content": "Milestone delivery within 14 days of acceptance. First response to queries within 24 hours on business days. Up to 2 revision rounds included.",
+  "id": "<32-byte-hex>",
+  "sig": "<64-byte-hex>"
+}
+```
+
+### Example: SaaS Uptime SLA Template
+
+A SaaS provider advertising tiered uptime and latency guarantees:
+
+```json
+{
+  "kind": 30578,
+  "pubkey": "<saas-provider-hex-pubkey>",
+  "created_at": 1698780000,
+  "tags": [
+    ["d", "saas-crm:sla_template:enterprise"],
+    ["t", "evidence-record"],
+    ["alt", "SLA template: CRM platform enterprise tier"],
+    ["evidence_type", "sla_template"],
+    ["sla_metric", "availability", "99.95", "percentage", "500000", "credit"],
+    ["sla_metric", "response_time", "500", "minutes", "100000", "credit"],
+    ["sla_threshold", "availability", "99.95", "percentage"],
+    ["sla_threshold", "response_time", "500", "minutes"],
+    ["sla_penalty", "availability", "500000", "credit"],
+    ["sla_penalty", "response_time", "100000", "credit"],
+    ["sla_measurement_window", "monthly"],
+    ["p", "<saas-provider-hex-pubkey>"],
+    ["currency", "USD"],
+    ["captured_at", "1698780000"]
+  ],
+  "content": "Enterprise SLA: 99.95% monthly availability, 500ms p95 API response time. Penalties as account credits against next billing cycle. Scheduled maintenance windows excluded.",
+  "id": "<32-byte-hex>",
+  "sig": "<64-byte-hex>"
+}
+```
+
 ### Tag Reference (SLA Template)
 
 | Tag                        | Required | Multiple | Description                                          |
@@ -162,17 +255,19 @@ Each `sla_metric` tag uses a structured multi-value format:
 | `ref`                      | MAY      | No       | External reference (service tier code)               |
 | `expiration`               | MAY      | No       | Template validity period (NIP-40)                    |
 
-**Content:** Empty string or NIP-44 encrypted JSON with extended SLA terms such as exclusion periods, force majeure clauses, or escalation procedures.
+**Content:** Empty string, plain text describing additional terms, or NIP-44 encrypted JSON with extended SLA terms such as exclusion periods, force majeure clauses, or escalation procedures.
 
 ---
 
-## SLA Agreements with NIP-APPROVAL
+## Component 2: SLA Agreements with NIP-APPROVAL
+
+> **Independent value.** Even without NIP-DISPUTES, adding NIP-APPROVAL to the pattern gives you verifiable multi-party sign-off on SLA terms. Both parties have a cryptographically signed record that they agreed to specific thresholds, which is valuable for accountability regardless of whether formal dispute resolution exists.
 
 Agreeing to an SLA is a multi-party approval workflow. The proposer creates an Approval Gate (`kind:30570`) referencing the SLA template evidence record and listing the parties. Each party then responds with an Approval Response (`kind:30571`). The agreed SLA is the combination of the template plus all approval responses.
 
 ### Step 1: Proposer Creates Approval Gate
 
-The consumer (or provider) publishes an approval gate referencing the SLA template. The gate lists all parties who must sign off.
+The consumer (or provider) publishes an approval gate referencing the SLA template. The gate lists all parties who need to sign off.
 
 ```json
 {
@@ -205,7 +300,7 @@ The `sla_template_ref` tag records the `d` tag value of the referenced `kind:305
 
 ### Step 2: Each Party Responds
 
-Each listed `gate_authority` publishes an approval response. The SLA is considered binding once all required parties have approved.
+Each listed `gate_authority` publishes an approval response. The SLA is considered agreed once all required parties have responded with approval.
 
 ```json
 {
@@ -242,7 +337,7 @@ If a party wants to negotiate different thresholds, they respond with `decision:
     ["e", "<gate-event-id>", "wss://relay.example.com"],
     ["decision", "revise"],
     ["sla_metric", "resolution_time", "72", "hours", "25000", "refund"],
-    ["revision_notes", "Requesting extended resolution time of 72 hours per scope adjustment"],
+    ["revision_notes", "Requesting extended resolution time of 72 hours given scope"],
     ["p", "<consumer-hex-pubkey>"]
   ],
   "content": "Resolution time of 48 hours is too tight for this engagement scope. Proposing 72 hours instead.",
@@ -271,9 +366,11 @@ for each override in gate.sla_metric:
 
 ## SLA Breach Reporting with NIP-EVIDENCE
 
+> **Uses the same component as templates.** Breach reports are also NIP-EVIDENCE records. If you have adopted NIP-EVIDENCE for SLA templates, you already have everything needed to record breaches -- no additional NIP required.
+
 An SLA breach is evidence of a threshold violation. When a metric is breached, either party (or an automated monitoring system) publishes a `kind:30578` evidence record with `evidence_type: sla_breach`. This captures the specific metric violated, the expected threshold, the actual measured value, and the measurement timestamp.
 
-### Example: Availability Breach
+### Example: SaaS Availability Breach
 
 ```json
 {
@@ -281,17 +378,17 @@ An SLA breach is evidence of a threshold violation. When a metric is breached, e
   "pubkey": "<consumer-hex-pubkey>",
   "created_at": 1698795780,
   "tags": [
-    ["d", "engagement_api_hosting_007:evidence:sla_breach_001"],
+    ["d", "engagement_saas_crm_012:evidence:sla_breach_001"],
     ["t", "evidence-record"],
     ["alt", "SLA breach: availability dropped to 99.2%"],
     ["evidence_type", "sla_breach"],
     ["sla_metric", "availability"],
-    ["sla_threshold", "availability", "99.9", "percentage"],
+    ["sla_threshold", "availability", "99.95", "percentage"],
     ["sla_actual_value", "99.2"],
     ["sla_measurement_timestamp", "1698794400"],
     ["severity", "major"],
     ["e", "<gate-event-id>", "wss://relay.example.com"],
-    ["sla_template_ref", "api-hosting:sla_template:premium"],
+    ["sla_template_ref", "saas-crm:sla_template:enterprise"],
     ["p", "<provider-hex-pubkey>"],
     ["p", "<consumer-hex-pubkey>"],
     ["captured_at", "1698795780"]
@@ -302,7 +399,7 @@ An SLA breach is evidence of a threshold violation. When a metric is breached, e
 }
 ```
 
-### Example: Response Time Breach
+### Example: API Latency Breach
 
 ```json
 {
@@ -310,22 +407,51 @@ An SLA breach is evidence of a threshold violation. When a metric is breached, e
   "pubkey": "<consumer-hex-pubkey>",
   "created_at": 1698795780,
   "tags": [
-    ["d", "engagement_consulting_001:evidence:sla_breach_001"],
+    ["d", "engagement_api_hosting_007:evidence:sla_breach_001"],
     ["t", "evidence-record"],
-    ["alt", "SLA breach: response time exceeded by 23 minutes"],
+    ["alt", "SLA breach: p95 latency exceeded 500ms target"],
     ["evidence_type", "sla_breach"],
     ["sla_metric", "response_time"],
-    ["sla_threshold", "response_time", "240", "minutes"],
-    ["sla_actual_value", "263"],
+    ["sla_threshold", "response_time", "500", "minutes"],
+    ["sla_actual_value", "847"],
     ["sla_measurement_timestamp", "1698795780"],
-    ["severity", "minor"],
+    ["severity", "major"],
     ["e", "<gate-event-id>", "wss://relay.example.com"],
+    ["sla_template_ref", "api-hosting:sla_template:premium"],
     ["p", "<provider-hex-pubkey>"],
     ["p", "<consumer-hex-pubkey>"],
     ["captured_at", "1698795780"],
-    ["ref", "INCIDENT-2026-0099"]
+    ["ref", "INCIDENT-2026-0042"]
   ],
-  "content": "Provider acknowledged fault at 4h 23m. 23 minutes past the 4-hour response SLA.",
+  "content": "API p95 latency measured at 847ms, exceeding the 500ms threshold. Measurement period: 1-31 March 2026.",
+  "id": "<32-byte-hex>",
+  "sig": "<64-byte-hex>"
+}
+```
+
+### Example: Freelance Deadline Breach
+
+```json
+{
+  "kind": 30578,
+  "pubkey": "<client-hex-pubkey>",
+  "created_at": 1698795780,
+  "tags": [
+    ["d", "engagement_freelance_029:evidence:sla_breach_001"],
+    ["t", "evidence-record"],
+    ["alt", "SLA breach: milestone delivery 3 days late"],
+    ["evidence_type", "sla_breach"],
+    ["sla_metric", "resolution_time"],
+    ["sla_threshold", "resolution_time", "14", "days"],
+    ["sla_actual_value", "17"],
+    ["sla_measurement_timestamp", "1698795780"],
+    ["severity", "minor"],
+    ["e", "<gate-event-id>", "wss://relay.example.com"],
+    ["p", "<freelancer-hex-pubkey>"],
+    ["p", "<client-hex-pubkey>"],
+    ["captured_at", "1698795780"]
+  ],
+  "content": "Milestone 2 (frontend prototype) delivered 3 days past the agreed 14-day deadline.",
   "id": "<32-byte-hex>",
   "sig": "<64-byte-hex>"
 }
@@ -333,11 +459,13 @@ An SLA breach is evidence of a threshold violation. When a metric is breached, e
 
 ### Severity Levels
 
+Applications define their own severity thresholds. The following classifications are suggested starting points:
+
 | Severity   | Description                                                                      |
 |------------|----------------------------------------------------------------------------------|
 | `minor`    | Threshold exceeded by a small margin (e.g. response time 5% over limit)          |
 | `major`    | Significant breach (e.g. response time 50% over limit, or repeated minor breach) |
-| `critical` | Severe breach (e.g. complete service failure, or safety-impacting breach)         |
+| `critical` | Severe breach (e.g. complete service failure, extended outage)                    |
 
 ### Tag Reference (SLA Breach)
 
@@ -358,11 +486,13 @@ An SLA breach is evidence of a threshold violation. When a metric is breached, e
 | `ref`                        | MAY      | No       | External reference (incident ticket, alert ID)        |
 | `file_hash`                  | MAY      | No       | Hash of supporting evidence file                      |
 
-**Content:** Plain text or NIP-44 encrypted JSON with breach details such as monitoring system output, timeline reconstruction, or witness statements.
+**Content:** Plain text or NIP-44 encrypted JSON with breach details such as monitoring system output, timeline reconstruction, or supporting documentation.
 
 ---
 
-## Escalating Breaches with NIP-DISPUTES
+## Component 3: Escalating Breaches with NIP-DISPUTES
+
+> **Independent value.** NIP-DISPUTES provides a structured mediation workflow for any contested claim. In the SLA context, it adds formal escalation when a breach report is disputed. Without it, breach resolution is left to the parties' own informal process, which may be perfectly adequate for many use cases.
 
 When a breach report is contested, either party can escalate by filing a Dispute Claim (`kind:7543`) from NIP-DISPUTES. The claim references both the breach evidence and the SLA agreement gate, enabling a mediator to review the full context.
 
@@ -413,7 +543,7 @@ Both parties submit additional evidence as `kind:30578` records referencing the 
 
 ### Resolution
 
-The mediator resolves the dispute via `kind:30545` (Dispute Resolution), ruling on whether the breach was valid and what penalty (if any) applies. Settlement can then proceed through NIP-ESCROW or NIP-INVOICING as appropriate.
+The mediator resolves the dispute via `kind:30545` (Dispute Resolution), ruling on whether the breach was valid and what penalty (if any) applies. Settlement can then proceed through whatever payment mechanism the parties have agreed on (e.g. NIP-ESCROW, NIP-INVOICING, or direct Lightning payment).
 
 ---
 
@@ -440,7 +570,7 @@ sequenceDiagram
     Provider->>Relay: kind:30571 (decision: approved)
     Relay->>Consumer: notification
 
-    Note over Provider,Consumer: SLA is now binding
+    Note over Provider,Consumer: SLA is now agreed
 
     rect rgb(27, 45, 61)
         Note over Monitor: Continuous Monitoring
@@ -454,7 +584,7 @@ sequenceDiagram
 
         alt Breach Accepted
             Note over Provider: Provider acknowledges breach
-            Note over Provider: Penalty settled via NIP-ESCROW or NIP-INVOICING
+            Note over Provider: Penalty settled per agreed terms
         else Breach Contested
             Provider->>Relay: kind:7543 (dispute claim)
             Relay->>Consumer: notification
@@ -556,7 +686,7 @@ Find dispute claims referencing a breach:
 
 ## Validation Rules
 
-Implementations MUST enforce these rules when processing SLA-composed events.
+Implementations SHOULD enforce these rules when processing SLA-composed events. The rules use MUST to indicate what a conforming event looks like; applications decide how strictly to enforce them.
 
 ### SLA Template Validation (kind:30578, evidence_type: sla_template)
 
@@ -564,9 +694,9 @@ Implementations MUST enforce these rules when processing SLA-composed events.
 |-----------|------------------------------------------------------------------------------------------------|
 | V-SLA-01  | MUST include at least one `sla_metric` tag                                                     |
 | V-SLA-02  | Each `sla_metric` tag MUST contain six elements: tag name, `sla_type`, `threshold_value`, `threshold_unit`, `penalty_amount`, and `penalty_type` |
-| V-SLA-03  | `sla_type` MUST be one of the defined metric types                                             |
+| V-SLA-03  | `sla_type` SHOULD be one of the defined metric types (applications MAY extend)                 |
 | V-SLA-04  | `threshold_unit` MUST be one of `minutes`, `hours`, `days`, or `percentage`                    |
-| V-SLA-05  | `penalty_type` MUST be one of `refund`, `credit`, or `stake_forfeit`                           |
+| V-SLA-05  | `penalty_type` SHOULD be one of `refund`, `credit`, or `stake_forfeit` (applications MAY extend) |
 | V-SLA-06  | `threshold_value` MUST be a positive numeric string                                            |
 | V-SLA-07  | `penalty_amount` MUST be a non-negative integer string                                         |
 | V-SLA-08  | `evidence_type` MUST be `"sla_template"`                                                       |
@@ -577,17 +707,17 @@ Implementations MUST enforce these rules when processing SLA-composed events.
 |-----------|------------------------------------------------------------------------------------------------|
 | V-SLA-09  | Gate MUST include an `sla_template_ref` tag referencing a valid SLA template `d` tag           |
 | V-SLA-10  | Gate MUST include an `e` tag referencing the SLA template event                                |
-| V-SLA-11  | Override `sla_metric` tags MUST follow the same validation as template metrics                 |
+| V-SLA-11  | Override `sla_metric` tags MUST follow the same format as template metrics                     |
 | V-SLA-12  | `effective_from` MUST be a valid Unix timestamp when present                                   |
 | V-SLA-13  | `effective_until` MUST be greater than `effective_from` when both are present                   |
-| V-SLA-14  | All listed `gate_authority` pubkeys MUST respond with `decision: approved` for the SLA to be binding |
+| V-SLA-14  | All listed `gate_authority` pubkeys SHOULD respond with `decision: approved` for the SLA to be considered agreed |
 
 ### SLA Breach Validation (kind:30578, evidence_type: sla_breach)
 
 | Rule      | Requirement                                                                                    |
 |-----------|------------------------------------------------------------------------------------------------|
 | V-SLA-15  | `evidence_type` MUST be `"sla_breach"`                                                         |
-| V-SLA-16  | `sla_metric` tag MUST match an `sla_type` defined in the referenced template                   |
+| V-SLA-16  | `sla_metric` tag SHOULD match an `sla_type` defined in the referenced template                 |
 | V-SLA-17  | `sla_threshold` tag MUST be present with metric name, value, and unit                          |
 | V-SLA-18  | `sla_actual_value` MUST be present                                                             |
 | V-SLA-19  | `sla_measurement_timestamp` MUST be a valid Unix timestamp                                     |
@@ -599,7 +729,7 @@ Implementations MUST enforce these rules when processing SLA-composed events.
 
 ### Fraudulent Breach Claims
 
-A consumer could publish fraudulent breach evidence to trigger unwarranted penalties. Applications MUST validate breach claims against objective evidence before executing penalties. Implementations SHOULD require `file_hash` tags on breach evidence and SHOULD verify that the evidence supports the claimed breach. For automated monitoring, the monitoring system's pubkey SHOULD be pre-authorised in the SLA agreement gate.
+A consumer could publish fraudulent breach evidence to trigger unwarranted penalties. Applications SHOULD validate breach claims against objective evidence before executing penalties. Implementations SHOULD require `file_hash` tags on breach evidence and verify that the evidence supports the claimed breach. For automated monitoring, the monitoring system's pubkey SHOULD be pre-authorised in the SLA agreement gate.
 
 ### SLA Template Manipulation
 
@@ -607,7 +737,7 @@ A provider could publish a revised SLA template after an agreement gate is appro
 
 ### Automated Monitor Trust
 
-Automated monitoring systems that publish breach evidence SHOULD be identified by a recognised pubkey that both parties have agreed to trust. The approval gate content MAY designate the authorised monitoring system pubkey. Clients SHOULD reject breach evidence from unrecognised publishers.
+Automated monitoring systems that publish breach evidence SHOULD be identified by a recognised pubkey that both parties have agreed to trust. The approval gate content MAY designate the authorised monitoring system pubkey. Clients SHOULD treat breach evidence from unrecognised publishers with caution.
 
 ### Collusion Between Parties
 
@@ -623,19 +753,23 @@ Disagreements over whether a deadline was actually missed depend on accurate tim
 
 ### API Hosting and Infrastructure
 
-A cloud hosting provider publishes a `kind:30578` SLA template advertising 99.9% availability and < 500ms response time guarantees. A client subscribing to the service proposes a `kind:30570` approval gate referencing the template. When automated monitoring detects downtime exceeding the threshold, a `kind:30578` breach evidence record is published. Settlement proceeds via NIP-ESCROW or NIP-INVOICING.
+A cloud hosting provider publishes a `kind:30578` SLA template advertising 99.9% availability and < 500ms response time guarantees. A client subscribing to the service proposes a `kind:30570` approval gate referencing the template. When automated monitoring detects downtime exceeding the threshold, a `kind:30578` breach evidence record is published. The provider acknowledges the breach and issues account credits per the agreed penalty terms.
 
 ### SaaS Uptime Guarantees
 
-A SaaS application provider commits to tiered availability (99.9% for enterprise, 99.5% for standard). Each tier is a separate `kind:30578` SLA template. Enterprise customers bind approval gates referencing the premium template. Monthly availability calculations drive automated breach detection.
-
-### Consulting and Professional Services
-
-A consultant commits to 4-hour first-contact response and 48-hour resolution for client queries. The SLA template encodes these as `first_contact` and `resolution_time` metrics. When the consultant misses a response window, the client publishes breach evidence and settlement proceeds via NIP-INVOICING credit.
+A SaaS application provider commits to tiered availability (99.95% for enterprise, 99.5% for standard). Each tier is a separate `kind:30578` SLA template. Enterprise customers bind approval gates referencing the premium template. Monthly availability calculations drive automated breach detection. Penalties are applied as credits against the next billing cycle.
 
 ### Freelance Milestone Contracts
 
-A freelancer commits to delivering project milestones by agreed dates. Each milestone deadline is encoded as a `resolution_time` metric in the SLA template. Late delivery triggers a breach evidence record, and the penalty (discount on final invoice) is settled via NIP-INVOICING.
+A freelancer commits to delivering project milestones by agreed dates. Each milestone deadline is encoded as a `resolution_time` metric in the SLA template. The client proposes an approval gate with the specific milestones and dates. Late delivery triggers a breach evidence record, and the agreed penalty (e.g. a percentage discount on the final invoice) is settled between the parties.
+
+### API Service Rate Limits and Latency
+
+An API provider guarantees rate limits (10,000 requests/minute) and latency targets (p95 < 200ms) to paying consumers. The SLA template encodes these as `availability` and `response_time` metrics. Automated monitoring publishes breach evidence when thresholds are exceeded. The consumer can present the signed breach record when requesting penalty credits.
+
+### Consulting and Professional Services
+
+A consultant commits to 4-hour first-contact response and 48-hour resolution for client queries. The SLA template encodes these as `first_contact` and `resolution_time` metrics. When the consultant misses a response window, the client publishes breach evidence. If the consultant disputes the timing (e.g. the query was sent outside business hours), they escalate via NIP-DISPUTES and a mediator rules on the claim.
 
 ---
 
@@ -648,19 +782,113 @@ Clients tracking SLA compliance SHOULD:
 1. Subscribe to `kind:30570` gates with `sla_template_ref` tags for active engagements
 2. Resolve the referenced `kind:30578` SLA template to obtain the full metric set
 3. Apply any override `sla_metric` tags from the approval gate
-4. Monitor engagement events against SLA deadlines
-5. Alert when deadlines approach (e.g. 80% of response time elapsed)
+4. Monitor service metrics against SLA thresholds
+5. Alert when thresholds approach (e.g. 80% of response time elapsed)
 6. Publish `kind:30578` breach evidence when thresholds are violated
 
 ### Automated SLA Monitoring
 
 Implementations MAY deploy automated monitoring systems that:
 
-- Subscribe to engagement events for engagements with approved SLA gates
+- Subscribe to relevant events for engagements with approved SLA gates
 - Track elapsed time against response time and resolution time thresholds
 - Calculate rolling availability and on-time rate metrics per measurement period
 - Automatically publish `kind:30578` breach evidence when thresholds are violated
 - The monitoring system SHOULD use a dedicated keypair identified in the SLA approval gate
+
+### Filing Deadlines and Escalation
+
+This guide does not prescribe specific filing deadlines or escalation timeframes. Applications define their own rules for:
+
+- How long after a threshold violation a breach report may be filed
+- Whether escalation to NIP-DISPUTES is automatic or manual
+- What penalty calculations apply for different severity levels
+- Whether penalties compound for repeated breaches within a measurement period
+
+These decisions depend on the specific service context and the agreement between parties.
+
+---
+
+## Test Vectors
+
+### Minimal Valid SLA Template
+
+```json
+{
+  "kind": 30578,
+  "pubkey": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
+  "created_at": 1698780000,
+  "tags": [
+    ["d", "test:sla_template:minimal"],
+    ["t", "evidence-record"],
+    ["evidence_type", "sla_template"],
+    ["sla_metric", "availability", "99.9", "percentage", "1000", "credit"]
+  ],
+  "content": ""
+}
+```
+
+This is valid because it includes the three required tags (`d`, `t` with `evidence-record`, `evidence_type` with `sla_template`) and at least one `sla_metric` with all six elements.
+
+### Invalid: Missing sla_metric
+
+```json
+{
+  "kind": 30578,
+  "pubkey": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
+  "created_at": 1698780000,
+  "tags": [
+    ["d", "test:sla_template:invalid"],
+    ["t", "evidence-record"],
+    ["evidence_type", "sla_template"]
+  ],
+  "content": ""
+}
+```
+
+Invalid: violates V-SLA-01 (no `sla_metric` tag).
+
+### Invalid: Incomplete sla_metric
+
+```json
+{
+  "kind": 30578,
+  "pubkey": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
+  "created_at": 1698780000,
+  "tags": [
+    ["d", "test:sla_template:invalid_metric"],
+    ["t", "evidence-record"],
+    ["evidence_type", "sla_template"],
+    ["sla_metric", "availability", "99.9"]
+  ],
+  "content": ""
+}
+```
+
+Invalid: violates V-SLA-02 (`sla_metric` has 3 elements instead of 6).
+
+### Minimal Valid SLA Breach
+
+```json
+{
+  "kind": 30578,
+  "pubkey": "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3",
+  "created_at": 1698795780,
+  "tags": [
+    ["d", "test:evidence:sla_breach_001"],
+    ["t", "evidence-record"],
+    ["evidence_type", "sla_breach"],
+    ["sla_metric", "availability"],
+    ["sla_threshold", "availability", "99.9", "percentage"],
+    ["sla_actual_value", "98.5"],
+    ["sla_measurement_timestamp", "1698794400"],
+    ["severity", "major"]
+  ],
+  "content": ""
+}
+```
+
+This is valid because it includes all required breach tags: `evidence_type`, `sla_metric`, `sla_threshold`, `sla_actual_value`, `sla_measurement_timestamp`, and `severity`.
 
 ---
 
@@ -673,7 +901,7 @@ Implementations MAY deploy automated monitoring systems that:
 | SLA Breach Report     | NIP-EVIDENCE (`evidence_type: sla_breach`)         | `kind:30578`     |
 | Breach Dispute        | NIP-DISPUTES (claim + resolution)                  | `kind:7543` + `kind:30545` |
 | Dispute Evidence      | NIP-EVIDENCE (`evidence_type: document`, etc.)     | `kind:30578`     |
-| Penalty Settlement    | NIP-ESCROW or NIP-INVOICING                        | (see those NIPs) |
+| Penalty Settlement    | Application-specific (e.g. NIP-ESCROW, NIP-INVOICING, Lightning) | (see those NIPs) |
 
 ---
 
@@ -685,6 +913,8 @@ Implementations MAY deploy automated monitoring systems that:
 * [NIP-01](https://github.com/nostr-protocol/nips/blob/master/01.md): Basic protocol flow, addressable events
 * [NIP-40](https://github.com/nostr-protocol/nips/blob/master/40.md): Expiration timestamps (template and agreement validity)
 * [NIP-44](https://github.com/nostr-protocol/nips/blob/master/44.md): Versioned encrypted payloads (private SLA terms)
+
+> **Note on draft dependencies.** NIP-EVIDENCE, NIP-APPROVAL, and NIP-DISPUTES are currently draft NIPs. This composition guide describes the intended interaction pattern. Implementers should track the status of these component NIPs and adjust their implementations as those specifications evolve.
 
 ## Informative References
 
@@ -698,6 +928,6 @@ A minimal implementation requires:
 
 1. A Nostr client that supports addressable event publishing.
 2. SLA template rendering logic: parsing `sla_metric` tags from `kind:30578` evidence records with `evidence_type: sla_template`.
-3. Agreement management: creating `kind:30570` approval gates referencing templates, collecting `kind:30571` responses, and resolving effective metrics (template + overrides).
-4. Breach detection: monitoring engagement events against SLA deadlines and publishing `kind:30578` breach evidence when thresholds are violated.
+3. Agreement management (optional): creating `kind:30570` approval gates referencing templates, collecting `kind:30571` responses, and resolving effective metrics (template + overrides).
+4. Breach detection (optional): monitoring service metrics against SLA thresholds and publishing `kind:30578` breach evidence when thresholds are violated.
 5. Dispute escalation (optional): filing `kind:7543` dispute claims when breaches are contested and resolving via `kind:30545`.

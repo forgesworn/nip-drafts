@@ -6,11 +6,11 @@ Scope & Price Change Management
 
 `draft` `optional`
 
-One addressable event kind for proposing changes to agreed work on Nostr. Pricing of changes composes with NIP-QUOTE; approval composes with NIP-APPROVAL.
+One addressable event kind for proposing changes to agreed work on Nostr. Applications MAY compose with NIP-QUOTE for pricing context and NIP-APPROVAL for multi-party sign-off, but NIP-VARIATION works independently.
 
-> **Design principle:** The Variation Request records that a change was proposed and describes its scope. It does not price the change or approve it. Pricing composes with NIP-QUOTE (kind 30530); approval composes with NIP-APPROVAL (kinds 30570-30571). The consuming application updates its internal state based on the approved variation.
+> **Design principle:** The Variation Request records that a change was proposed and describes its scope. It does not price the change or approve it. Pricing composes OPTIONALLY with NIP-QUOTE (kind 30530); approval composes OPTIONALLY with NIP-APPROVAL (kinds 30570-30571). The consuming application updates its internal state based on the approved variation.
 
-> **Standalone usability:** This NIP works independently on any Nostr application. Within the TROTT protocol (v0.9), it is pattern P6 in TROTT-00: Core Patterns. TROTT composes variation management with payment commitment (amended stakes), task lifecycle states, and domain-specific scope change rules, but adoption of TROTT is not required.
+> **Standalone.** This NIP works independently on any Nostr application.
 
 ## Motivation
 
@@ -275,7 +275,7 @@ Variation Request → Approval Gate → Approval Response
 
 ---
 
-## Use Cases Beyond TROTT
+## Example Applications
 
 ### Marketplace Order Modifications
 

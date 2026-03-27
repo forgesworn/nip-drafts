@@ -10,7 +10,7 @@ One event kind for recording verified handoffs of physical or digital assets on 
 
 > **Design principle:** Custody events create an append-only chain of signed records. Each transfer is independently verifiable — any party can reconstruct the full chain by following event references from the most recent transfer back to the origin.
 
-> **Standalone usability:** This NIP works independently on any Nostr application. Within the TROTT protocol (v0.9), it is pattern P2 in TROTT-00: Core Patterns. TROTT composes custody transfers with task lifecycle states, domain-specific handoff requirements (freight, delivery, asset rental), and compliance records — but adoption of TROTT is not required.
+> **Standalone.** This NIP works independently on any Nostr application.
 
 ## Motivation
 
@@ -75,12 +75,12 @@ Tags:
 * `p` with role `"custody_from"` (REQUIRED): Hex pubkey of the outgoing custodian. Format: `["p", "<pubkey>", "", "custody_from"]`.
 * `p` with role `"custody_to"` (REQUIRED): Hex pubkey of the incoming receiver. Format: `["p", "<pubkey>", "", "custody_to"]`.
 * `asset_id` (REQUIRED): Identifier for the asset being transferred.
-* `condition_grade` (RECOMMENDED): Condition at time of handoff. One of `"excellent"`, `"good"`, `"fair"`, or `"damaged"`.
+* `condition_grade` (OPTIONAL): Condition at time of handoff. Applications define their own condition values. Common examples include `"excellent"`, `"good"`, `"fair"`, and `"damaged"`.
 * `condition_evidence` (RECOMMENDED): Event ID of a Kind 30578 (NIP-EVIDENCE) documenting condition.
 * `p` (RECOMMENDED): Additional parties to notify (without a role marker).
 * `g` (RECOMMENDED): Geohash of the handoff location.
 * `custody_handoff_ref` (OPTIONAL): Event ID of the previous custody transfer in the chain.
-* `asset_type` (OPTIONAL): Category: `vehicle`, `tool`, `parcel`, `material`, `equipment`, `ticket`, `document`.
+* `asset_type` (OPTIONAL): Category of the asset being transferred. Applications define their own asset type values. Common examples include `vehicle`, `tool`, `parcel`, `document`.
 * `ref` (OPTIONAL): External reference (waybill number, tracking ID, order number).
 * `e` (OPTIONAL): Reference to a related event.
 
@@ -89,6 +89,8 @@ Tags:
 ---
 
 ## Composing with NIP-EVIDENCE
+
+Composition with NIP-EVIDENCE is OPTIONAL. The custody transfer record is self-contained.
 
 Custody evidence is recorded as NIP-EVIDENCE events (kind 30578) with custody-specific tags. This avoids a dedicated evidence kind while preserving full chain-linked audit trails. Either party MAY publish evidence at the time of a custody transfer to document the condition of the asset. Multiple evidence events may be published per transfer.
 
@@ -99,7 +101,7 @@ When recording custody evidence, the following tags SHOULD be added to a standar
 * `evidence_type` (REQUIRED): One of `"custody_inspection"`, `"custody_condition"`, `"custody_receipt"`, or other custody-relevant values (e.g. `"photo"`, `"video"`, `"reading"`).
 * `e` (REQUIRED): Event ID of the Kind 30572 custody transfer event this evidence relates to.
 * `custody_handoff_ref` (RECOMMENDED): Event ID of the specific custody transfer in the chain. Links the evidence to a particular leg for multi-leg audit trails.
-* `condition_grade` (RECOMMENDED): Condition assessment at time of handoff. One of `"excellent"`, `"good"`, `"fair"`, or `"damaged"`.
+* `condition_grade` (OPTIONAL): Condition assessment at time of handoff. Applications define their own values; common examples include `"excellent"`, `"good"`, `"fair"`, and `"damaged"`.
 * `asset_id` (RECOMMENDED): Identifier of the asset being documented.
 
 All standard NIP-EVIDENCE tags (`d`, `t`, `file_hash`, `captured_at`, `g`, `mime_type`, `ref`) apply as defined in NIP-EVIDENCE.
@@ -257,7 +259,7 @@ sequenceDiagram
 
 > **Note:** Because custody roles are encoded in standard `p` tags, relays can filter custody events by participant pubkey using `#p`. Filters on multi-letter tags (e.g. `#asset_id`, `#condition_grade`) are not supported by relay-side `REQ` filtering; clients MUST apply these filters locally.
 
-## Use Cases Beyond TROTT
+## Use Cases
 
 ### Nostr Marketplace Item Handoffs
 

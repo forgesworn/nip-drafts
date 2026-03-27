@@ -10,7 +10,7 @@ Three addressable event kinds for calendar-based scheduling on Nostr; a provider
 
 > **Design principle:** Booking events coordinate scheduling. They communicate availability and record reservations. They do not enforce exclusivity at the relay level; the consuming application is responsible for preventing double-bookings and handling cancellation policies.
 
-> **Standalone usability:** This NIP works independently on any Nostr application. Within the TROTT protocol (v0.9), TROTT-11: Scheduling & Availability extends NIP-BOOKING with domain-specific configuration (default slot durations, cancellation windows per domain) and composition with the TROTT task lifecycle. Adoption of TROTT is not required.
+> **Standalone.** This NIP works independently on any Nostr application.
 
 ## Motivation
 
@@ -22,7 +22,7 @@ Nostr has NIP-52 for calendar events and NIP-53 for live activities, but no stan
 - **Event ticketing** - time-limited entry slots with capacity management
 - **Tutoring & consulting** - one-on-one sessions with calendar-based scheduling
 
-Without a standard, each scheduling application invents its own availability and booking scheme. NIP-BOOKING provides three minimal, composable primitives that any Nostr application can adopt for time-based coordination. Booking confirmation and rescheduling are handled by composing with NIP-APPROVAL and NIP-VARIATION respectively, keeping NIP-BOOKING focused on the core scheduling data model.
+Without a standard, each scheduling application invents its own availability and booking scheme. NIP-BOOKING provides three minimal, composable primitives that any Nostr application can adopt for time-based coordination. Applications MAY compose with NIP-APPROVAL for multi-party confirmation and NIP-VARIATION for scope changes, but NIP-BOOKING works independently.
 
 ## Relationship to Existing NIPs
 
@@ -144,7 +144,7 @@ Here the recurring pattern generates Monday/Wednesday/Friday 09:00 slots, but th
 
 ### Tags
 
-* `d` (REQUIRED): Addressable event identifier. For period-based calendars, format `<provider_pubkey>:calendar:<period>`. For recurring calendars, format `<provider_pubkey>:calendar:<category>`. One calendar per provider per period or category.
+* `d` (REQUIRED): Addressable event identifier. RECOMMENDED format: `<provider_pubkey>:calendar:<period>` for period-based calendars, or `<provider_pubkey>:calendar:<category>` for recurring calendars. Applications MAY use any d-tag format that ensures uniqueness.
 * `t` (REQUIRED): Protocol family marker. MUST be `"availability-calendar"`.
 * `slot` (RECOMMENDED, multiple): Explicit time slots. Format: `["slot", "<start_unix>", "<end_unix>", "<status>"]` where `status` is `"available"`, `"booked"`, or `"blocked"`. A calendar event MAY contain multiple `slot` tags.
 * `g` (RECOMMENDED): Geohash of the service area.
@@ -278,7 +278,7 @@ Published by a requester to book a specific slot from a provider's calendar.
 
 Tags:
 
-* `d` (REQUIRED): Format `<calendar_d_tag>:slot:<slot_start>:booking:<requester_pubkey>`. The `slot_start` timestamp participates in the identifier to ensure one booking per requester per slot; without it, a second booking from the same requester on the same calendar would replace the first.
+* `d` (REQUIRED): Addressable event identifier. RECOMMENDED format: `<calendar_d_tag>:slot:<slot_start>:booking:<requester_pubkey>`. The `slot_start` timestamp participates in the identifier to ensure one booking per requester per slot; without it, a second booking from the same requester on the same calendar would replace the first. Applications MAY use any d-tag format that ensures uniqueness.
 * `t` (REQUIRED): Protocol family marker. MUST be `"booking-slot"`.
 * `e` (REQUIRED): Event ID of the Kind 30582 availability calendar.
 * `p` (REQUIRED): Provider's hex pubkey.
@@ -335,7 +335,7 @@ Published by either party to cancel a booking. The `d` tag format creates one ca
 
 Tags:
 
-* `d` (REQUIRED): Format `<booking_d_tag>:cancellation`. One cancellation per booking.
+* `d` (REQUIRED): Addressable event identifier. RECOMMENDED format: `<booking_d_tag>:cancellation`. One cancellation per booking. Applications MAY use any d-tag format that ensures uniqueness.
 * `t` (REQUIRED): Protocol family marker. MUST be `"booking-cancellation"`.
 * `e` (REQUIRED): Event ID of the Kind 30583 booking being cancelled.
 * `cancel_reason` (REQUIRED): Reason code. One of `"requester_initiated"`, `"provider_initiated"`, `"schedule_conflict"`, `"no_show"`, `"force_majeure"`.
@@ -363,11 +363,13 @@ Tags:
 
 ---
 
-## Composing with NIP-APPROVAL
+## Composing with NIP-APPROVAL (OPTIONAL)
+
+This section describes OPTIONAL composition with NIP-APPROVAL. NIP-BOOKING works independently without NIP-APPROVAL.
 
 Booking confirmation is handled by [NIP-APPROVAL](./NIP-APPROVAL.md) (kinds 30570-30571). In workflows where bookings require provider approval, a Kind 30583 booking is treated as a _request_ rather than a confirmed reservation. The provider creates an Approval Gate referencing the booking, then publishes an Approval Response with their decision.
 
-In workflows where bookings are auto-confirmed, this composition step is optional; the Kind 30583 booking itself constitutes confirmation.
+In workflows where bookings are auto-confirmed, this composition step is not needed; the Kind 30583 booking itself constitutes confirmation.
 
 ### Confirmation Flow
 
@@ -468,7 +470,9 @@ To fetch all approval responses for a specific booking:
 
 ---
 
-## Composing with NIP-VARIATION
+## Composing with NIP-VARIATION (OPTIONAL)
+
+This section describes OPTIONAL composition with NIP-VARIATION. NIP-BOOKING works independently without NIP-VARIATION. Applications that do not need rescheduling support can use cancellation-and-rebook instead.
 
 Rescheduling is handled by [NIP-VARIATION](./NIP-VARIATION.md) (kind 30579). A reschedule is a scope change: the proposer creates a Variation Request with `variation_type: schedule_change` and new `slot_start`/`slot_end` tags. The other party responds via NIP-APPROVAL.
 

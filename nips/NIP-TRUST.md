@@ -8,13 +8,13 @@ Portable Trust Networks
 
 Two addressable event kinds for trust revocation and provider endorsements on Nostr. List-based trust data (trusted providers, recommendations, collectives, block lists) is handled by NIP-51.
 
-> **Standalone usability:** This NIP works independently on any Nostr application. Within the TROTT protocol (v0.9), these kinds are defined in TROTT-10: Trusted Networks. TROTT extends them with trusted follower location sharing (`kind:20503`), operator-managed trust configuration, and domain-specific trust weighting. Adoption of TROTT is not required.
+> **Standalone.** This NIP works independently on any Nostr application.
 
 ## Motivation
 
 Trust relationships form organically through repeated interactions, yet no Nostr protocol standardises how these relationships are expressed, shared, or discovered across applications. NIP-02 contact lists are binary (follow/don't follow) with no category scoping, ratings, or reasons. NIP-51 lists provide flexible, categorised grouping of pubkeys, but two critical trust primitives cannot be modelled as list membership:
 
-1. **Trust revocation** must be a publicly timestamped, reason-coded event. Removing someone from a list is silent and leaves no audit trail. Revocations need tiered visibility, notification rules, and a permanent record that coordinators and safety contacts can query.
+1. **Trust revocation** must be a publicly timestamped, reason-coded event. Removing someone from a list is silent and leaves no audit trail. Revocations need tiered visibility, notification rules, and a permanent record that platform operators and safety contacts can query.
 2. **Provider endorsements** are directional attestations from one provider to another. They carry endorsement types, weighting criteria, and withdrawal semantics. A list entry cannot express "I vouch for this person's skill, weighted by my own track record."
 
 This NIP defines these two primitives. For list-based trust data, see [Composing with NIP-51](#composing-with-nip-51) below.
@@ -78,7 +78,7 @@ Explicit trust removal with reason-tiered visibility. Provides an audit trail an
         ["reason_code", "quality_decline"],
         ["e", "<nip-51-trust-list-event-id>"]
     ],
-    "content": "<NIP-44 encrypted to coordinator(s): 'Quality dropped significantly over last 3 jobs.'>",
+    "content": "<NIP-44 encrypted to platform operator(s): 'Quality dropped significantly over last 3 jobs.'>",
     "id": "<32-byte-hex>",
     "sig": "<64-byte-hex>"
 }
@@ -102,14 +102,14 @@ Optional tags:
 
 | Code | Visibility | Notification |
 | ---- | ---------- | ------------ |
-| `safety_concern` | Coordinators + safety contacts | NIP-17 to revoked party (code only, NOT free-text) |
-| `no_show` | Coordinators | NIP-17 to revoked party (code only) |
-| `quality_decline` | Coordinators | NIP-17 to revoked party (code only) |
+| `safety_concern` | Platform operators + safety contacts | NIP-17 to revoked party (code only, NOT free-text) |
+| `no_show` | Platform operators | NIP-17 to revoked party (code only) |
+| `quality_decline` | Platform operators | NIP-17 to revoked party (code only) |
 | `personal_preference` | Revoked party only | NIP-17 with reason code |
 | `moved_area` | Revoked party only | NIP-17 with reason code |
 | `inactive` | Silent | No notification |
 
-Content encryption: For safety/quality codes, content MUST be NIP-44 encrypted to relevant coordinators. The revoked party receives only the reason code via NIP-17, never the free-text. This prevents retaliation while giving signal.
+Content encryption: For safety/quality codes, content MUST be NIP-44 encrypted to relevant platform operators. The revoked party receives only the reason code via NIP-17, never the free-text. This prevents retaliation while giving signal.
 
 ### Revocation Lifecycle
 
@@ -179,7 +179,7 @@ Optional tags:
 
 Apps SHOULD weight endorsements by the endorser's track record:
 
-- **Completed tasks** - an endorser with 500 completed tasks carries more weight than one with 5. Zero-history endorser = zero weight (primary Sybil defence).
+- **Verified interactions** - an endorser with 500 completed transactions carries more weight than one with 5. Zero-history endorser = zero weight (primary Sybil defence).
 - **Ratings** - higher-rated endorsers carry more weight.
 - **Category relevance** - same-category endorsements carry full weight; cross-category MAY be weighted at 50%.
 
@@ -526,15 +526,15 @@ Researchers form collectives (NIP-51 lists) for peer review groups. Trust lists 
 
 * **No automatic trust injection.** Importing recommendations requires explicit user action. Apps MUST NOT silently add providers to trust lists.
 * **Self-encrypted block lists.** Block data is NIP-44 self-encrypted within `kind:10000` mute lists; relays cannot read who is blocked.
-* **Tiered revocation visibility.** Safety-related revocations are visible to coordinators for pattern detection; personal preference revocations are private.
-* **Sybil resistance for endorsements.** Apps SHOULD weight endorsements by the endorser's track record (completed tasks, ratings). Zero-history endorsers carry zero weight.
+* **Tiered revocation visibility.** Safety-related revocations are visible to platform operators for pattern detection; personal preference revocations are private.
+* **Sybil resistance for endorsements.** Apps SHOULD weight endorsements by the endorser's track record (verified interactions, ratings). Zero-history endorsers carry zero weight.
 * **Expiration support.** Trust entries and endorsements support NIP-40 expiration for time-bounded relationships.
 * **Revocation is not deletion.** A `kind:30515` trust revocation is a permanent, timestamped signal. It cannot be silently undone. To restore trust, the revoking party publishes a new endorsement or re-adds the provider to their trust list. The revocation history remains queryable.
 
 ## Privacy
 
 * **Block lists are fully encrypted.** Blocked pubkeys MUST NOT appear in public tags. All block data is stored in NIP-44 self-encrypted content within the `kind:10000` mute list.
-* **Revocation content is encrypted.** Free-text reasons in `kind:30515` are NIP-44 encrypted to relevant coordinators. The revoked party receives only the reason code via NIP-17, never the free-text.
+* **Revocation content is encrypted.** Free-text reasons in `kind:30515` are NIP-44 encrypted to relevant platform operators. The revoked party receives only the reason code via NIP-17, never the free-text.
 * **Private recommendations use NIP-44.** When visibility is `private`, recommendation list content is NIP-44 encrypted to specified recipients.
 * **Trust lists reveal social graph.** Public NIP-51 trust lists and `kind:30517` endorsements are visible on relays. Users concerned about social graph exposure SHOULD use NIP-44 encrypted content within their NIP-51 lists, keeping `p` tags in the encrypted payload rather than public tags.
 
@@ -556,7 +556,7 @@ Researchers form collectives (NIP-51 lists) for peer review groups. Trust lists 
     ["reason_code", "quality_decline"],
     ["e", "dddd4444eeee5555ffff6666aaaa1111bbbb2222cccc3333dddd4444eeee5555"]
   ],
-  "content": "<NIP-44 encrypted to coordinator(s): 'Quality dropped significantly over last 3 jobs.'>",
+  "content": "<NIP-44 encrypted to platform operator(s): 'Quality dropped significantly over last 3 jobs.'>",
   "id": "<32-byte-hex>",
   "sig": "<64-byte-hex>"
 }
@@ -626,15 +626,6 @@ Researchers form collectives (NIP-51 lists) for peer review groups. Trust lists 
 * [NIP-40](https://github.com/nostr-protocol/nips/blob/master/40.md): Expiration timestamps
 * [NIP-44](https://github.com/nostr-protocol/nips/blob/master/44.md): Versioned encrypted payloads
 * [NIP-51](https://github.com/nostr-protocol/nips/blob/master/51.md): Lists (trusted providers, recommendations, collectives, block lists)
-
-## Relationship to TROTT-10 Trusted Networks
-
-NIP-TRUST is a standalone NIP. Within the TROTT protocol, trust networks are extended with additional capabilities:
-
-- **TROTT-10: Trusted Networks** adds `kind:20503` (Trusted Follower Location) for sharing approximate location with trusted followers outside a task context, and defines operator-managed trust configuration including safety floors and auto-revocation policies. TROTT-10 also defines `kind:30514` (Trusted Network Configuration) for self-encrypted follower lists and shared-key management, and `kind:30516` (Personal Provider Presence) for NIP-44 encrypted availability and service terms visible only to approved followers. These private bilateral trust kinds are intentionally excluded from this standalone NIP as they depend on TROTT-specific infrastructure.
-- **P3 (Multi-party Consensus)** allows provider collectives to use consensus proposals (`kind:30574`) for group governance decisions (accepting new members, setting shared policies).
-
-These extensions are optional. NIP-TRUST works without any TROTT adoption.
 
 ## Reference Implementation
 

@@ -76,9 +76,9 @@ Funds committed. Proof that money has been locked and is no longer spendable by 
 
 Tags:
 
-* `d` (REQUIRED): Unique identifier. RECOMMENDED format: `<tx-id>:lock:<party>` where party is `requester` or `provider`.
-* `e` (REQUIRED): References the upstream event, typically the NIP-QUOTE Payment Terms event (kind 30531), but MAY reference the Quote directly when terms are implicit.
-* `party` (REQUIRED): Which party locked funds (`requester` or `provider`).
+* `d` (REQUIRED): Unique identifier. RECOMMENDED format: `<tx-id>:lock:<party>`. Applications MAY use any d-tag format that ensures uniqueness.
+* `e` (REQUIRED): References the upstream event. Lock events MAY reference a NIP-QUOTE Payment Terms event (kind 30531), but can reference any upstream pricing agreement. The `e` tag is not limited to NIP-QUOTE events.
+* `party` (REQUIRED): Which party locked funds. The `party` tag value is application-defined. Common conventions include `buyer`/`seller`, `payer`/`payee`, or `client`/`contractor`.
 * `amount` (REQUIRED): Locked amount in smallest currency unit.
 * `currency` (REQUIRED): Currency code.
 * `trust_model` (REQUIRED): Trust model (matches NIP-QUOTE Payment Terms).
@@ -124,7 +124,7 @@ Tags:
 
 * `d` (REQUIRED): Unique identifier. RECOMMENDED format: `<tx-id>:settlement:<party>` or `<tx-id>:settlement:milestone_<N>`.
 * `e` (REQUIRED): References the Lock event being settled.
-* `party` (REQUIRED): Which party's funds are being settled.
+* `party` (REQUIRED): Which party's funds are being settled. Uses the same application-defined values as the Lock event.
 * `outcome` (REQUIRED): One of:
     * `released` -- funds released to the counterparty on successful completion
     * `forfeited` -- full funds penalised for breach of terms
@@ -139,14 +139,14 @@ Tags:
 
 ### Tags for `released` and `expired` outcomes
 
-* `release_reason` (REQUIRED for `released`): One of `completed`, `cancelled_mutual`, `cancelled_grace`, `milestone`, `dispute_resolved`.
+* `release_reason` (REQUIRED for `released`): Primary values: `completed`, `cancelled`, `refunded`. Applications MAY define additional release reasons such as `cancelled_grace`, `milestone`, `dispute_resolved`.
 * `released_at` (OPTIONAL): Explicit release timestamp. When omitted, `created_at` serves the same purpose.
 * `milestone_id` (OPTIONAL): Identifier of the completed milestone.
 
 ### Tags for `forfeited` and `partial_forfeit` outcomes
 
 * `forfeit_amount` (REQUIRED): Forfeited amount in smallest currency unit. For `forfeited`, equals the full locked amount. For `partial_forfeit`, the penalised portion.
-* `forfeit_reason` (REQUIRED): One of `no_show`, `late_cancellation`, `abandonment`, `misconduct`, `dispute_loss`.
+* `forfeit_reason` (REQUIRED): Primary values: `breach`, `timeout`, `dispute_loss`. Applications MAY define additional forfeit reasons such as `no_show`, `late_cancellation`, `abandonment`, `misconduct`.
 * `refund_amount` (OPTIONAL for `partial_forfeit`): Amount returned to the offending party.
 * `forfeited_at` (OPTIONAL): Explicit forfeiture timestamp. When omitted, `created_at` serves the same purpose.
 

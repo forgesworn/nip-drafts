@@ -8,7 +8,7 @@ Spatial Signals & Corroboration
 
 Two regular event kinds for reporting location-bound real-world conditions and publishing follow-up corroboration on Nostr. A report declares that a spatial condition exists at a place; corroborations extend or curtail its effective lifetime. The same pair supports road hazards, pickup and access issues, temporary closures, security perimeters, weather alerts, and similar public geospatial signals.
 
-> **Standalone usability:** This NIP works independently on any Nostr application. Within the TROTT protocol, it composes with TROTT-07: Navigation as an external signal feed for rerouting, pickup warnings, and operational alerts. Adoption of any specific external project is not required.
+> **Standalone.** This NIP works independently on any Nostr application.
 
 ## Motivation
 
@@ -122,7 +122,7 @@ A profile adopting this NIP MUST define:
 - whether public `lat`/`lon` tags are required, optional, or forbidden
 - any additional extension tags it relies on
 
-TROTT domains can define profiles without changing the two core kinds. Other applications can do the same.
+Any application domain can define profiles without changing the two core kinds.
 
 ### Default Profile
 
@@ -287,9 +287,9 @@ A road-hazard profile can fit this NIP directly:
 
 One existing implementation already follows this shape closely, so interoperability is available even without a shared governance process.
 
-### TROTT-Style Profiles
+### Domain-Specific Profile Extensions
 
-TROTT domains can adopt the same two kinds for public or semi-public operating conditions such as:
+Domain-specific applications can adopt the same two kinds for public or semi-public operating conditions such as:
 
 - `pickup_access_issue`
 - `dropoff_restriction`
@@ -297,7 +297,7 @@ TROTT domains can adopt the same two kinds for public or semi-public operating c
 - `weather_hazard`
 - `site_closure`
 
-Typical TROTT extensions include:
+Typical domain-specific extensions include:
 
 - `domain` to identify the active service domain
 - `context` or `task_id` to scope the signal to an active task or route
