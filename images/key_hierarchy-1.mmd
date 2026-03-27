@@ -1,0 +1,29 @@
+sequenceDiagram
+    participant S as Superior
+    participant R as Relay
+    participant Sub as Subordinate
+    participant App as Application
+
+    S->>R: Publish kind:30594 (hierarchy declaration:<br/>parent > child, scope: family,<br/>permissions: sign, read, write)
+
+    Sub->>R: Publish kind:30594 (confirmation:<br/>child confirms parent authority)
+
+    Sub->>App: Request action requiring hierarchy check
+
+    App->>R: Query kind:30594 + kind:30595
+
+    note over App: Verification checks:<br/>kind:30594 exists for this pair<br/>scope matches requested action<br/>valid_until not expired<br/>no kind:30595 revocation found
+
+    App->>Sub: Authorised
+
+    note over S,Sub: Later: graduation
+
+    S->>R: Publish kind:30595 (revocation:<br/>graduation, sovereign)
+
+    Sub->>App: Request action requiring hierarchy check
+
+    App->>R: Query kind:30594 + kind:30595
+
+    note over App: Verification checks:<br/>kind:30595 revocation exists<br/>effective_at is in the past
+
+    App->>Sub: Rejected (no longer authorised)

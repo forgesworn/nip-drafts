@@ -1,0 +1,36 @@
+flowchart TD
+    A[Start: Verify authority<br/>superior over subordinate] --> B[1. Discover declarations<br/>Subscribe to kind:30594 where<br/>p tag matches subordinate<br/>or author matches superior]
+
+    B --> C{Declarations<br/>found?}
+    C -- No --> REJECT[Reject: no hierarchy exists]
+    C -- Yes --> D[2. Match scope<br/>Check scope tag covers<br/>the requested action<br/>using prefix matching]
+
+    D --> E{Scope<br/>matches?}
+    E -- No --> REJECT
+    E -- Yes --> F[3. Check permissions<br/>Verify declaration includes<br/>required permission tag]
+
+    F --> G{Permission<br/>present?}
+    G -- No --> REJECT
+    G -- Yes --> H[4. Check time bounds<br/>Current time between<br/>valid_from and valid_until]
+
+    H --> I{Within<br/>bounds?}
+    I -- No --> REJECT
+    I -- Yes --> J[5. Check revocation<br/>Query kind:30595 where<br/>a tag matches declaration address]
+
+    J --> K{Revocation found<br/>with past<br/>effective_at?}
+    K -- Yes --> REJECT
+    K -- No --> L{Mutual confirmation<br/>required for this<br/>relationship type?}
+
+    L -- No --> N[7. Check delegation chain<br/>If superior is themselves<br/>a subordinate, verify<br/>delegation_depth permits<br/>re-delegation at this level]
+    L -- Yes --> M[6. Check confirmation<br/>Verify subordinate published<br/>kind:30594 with confirms tag]
+
+    M --> M1{Confirmation<br/>found?}
+    M1 -- No --> REJECT
+    M1 -- Yes --> N
+
+    N --> O{Chain<br/>valid?}
+    O -- No --> REJECT
+    O -- Yes --> ACCEPT[Authorised]
+
+    style REJECT fill:#f4cccc,stroke:#cc0000,color:#000
+    style ACCEPT fill:#d9ead3,stroke:#38761d,color:#000

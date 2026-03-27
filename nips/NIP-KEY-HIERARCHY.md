@@ -116,7 +116,7 @@ Published by a superior to declare authority over a subordinate within a defined
 
 | Tag                | Required    | Description |
 |--------------------|-------------|-------------|
-| `d`                | Yes         | `<superior_pubkey>:hierarchy:<subordinate_pubkey>:<scope>`. Unique per superior per subordinate per scope. The pubkeys MUST be the full 64-character hex-encoded public keys (not truncated). The `<scope>` segment is application-defined (e.g. a domain name, a project identifier, or a department name). Examples in this document use truncated pubkeys for readability; implementations MUST use full-length pubkeys. |
+| `d`                | Yes         | `<superior_pubkey>:hierarchy:<subordinate_pubkey>:<scope>`. Unique per superior per subordinate per scope. The pubkeys MUST be the full 64-character hex-encoded public keys (not truncated). The `<scope>` segment is application-defined (e.g. a domain name, a project identifier, or a department name). |
 | `p`                | Yes         | Subordinate's Nostr pubkey. The fourth element SHOULD be `"subordinate"` as a role marker. Additional `p` tags MAY reference witnesses (see [Witnessed Declarations](#witnessed-declarations)). |
 | `t`                | Yes         | Protocol family marker. MUST be `"hierarchy-declaration"`. |
 | `role_superior`    | Yes         | The superior's role in this relationship. Application-defined values. Recommended: `parent`, `guardian`, `organisation`, `project_lead`, `mentor`, `keeper`, `custodian`, `employer`. |
@@ -247,42 +247,36 @@ This is a social signal -- it does not cryptographically prevent the superior fr
 
 ## Protocol Flow
 
-```
-  Superior                Relay              Subordinate          Application
-      |                     |                     |                    |
-      |-- kind:30594 ------>|                     |                    |
-      |  (hierarchy:        |                     |                    |
-      |   parent > child,   |                     |                    |
-      |   scope: family,    |                     |                    |
-      |   permissions:      |                     |                    |
-      |   sign, read, write)|                     |                    |
-      |                     |                     |                    |
-      |                     |<-- kind:30594 ------|                    |
-      |                     |  (confirmation:     |                    |
-      |                     |   child confirms    |                    |
-      |                     |   parent authority)  |                    |
-      |                     |                     |                    |
-      |                     |                     |-- Request -------->|
-      |                     |                     |  (action requiring |
-      |                     |                     |   hierarchy check) |
-      |                     |                     |                    |
-      |   Application checks:                     |                    |
-      |   kind:30594 exists for this pair ✓        |                    |
-      |   scope matches requested action ✓         |                    |
-      |   valid_until not expired ✓                |                    |
-      |   no kind:30595 revocation ✓               |                    |
-      |   → Authorised       |                     |                    |
-      |                     |                     |                    |
-      |                     |                (later: graduation)       |
-      |                     |                     |                    |
-      |-- kind:30595 ------>|                     |                    |
-      |  (revocation:       |                     |                    |
-      |   graduation,       |                     |                    |
-      |   sovereign)        |                     |                    |
-      |                     |                     |                    |
-      |   Application checks:                     |                    |
-      |   revocation exists ✗                      |                    |
-      |   → No longer authorised                   |                    |
+```mermaid
+sequenceDiagram
+    participant S as Superior
+    participant R as Relay
+    participant Sub as Subordinate
+    participant App as Application
+
+    S->>R: Publish kind:30594 (hierarchy declaration:<br/>parent > child, scope: family,<br/>permissions: sign, read, write)
+
+    Sub->>R: Publish kind:30594 (confirmation:<br/>child confirms parent authority)
+
+    Sub->>App: Request action requiring hierarchy check
+
+    App->>R: Query kind:30594 + kind:30595
+
+    note over App: Verification checks:<br/>kind:30594 exists for this pair<br/>scope matches requested action<br/>valid_until not expired<br/>no kind:30595 revocation found
+
+    App->>Sub: Authorised
+
+    note over S,Sub: Later: graduation
+
+    S->>R: Publish kind:30595 (revocation:<br/>graduation, sovereign)
+
+    Sub->>App: Request action requiring hierarchy check
+
+    App->>R: Query kind:30594 + kind:30595
+
+    note over App: Verification checks:<br/>kind:30595 revocation exists<br/>effective_at is in the past
+
+    App->>Sub: Rejected (no longer authorised)
 ```
 
 ### Verification Algorithm
@@ -296,6 +290,45 @@ Applications verifying whether a superior has authority over a subordinate SHOUL
 5. **Check revocation** — subscribe to `kind:30595` events where the `#a` filter matches the declaration's address (`30594:<superior-pubkey>:<d-tag-value>`). If any revocation exists with an `effective_at` in the past, the hierarchy is invalid.
 6. **Check confirmation** (if required) — for relationship types that require mutual consent, verify that the subordinate has published a confirming Kind 30594 event with a `confirms` tag.
 7. **Check delegation chain** — if the superior is themselves a subordinate in a higher hierarchy, verify that their `delegation_depth` permits re-delegation at this level.
+
+```mermaid
+flowchart TD
+    A[Start: Verify authority<br/>superior over subordinate] --> B[1. Discover declarations<br/>Subscribe to kind:30594 where<br/>p tag matches subordinate<br/>or author matches superior]
+
+    B --> C{Declarations<br/>found?}
+    C -- No --> REJECT[Reject: no hierarchy exists]
+    C -- Yes --> D[2. Match scope<br/>Check scope tag covers<br/>the requested action<br/>using prefix matching]
+
+    D --> E{Scope<br/>matches?}
+    E -- No --> REJECT
+    E -- Yes --> F[3. Check permissions<br/>Verify declaration includes<br/>required permission tag]
+
+    F --> G{Permission<br/>present?}
+    G -- No --> REJECT
+    G -- Yes --> H[4. Check time bounds<br/>Current time between<br/>valid_from and valid_until]
+
+    H --> I{Within<br/>bounds?}
+    I -- No --> REJECT
+    I -- Yes --> J[5. Check revocation<br/>Query kind:30595 where<br/>a tag matches declaration address]
+
+    J --> K{Revocation found<br/>with past<br/>effective_at?}
+    K -- Yes --> REJECT
+    K -- No --> L{Mutual confirmation<br/>required for this<br/>relationship type?}
+
+    L -- No --> N[7. Check delegation chain<br/>If superior is themselves<br/>a subordinate, verify<br/>delegation_depth permits<br/>re-delegation at this level]
+    L -- Yes --> M[6. Check confirmation<br/>Verify subordinate published<br/>kind:30594 with confirms tag]
+
+    M --> M1{Confirmation<br/>found?}
+    M1 -- No --> REJECT
+    M1 -- Yes --> N
+
+    N --> O{Chain<br/>valid?}
+    O -- No --> REJECT
+    O -- Yes --> ACCEPT[Authorised]
+
+    style REJECT fill:#f4cccc,stroke:#cc0000,color:#000
+    style ACCEPT fill:#d9ead3,stroke:#38761d,color:#000
+```
 
 ### REQ Filters
 
@@ -469,13 +502,13 @@ A project lead grants a developer scoped authority within a project. The develop
     "pubkey": "e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6",
     "created_at": 1707500100,
     "tags": [
-        ["d", "e5f6a1b2:confirms:d4e5f6a1:project:alpha:development"],
+        ["d", "e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6:confirms:d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5:project:alpha:development"],
         ["p", "d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5", "", "superior"],
         ["t", "hierarchy-confirmation"],
         ["role_superior", "project_lead"],
         ["role_subordinate", "developer"],
         ["scope", "project:alpha:development"],
-        ["confirms", "30594:d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5:d4e5f6a1:hierarchy:e5f6a1b2:project:alpha:development"],
+        ["confirms", "30594:d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5:d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5:hierarchy:e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6:project:alpha:development"],
         ["domain", "project"]
     ],
     "content": "",
@@ -494,7 +527,7 @@ A training provider assigns a mentor to an apprentice for a six-month programme.
     "pubkey": "f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1",
     "created_at": 1707500000,
     "tags": [
-        ["d", "f6a1b2c3:hierarchy:a1b2c3d4:org:training:welding"],
+        ["d", "f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1:hierarchy:a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2:org:training:welding"],
         ["p", "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2", "", "subordinate"],
         ["alt", "Hierarchy declaration: mentor over apprentice (welding training)"],
         ["t", "hierarchy-declaration"],
@@ -658,7 +691,7 @@ This NIP uses several multi-letter tags (`role_superior`, `role_subordinate`, `s
     "pubkey": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
     "created_at": 1707500000,
     "tags": [
-        ["d", "a1b2c3d4:hierarchy:b2c3d4e5:family:childcare"],
+        ["d", "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2:hierarchy:b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b200:family:childcare"],
         ["p", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b200", "", "subordinate"],
         ["alt", "Hierarchy declaration: parent over child (family)"],
         ["t", "hierarchy-declaration"],
@@ -687,7 +720,7 @@ This NIP uses several multi-letter tags (`role_superior`, `role_subordinate`, `s
     "pubkey": "f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1",
     "created_at": 1707500000,
     "tags": [
-        ["d", "f6a1b2c3:hierarchy:a1b2c3d4:org:training:welding"],
+        ["d", "f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1:hierarchy:a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2:org:training:welding"],
         ["p", "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2", "", "subordinate"],
         ["alt", "Hierarchy declaration: mentor over apprentice (welding training)"],
         ["t", "hierarchy-declaration"],
@@ -717,10 +750,10 @@ This NIP uses several multi-letter tags (`role_superior`, `role_subordinate`, `s
     "pubkey": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
     "created_at": 1770000000,
     "tags": [
-        ["d", "b2c3d4e5:revocation:family:childcare:1770000000"],
+        ["d", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b200:revocation:family:childcare:1770000000"],
         ["alt", "Hierarchy revocation: child graduated to sovereignty"],
         ["t", "hierarchy-revocation"],
-        ["a", "30594:a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2:a1b2c3d4:hierarchy:b2c3d4e5:family:childcare", "wss://relay.example.com"],
+        ["a", "30594:a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2:a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2:hierarchy:b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b200:family:childcare", "wss://relay.example.com"],
         ["p", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b200"],
         ["revocation_reason", "graduation"],
         ["effective_at", "1882915200"],
@@ -740,10 +773,10 @@ This NIP uses several multi-letter tags (`role_superior`, `role_subordinate`, `s
     "pubkey": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
     "created_at": 1710000000,
     "tags": [
-        ["d", "b2c3d4e5:revocation:family:childcare:1710000000"],
+        ["d", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b200:revocation:family:childcare:1710000000"],
         ["alt", "Hierarchy revocation: custody transferred to co-parent"],
         ["t", "hierarchy-revocation"],
-        ["a", "30594:a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2:a1b2c3d4:hierarchy:b2c3d4e5:family:childcare", "wss://relay.example.com"],
+        ["a", "30594:a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2:a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2:hierarchy:b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b200:family:childcare", "wss://relay.example.com"],
         ["p", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b200"],
         ["revocation_reason", "transfer"],
         ["effective_at", "1742169600"],
