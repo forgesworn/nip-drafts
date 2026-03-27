@@ -19,10 +19,17 @@ RELAYS=(
   "wss://relay.primal.net"
 )
 
+SECRET_KEY_FILE="${NOSTR_SECRET_KEY_FILE:-$HOME/.nostr/secret.key}"
+
 if [[ -z "${NOSTR_SECRET_KEY:-}" ]]; then
-  echo "Error: NOSTR_SECRET_KEY not set."
-  echo "  NOSTR_SECRET_KEY=nsec1... ./tombstone-and-fix.sh"
-  exit 1
+  if [[ -f "$SECRET_KEY_FILE" ]]; then
+    NOSTR_SECRET_KEY=$(cat "$SECRET_KEY_FILE" | tr -d '[:space:]')
+    echo "Using key from ${SECRET_KEY_FILE}"
+  else
+    echo "Error: No signing key found."
+    echo "  Place your nsec in ~/.nostr/secret.key or set NOSTR_SECRET_KEY"
+    exit 1
+  fi
 fi
 
 DRY_RUN=false
