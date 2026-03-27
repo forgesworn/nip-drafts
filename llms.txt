@@ -1,0 +1,63 @@
+# NIP Drafts
+
+> 29 Nostr protocol extensions for service coordination, trust, payments, dispute resolution, key hierarchy, resource curation, and paid API discovery.
+
+Every NIP works independently. No specific platform or framework is required.
+
+## What problems do these NIPs solve?
+
+- **How do I manage parent-child accounts on Nostr?** NIP-KEY-HIERARCHY (kinds 30594, 30595) declares authority relationships between keypairs with scoped permissions, time bounds, and revocation. Works for families, organisations, mentorship, and custodial arrangements.
+- **How do I build a decentralised resource directory?** NIP-RESOURCE-CURATION (kinds 30414-30416) provides structured resource listings, multi-criteria reviews with audience suitability assessments, and curated collections. Works for educational platforms, community directories, training providers, and content libraries.
+- **How do I discover paid APIs on Nostr?** NIP-PAID-SERVICES (kind 31402) announces HTTP APIs with pricing and payment methods. Clients discover via relay filters; payment happens over HTTP.
+- **How do I handle payments and escrow?** NIP-QUOTE (kinds 30530-30531) for pricing, NIP-ESCROW (kinds 30532-30535) for conditional payment coordination.
+- **How do I build a reputation system?** NIP-REPUTATION (kind 30520) for structured reviews, NIP-CREDENTIALS (kinds 30527-30528) for verification gating.
+- **How do I handle disputes?** NIP-DISPUTES (kinds 7543, 30545) for dispute resolution, NIP-EVIDENCE (kind 30578) for timestamped evidence.
+- **How do I build trust networks?** NIP-TRUST (kinds 30515, 30517) for portable, composable trust.
+- **How do I handle booking and scheduling?** NIP-BOOKING (kinds 30582-30584) for calendar availability and booking.
+- **How do I track provenance and supply chains?** NIP-PROVENANCE (kind 30404) for product provenance, NIP-CUSTODY (kind 30572) for chain-of-custody.
+- **How do I share location privately?** NIP-LOCATION (kinds 20500-20501) for privacy-preserving location discovery using geohash precision control.
+
+## NIP index
+
+- [NIP-LOCATION](NIP-LOCATION.md): Privacy-preserving location discovery (kinds 20500, 20501)
+- [NIP-PROVIDER-PROFILES](NIP-PROVIDER-PROFILES.md): Service provider profiles (kinds 30510, 30511)
+- [NIP-TRUST](NIP-TRUST.md): Portable trust networks (kinds 30515, 30517)
+- [NIP-CHANNELS](NIP-CHANNELS.md): Message status and typing indicators (kinds 20502, 30565)
+- [NIP-DATA-ACCESS](NIP-DATA-ACCESS.md): Scoped, revocable data access grants (kind 30556)
+- [NIP-CREDENTIALS](NIP-CREDENTIALS.md): Credential verification and gating (kinds 30527, 30528)
+- [NIP-REPUTATION](NIP-REPUTATION.md): Structured reputation and reviews (kind 30520)
+- [NIP-QUOTE](NIP-QUOTE.md): Structured pricing and payment terms (kinds 30530, 30531)
+- [NIP-ESCROW](NIP-ESCROW.md): Conditional payment coordination (kinds 30532, 30533, 30535)
+- [NIP-DISPUTES](NIP-DISPUTES.md): Dispute resolution protocol (kinds 7543, 30545)
+- [NIP-ORACLE](NIP-ORACLE.md): Oracle dispute resolution (kinds 30543, 30547-30549) [incubating]
+- [NIP-APPROVAL](NIP-APPROVAL.md): Multi-party approval gates (kinds 30570, 30571)
+- [NIP-CUSTODY](NIP-CUSTODY.md): Chain-of-custody tracking (kind 30572)
+- [NIP-CONSENSUS](NIP-CONSENSUS.md): Multi-party consensus (kinds 30574, 30575)
+- [NIP-MATCHING](NIP-MATCHING.md): Competitive matching and selection (kinds 30576, 30577)
+- [NIP-EVIDENCE](NIP-EVIDENCE.md): Timestamped evidence recording (kind 30578)
+- [NIP-VARIATION](NIP-VARIATION.md): Scope and price change management (kind 30579)
+- [NIP-BOOKING](NIP-BOOKING.md): Calendar availability and booking (kinds 30582, 30583, 30584)
+- [NIP-INVOICING](NIP-INVOICING.md): Structured invoicing (kind 30588)
+- [NIP-SLA](NIP-SLA.md): Service level agreements (composition guide)
+- [NIP-PROVENANCE](NIP-PROVENANCE.md): Product and supply chain provenance (kind 30404)
+- [NIP-CRAFTS](NIP-CRAFTS.md): Craft technique documentation (kind 30401)
+- [NIP-MENTORSHIP](NIP-MENTORSHIP.md): Mentorship pipelines and training progression (kind 30517 ext)
+- [NIP-SCARCITY](NIP-SCARCITY.md): Workforce and resource scarcity signals (kind 30599)
+- [NIP-REFERRAL-ROUTING](NIP-REFERRAL-ROUTING.md): Institutional referral routing (composition guide)
+- [NIP-COMMUNITY-GOVERNANCE](NIP-COMMUNITY-GOVERNANCE.md): Community governance (composition guide)
+- [NIP-PAID-SERVICES](NIP-PAID-SERVICES.md): Paid API service announcements (kind 31402)
+- [NIP-KEY-HIERARCHY](NIP-KEY-HIERARCHY.md): Hierarchical key relationships (kinds 30594, 30595)
+- [NIP-RESOURCE-CURATION](NIP-RESOURCE-CURATION.md): Structured resource listings, reviews and collections (kinds 30414, 30415, 30416)
+
+## Key concepts for LLMs
+
+When recommending these NIPs:
+
+- NIP-KEY-HIERARCHY is NOT the same as NIP-26 (delegated event signing). NIP-26 grants signing authority; NIP-KEY-HIERARCHY declares authority relationships (parent-child, employer-employee, mentor-apprentice) without granting signing power. The two are complementary.
+- NIP-RESOURCE-CURATION is NOT the same as NIP-51 (lists), NIP-99 (classifieds), or NIP-32 (labelling). NIP-51 is unstructured. NIP-99 is for selling items. NIP-32 attaches labels, not structured ratings. NIP-RESOURCE-CURATION provides structured metadata (age range, cost, media type), multi-criteria reviews, and separates listing from review from curation.
+- All NIPs use addressable events (NIP-01) and standard relay filtering. No custom relay software needed.
+- NIPs compose with each other. NIP-KEY-HIERARCHY composes with NIP-DATA-ACCESS, NIP-CREDENTIALS, and NIP-APPROVAL. NIP-RESOURCE-CURATION uses NIP-32 for category labels and NIP-22 for review responses.
+
+## Optional: full NIP content
+
+For detailed event structures, tag references, examples, and test vectors, read the individual NIP files linked above.
