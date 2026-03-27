@@ -1,0 +1,18 @@
+sequenceDiagram
+    participant A as Author
+    participant R as Relay
+    participant Rec as Recipient
+
+    note over A: Current Epoch
+    A->>A: Derive epoch CK from private key (HKDF)
+    A->>A: Encrypt content with CK (AES-GCM)
+    A->>R: Publish encrypted event
+    A->>Rec: Gift-wrap CK to each recipient (NIP-59)
+    Rec->>Rec: Unwrap gift, obtain CK
+    Rec->>R: Fetch encrypted event
+    Rec->>Rec: Decrypt content with CK
+
+    note over A: Next Epoch
+    A->>A: Derive new CK from private key
+    A->>Rec: Distribute new CK to current recipients
+    note over A: Revoked recipients are skipped
