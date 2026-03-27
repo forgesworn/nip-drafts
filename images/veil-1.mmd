@@ -1,0 +1,33 @@
+sequenceDiagram
+    participant M1 as Circle Member 1
+    participant M2 as Circle Member 2
+    participant M3 as Circle Member 3
+    participant Agg as Aggregator
+    participant R as Relay
+    participant V as Verifier
+
+    note over M1,M3: Trust Circle (3 members, all pubkeys public)
+
+    M1->>M1: Sign canonical message with LSAG
+    M1->>Agg: Contribution (LSAG signature + key image + metrics)
+
+    M2->>M2: Sign canonical message with LSAG
+    M2->>Agg: Contribution (LSAG signature + key image + metrics)
+
+    note over M3: Member 3 does NOT contribute
+
+    Agg->>Agg: Verify all LSAG signatures
+    Agg->>Agg: Check key image uniqueness
+    Agg->>Agg: Aggregate metrics (median)
+    Agg->>Agg: Build NIP-85 event + veil-* tags
+
+    Agg->>R: Publish kind 30382 event
+
+    V->>R: REQ kind 30382
+    R->>V: Event with veil-ring, veil-threshold, veil-sig tags
+    V->>V: Extract ring from veil-ring
+    V->>V: Reconstruct LSAG signatures
+    V->>V: Verify each signature against ring
+    V->>V: Confirm key image uniqueness
+    V->>V: Check threshold met (2/3)
+    note over V: Valid assertion, anonymous contributors
