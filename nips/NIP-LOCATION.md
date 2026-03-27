@@ -433,7 +433,7 @@ These extensions are optional. NIP-LOCATION works without any TROTT adoption.
 
 ## Reference Implementation
 
-The [`@trott/sdk`](https://github.com/TheCryptoDonkey/trott-sdk) TypeScript library provides builders and parsers for both kinds defined in this NIP. For standalone use without TROTT, implementors SHOULD refer to the kind definitions above and the [geohash algorithm](https://en.wikipedia.org/wiki/Geohash) for computing cell neighbours.
+No public reference implementation exists yet. Implementors SHOULD refer to the kind definitions above and the [geohash algorithm](https://en.wikipedia.org/wiki/Geohash) for computing cell neighbours.
 
 A minimal implementation requires:
 

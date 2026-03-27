@@ -142,6 +142,5 @@ Nostr is used only for discovery. Payment and API consumption happen over HTTP u
 | [402-mcp](https://github.com/forgesworn/402-mcp) | TypeScript | MCP server: AI agents discover and consume 402 APIs |
 | [402-indexer](https://github.com/forgesworn/402-indexer) | TypeScript | Nostr-native crawler for paid API discovery |
 | [toll-booth-dvm](https://github.com/forgesworn/toll-booth-dvm) | TypeScript | Expose L402 APIs as [NIP-90](90.md) DVMs |
-| [satgate](https://github.com/TheCryptoDonkey/satgate) | TypeScript | L402 gateway with Lightning and Cashu support |
 
 All implementations are by the same author. Independent implementations are encouraged.

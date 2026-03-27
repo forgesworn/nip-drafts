@@ -6,7 +6,7 @@ Epoch-Based Encrypted Content Access (Dominion)
 
 `draft` `optional`
 
-Authors: [TheCryptoDonkey](https://github.com/TheCryptoDonkey), [decented](https://github.com/decented)
+Authors: [decented](https://github.com/decented)
 
 This NIP defines a mechanism for encrypting Nostr content with epoch-based Content Keys (CKs) and distributing those keys to tiered audiences via gift-wrapped events. It enables revocable, scalable content access control on standard Nostr relays without custom relay software or new cryptographic primitives.
 
