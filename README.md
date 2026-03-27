@@ -12,36 +12,36 @@ All drafts are `draft` `optional` unless noted otherwise.
 
 | NIP | Title | Classification | Status | Kinds | Key Dependencies |
 | --- | ----- | -------------- | ------ | ----- | ---------------- |
-| [NIP-LOCATION](NIP-LOCATION.md) | Privacy-Preserving Location Discovery | upstream | `draft` | 20500, 20501 | NIP-01, NIP-40, NIP-44 |
-| [NIP-PROVIDER-PROFILES](NIP-PROVIDER-PROFILES.md) | Service Provider Profiles | upstream | `draft` | 30510, 30511 | NIP-01, NIP-40, NIP-58, NIP-99, NIP-EVIDENCE |
-| [NIP-TRUST](NIP-TRUST.md) | Portable Trust Networks | upstream | `draft` | 30515, 30517 | NIP-01, NIP-02, NIP-09, NIP-17, NIP-40, NIP-44, NIP-51 |
-| [NIP-CHANNELS](NIP-CHANNELS.md) | Message Status & Typing Indicators | upstream | `draft` | 20502, 30565 | NIP-01, NIP-17, NIP-40, NIP-44, NIP-59 |
-| [NIP-DATA-ACCESS](NIP-DATA-ACCESS.md) | Scoped, Revocable Data Access Grants | ecosystem | `draft` | 30556 | NIP-01, NIP-44, NIP-59 |
-| [NIP-CREDENTIALS](NIP-CREDENTIALS.md) | Credential Verification & Gating | upstream | `draft` | 30527, 30528 | NIP-01, NIP-40, NIP-44, NIP-REPUTATION |
-| [NIP-REPUTATION](NIP-REPUTATION.md) | Structured Reputation & Reviews | upstream | `draft` | 30520 | NIP-01, NIP-02, NIP-22, NIP-32, NIP-58, NIP-EVIDENCE |
-| [NIP-QUOTE](NIP-QUOTE.md) | Structured Pricing & Payment Terms | upstream | `draft` | 30530, 30531 | NIP-01, NIP-40, NIP-44 |
-| [NIP-ESCROW](NIP-ESCROW.md) | Conditional Payment Coordination | upstream | `draft` | 30532, 30533, 30535 | NIP-01, NIP-40, NIP-44, NIP-59, NIP-QUOTE |
-| [NIP-DISPUTES](NIP-DISPUTES.md) | Dispute Resolution Protocol | upstream | `draft` | 7543, 30545 | NIP-01, NIP-32, NIP-44, NIP-56, NIP-59, NIP-EVIDENCE |
-| [NIP-ORACLE](NIP-ORACLE.md) | Oracle Dispute Resolution | incubating | `draft` `incubating` | 30543, 30547, 30548, 30549 | NIP-01, NIP-40, NIP-44, NIP-59 |
-| [NIP-APPROVAL](NIP-APPROVAL.md) | Multi-Party Approval Gates | upstream | `draft` | 30570, 30571 | NIP-01, NIP-40, NIP-44 |
-| [NIP-CUSTODY](NIP-CUSTODY.md) | Chain-of-Custody Tracking | upstream | `draft` | 30572 | NIP-01, NIP-44, NIP-EVIDENCE, NIP-LOCATION |
-| [NIP-CONSENSUS](NIP-CONSENSUS.md) | Multi-Party Consensus | upstream | `draft` | 30574, 30575 | NIP-01, NIP-40, NIP-44 |
-| [NIP-MATCHING](NIP-MATCHING.md) | Competitive Matching & Selection | upstream | `draft` | 30576, 30577 | NIP-01, NIP-15, NIP-40, NIP-44, NIP-99 |
-| [NIP-EVIDENCE](NIP-EVIDENCE.md) | Timestamped Evidence Recording | upstream | `draft` | 30578 | NIP-01, NIP-40, NIP-44 |
-| [NIP-VARIATION](NIP-VARIATION.md) | Scope & Price Change Management | upstream | `draft` | 30579 | NIP-01, NIP-40, NIP-44, NIP-QUOTE, NIP-APPROVAL |
-| [NIP-BOOKING](NIP-BOOKING.md) | Calendar Availability & Booking | upstream | `draft` | 30582, 30583, 30584 | NIP-01, NIP-40, NIP-44, NIP-52, NIP-APPROVAL, NIP-VARIATION, RFC 5545 |
-| [NIP-INVOICING](NIP-INVOICING.md) | Structured Invoicing | ecosystem | `draft` | 30588 | NIP-01, NIP-40, NIP-44, NIP-ESCROW, NIP-APPROVAL |
-| [NIP-SLA](NIP-SLA.md) | Service Level Agreements (Composition Guide) | ecosystem | `draft` `composition-guide` | none | NIP-EVIDENCE, NIP-APPROVAL, NIP-DISPUTES |
-| [NIP-PROVENANCE](NIP-PROVENANCE.md) | Product & Supply Chain Provenance | ecosystem | `draft` | 30404 | NIP-01, NIP-32, NIP-40, NIP-44, NIP-VA, NIP-CUSTODY, NIP-EVIDENCE |
-| [NIP-CRAFTS](NIP-CRAFTS.md) | Craft Technique Documentation | ecosystem | `draft` | 30401 | NIP-01, NIP-32, NIP-40, NIP-44, NIP-PROVIDER-PROFILES |
-| [NIP-MENTORSHIP](NIP-MENTORSHIP.md) | Mentorship Pipelines & Training Progression | upstream | `draft` | 30517 (ext) | NIP-01, NIP-40, NIP-44, NIP-TRUST, NIP-REPUTATION, NIP-EVIDENCE |
-| [NIP-SCARCITY](NIP-SCARCITY.md) | Workforce & Resource Scarcity Signals | upstream | `draft` | 30599 | NIP-01, NIP-40, NIP-TRUST, NIP-REPUTATION, NIP-PROVENANCE |
-| [NIP-REFERRAL-ROUTING](NIP-REFERRAL-ROUTING.md) | Institutional Referral Routing (Composition Guide) | ecosystem | `draft` `composition-guide` | none | NIP-51, NIP-APPROVAL, NIP-44, NIP-59 |
-| [NIP-COMMUNITY-GOVERNANCE](NIP-COMMUNITY-GOVERNANCE.md) | Community Governance (Composition Guide) | ecosystem | `draft` `composition-guide` | none | NIP-51, NIP-CONSENSUS, NIP-EVIDENCE |
-| [NIP-PAID-SERVICES](NIP-PAID-SERVICES.md) | Paid API Service Announcements | upstream | `draft` | 31402 | NIP-01, NIP-40 |
-| [NIP-KEY-HIERARCHY](NIP-KEY-HIERARCHY.md) | Hierarchical Key Relationships | upstream | `draft` | 30594, 30595 | NIP-01, NIP-40, NIP-44, NIP-59 |
-| [NIP-RESOURCE-CURATION](NIP-RESOURCE-CURATION.md) | Structured Resource Listings, Reviews & Collections | upstream | `draft` | 30414, 30415, 30416 | NIP-01, NIP-22, NIP-32, NIP-40, NIP-51 |
-| [NIP-DOMINION](NIP-DOMINION.md) | Epoch-Based Encrypted Content Access | upstream | `draft` | 30480 | NIP-01, NIP-44, NIP-59, NIP-78 |
+| [NIP-LOCATION](nips/NIP-LOCATION.md) | Privacy-Preserving Location Discovery | upstream | `draft` | 20500, 20501 | NIP-01, NIP-40, NIP-44 |
+| [NIP-PROVIDER-PROFILES](nips/NIP-PROVIDER-PROFILES.md) | Service Provider Profiles | upstream | `draft` | 30510, 30511 | NIP-01, NIP-40, NIP-58, NIP-99, NIP-EVIDENCE |
+| [NIP-TRUST](nips/NIP-TRUST.md) | Portable Trust Networks | upstream | `draft` | 30515, 30517 | NIP-01, NIP-02, NIP-09, NIP-17, NIP-40, NIP-44, NIP-51 |
+| [NIP-CHANNELS](nips/NIP-CHANNELS.md) | Message Status & Typing Indicators | upstream | `draft` | 20502, 30565 | NIP-01, NIP-17, NIP-40, NIP-44, NIP-59 |
+| [NIP-DATA-ACCESS](nips/NIP-DATA-ACCESS.md) | Scoped, Revocable Data Access Grants | ecosystem | `draft` | 30556 | NIP-01, NIP-44, NIP-59 |
+| [NIP-CREDENTIALS](nips/NIP-CREDENTIALS.md) | Credential Verification & Gating | upstream | `draft` | 30527, 30528 | NIP-01, NIP-40, NIP-44, NIP-REPUTATION |
+| [NIP-REPUTATION](nips/NIP-REPUTATION.md) | Structured Reputation & Reviews | upstream | `draft` | 30520 | NIP-01, NIP-02, NIP-22, NIP-32, NIP-58, NIP-EVIDENCE |
+| [NIP-QUOTE](nips/NIP-QUOTE.md) | Structured Pricing & Payment Terms | upstream | `draft` | 30530, 30531 | NIP-01, NIP-40, NIP-44 |
+| [NIP-ESCROW](nips/NIP-ESCROW.md) | Conditional Payment Coordination | upstream | `draft` | 30532, 30533, 30535 | NIP-01, NIP-40, NIP-44, NIP-59, NIP-QUOTE |
+| [NIP-DISPUTES](nips/NIP-DISPUTES.md) | Dispute Resolution Protocol | upstream | `draft` | 7543, 30545 | NIP-01, NIP-32, NIP-44, NIP-56, NIP-59, NIP-EVIDENCE |
+| [NIP-ORACLE](nips/NIP-ORACLE.md) | Oracle Dispute Resolution | incubating | `draft` `incubating` | 30543, 30547, 30548, 30549 | NIP-01, NIP-40, NIP-44, NIP-59 |
+| [NIP-APPROVAL](nips/NIP-APPROVAL.md) | Multi-Party Approval Gates | upstream | `draft` | 30570, 30571 | NIP-01, NIP-40, NIP-44 |
+| [NIP-CUSTODY](nips/NIP-CUSTODY.md) | Chain-of-Custody Tracking | upstream | `draft` | 30572 | NIP-01, NIP-44, NIP-EVIDENCE, NIP-LOCATION |
+| [NIP-CONSENSUS](nips/NIP-CONSENSUS.md) | Multi-Party Consensus | upstream | `draft` | 30574, 30575 | NIP-01, NIP-40, NIP-44 |
+| [NIP-MATCHING](nips/NIP-MATCHING.md) | Competitive Matching & Selection | upstream | `draft` | 30576, 30577 | NIP-01, NIP-15, NIP-40, NIP-44, NIP-99 |
+| [NIP-EVIDENCE](nips/NIP-EVIDENCE.md) | Timestamped Evidence Recording | upstream | `draft` | 30578 | NIP-01, NIP-40, NIP-44 |
+| [NIP-VARIATION](nips/NIP-VARIATION.md) | Scope & Price Change Management | upstream | `draft` | 30579 | NIP-01, NIP-40, NIP-44, NIP-QUOTE, NIP-APPROVAL |
+| [NIP-BOOKING](nips/NIP-BOOKING.md) | Calendar Availability & Booking | upstream | `draft` | 30582, 30583, 30584 | NIP-01, NIP-40, NIP-44, NIP-52, NIP-APPROVAL, NIP-VARIATION, RFC 5545 |
+| [NIP-INVOICING](nips/NIP-INVOICING.md) | Structured Invoicing | ecosystem | `draft` | 30588 | NIP-01, NIP-40, NIP-44, NIP-ESCROW, NIP-APPROVAL |
+| [NIP-SLA](nips/NIP-SLA.md) | Service Level Agreements (Composition Guide) | ecosystem | `draft` `composition-guide` | none | NIP-EVIDENCE, NIP-APPROVAL, NIP-DISPUTES |
+| [NIP-PROVENANCE](nips/NIP-PROVENANCE.md) | Product & Supply Chain Provenance | ecosystem | `draft` | 30404 | NIP-01, NIP-32, NIP-40, NIP-44, NIP-VA, NIP-CUSTODY, NIP-EVIDENCE |
+| [NIP-CRAFTS](nips/NIP-CRAFTS.md) | Craft Technique Documentation | ecosystem | `draft` | 30401 | NIP-01, NIP-32, NIP-40, NIP-44, NIP-PROVIDER-PROFILES |
+| [NIP-MENTORSHIP](nips/NIP-MENTORSHIP.md) | Mentorship Pipelines & Training Progression | upstream | `draft` | 30517 (ext) | NIP-01, NIP-40, NIP-44, NIP-TRUST, NIP-REPUTATION, NIP-EVIDENCE |
+| [NIP-SCARCITY](nips/NIP-SCARCITY.md) | Workforce & Resource Scarcity Signals | upstream | `draft` | 30599 | NIP-01, NIP-40, NIP-TRUST, NIP-REPUTATION, NIP-PROVENANCE |
+| [NIP-REFERRAL-ROUTING](nips/NIP-REFERRAL-ROUTING.md) | Institutional Referral Routing (Composition Guide) | ecosystem | `draft` `composition-guide` | none | NIP-51, NIP-APPROVAL, NIP-44, NIP-59 |
+| [NIP-COMMUNITY-GOVERNANCE](nips/NIP-COMMUNITY-GOVERNANCE.md) | Community Governance (Composition Guide) | ecosystem | `draft` `composition-guide` | none | NIP-51, NIP-CONSENSUS, NIP-EVIDENCE |
+| [NIP-PAID-SERVICES](nips/NIP-PAID-SERVICES.md) | Paid API Service Announcements | upstream | `draft` | 31402 | NIP-01, NIP-40 |
+| [NIP-KEY-HIERARCHY](nips/NIP-KEY-HIERARCHY.md) | Hierarchical Key Relationships | upstream | `draft` | 30594, 30595 | NIP-01, NIP-40, NIP-44, NIP-59 |
+| [NIP-RESOURCE-CURATION](nips/NIP-RESOURCE-CURATION.md) | Structured Resource Listings, Reviews & Collections | upstream | `draft` | 30414, 30415, 30416 | NIP-01, NIP-22, NIP-32, NIP-40, NIP-51 |
+| [NIP-DOMINION](nips/NIP-DOMINION.md) | Epoch-Based Encrypted Content Access | upstream | `draft` | 30480 | NIP-01, NIP-44, NIP-59, NIP-78 |
 
 ### Incubating
 
@@ -75,7 +75,7 @@ Each NIP is classified by its maturity and genericness. See the Classification c
 
 ### Extended by TROTT
 
-The [TROTT protocol](https://github.com/TheCryptoDonkey/trott) (TROTT-00 through TROTT-14) extends these NIPs with domain-specific configuration, operator integration, and cross-spec wiring. For example:
+The TROTT protocol (TROTT-00 through TROTT-14) extends these NIPs with domain-specific configuration, operator integration, and cross-spec wiring. For example:
 
 - **TROTT-03** extends NIP-CREDENTIALS with domain-specific credential requirements and reputation weighting.
 - **TROTT-04 / TROTT-04b** extend NIP-QUOTE and NIP-ESCROW with payment commitment and settlement workflows.
@@ -88,11 +88,11 @@ The [TROTT protocol](https://github.com/TheCryptoDonkey/trott) (TROTT-00 through
 - **TROTT-12** extends NIP-INVOICING with lifecycle-triggered invoicing, approval gate composition, and tax retention guidance.
 - **TROTT-14** extends NIP-SLA with escrow integration, dispute escalation, and domain-specific SLA defaults.
 
-The [`@trott/sdk`](https://github.com/TheCryptoDonkey/trott-sdk) TypeScript library is a reference implementation, providing builders and parsers for all NIP kinds.
+No public reference implementation exists yet. Implementors SHOULD refer to the kind definitions in each NIP.
 
 ### To AtoB
 
-NIPs that reference a "task" or "transaction" lifecycle are designed to work with the [AtoB state machine protocol](https://github.com/TheCryptoDonkey/atob) or any similar state machine. AtoB defines the state transitions (kinds 7500, 7501, 7502, 30078); these NIPs define what happens around those transitions: payments, reputation, disputes, messaging.
+NIPs that reference a "task" or "transaction" lifecycle are designed to work with any state machine protocol that defines request/accept/complete/cancel transitions. These NIPs define what happens around those transitions: payments, reputation, disputes, messaging.
 
 ### To nostr-protocol/nips
 
