@@ -1,0 +1,24 @@
+sequenceDiagram
+    participant U as User
+    participant C as Client
+    participant R as Relay
+    participant P as Peer
+    participant V as Professional Verifier
+
+    note over U,C: Tier 1: Self-Declaration
+    U->>C: "I want to verify"
+    C->>C: Build kind 31000 (type: credential, tier: 1)
+    C->>R: Publish self-declared credential
+
+    note over U,P: Tier 2: Peer Vouching
+    U->>P: Meet in person
+    P->>C: Build kind 31000 (type: vouch, method: in-person)
+    P->>R: Publish vouch
+    note over C: After 3+ qualifying vouches
+    C->>R: Publish Tier 2 credential
+
+    note over U,V: Tier 3: Professional Verification
+    U->>V: Meet in person with government ID
+    V->>V: Verify document, compute nullifier
+    V->>C: Build kind 31000 (type: credential, tier: 3)
+    V->>R: Publish professional credential

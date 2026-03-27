@@ -1,0 +1,13 @@
+flowchart TD
+    A[Receive contributions] --> B{All LSAG signatures valid?}
+    B -- No --> X[Reject: invalid signature]
+    B -- Yes --> C{All key images unique?}
+    C -- No --> Y[Reject: double-signing detected]
+    C -- Yes --> D{All electionIds match expected?}
+    D -- No --> Z[Reject: electionId mismatch]
+    D -- Yes --> E[Aggregate metrics]
+    E --> F[Build NIP-85 event with metric tags]
+    F --> G[Add veil-ring tag]
+    G --> H[Add veil-threshold tag]
+    H --> I[Add veil-sig tags]
+    I --> J[Sign and publish]

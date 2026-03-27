@@ -99,6 +99,10 @@ IMAGES=(
   "NIP-SLA.md|sequenceDiagram|sla-1|SLA Monitoring Workflow"
   "NIP-COMMUNITY-GOVERNANCE.md|sequenceDiagram|community_governance-1|Governance Workflow"
   "NIP-REFERRAL-ROUTING.md|sequenceDiagram|referral_routing-1|Referral Flow"
+  # Batch 3 (identity, trust, access)
+  "NIP-SIGNET.md|sequenceDiagram|signet-1|Progressive Verification Flow"
+  "NIP-VEIL.md|sequenceDiagram|veil-1|Anonymous Trust Assertion Flow"
+  "NIP-DOMINION.md|sequenceDiagram|dominion-1|Epoch-Based Access Flow"
 )
 
 # ── CLI parsing ──────────────────────────────────────────────────────────────

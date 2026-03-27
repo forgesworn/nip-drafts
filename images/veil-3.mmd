@@ -1,0 +1,24 @@
+flowchart TD
+    S[Start verification] --> A[Extract veil-ring tag]
+    A --> B{Ring size 2..1000?}
+    B -- No --> FAIL1[INVALID: ring size out of bounds]
+    B -- Yes --> C[Extract veil-threshold tag]
+    C --> D{total == ring size?}
+    D -- No --> FAIL2[INVALID: threshold mismatch]
+    D -- Yes --> E[Compute circleId and expected electionId]
+    E --> F[For each veil-sig tag]
+    F --> G[Parse JSON signature + key image]
+    G --> H[Reconstruct full LSAG signature]
+    H --> I{LSAG signature valid?}
+    I -- No --> SKIP[Skip this signature, record error]
+    I -- Yes --> J{electionId matches expected?}
+    J -- No --> SKIP
+    J -- Yes --> K{Key image unique?}
+    K -- No --> SKIP
+    K -- Yes --> L[Count as valid]
+    L --> M{More veil-sig tags?}
+    SKIP --> M
+    M -- Yes --> F
+    M -- No --> N{valid count >= threshold?}
+    N -- No --> FAIL3[INVALID: threshold not met]
+    N -- Yes --> PASS[VALID]
