@@ -137,18 +137,22 @@ fi
 
 # ── Signer setup ─────────────────────────────────────────────────────────────
 
-if [[ -z "${NOSTR_SECRET_KEY:-}" ]]; then
-  echo "Error: NOSTR_SECRET_KEY not set."
+SECRET_KEY_FILE="${NOSTR_SECRET_KEY_FILE:-$HOME/.nostr/secret.key}"
+
+if [[ -n "${NOSTR_SECRET_KEY:-}" ]]; then
+  SEC_FLAG="--sec $NOSTR_SECRET_KEY"
+elif [[ -f "$SECRET_KEY_FILE" ]]; then
+  SEC_FLAG="--sec $(cat "$SECRET_KEY_FILE" | tr -d '[:space:]')"
+  echo "Using key from ${SECRET_KEY_FILE}"
+else
+  echo "Error: No signing key found."
   echo ""
-  echo "Usage:"
-  echo "  export NOSTR_SECRET_KEY=nsec1..."
-  echo "  ./publish.sh"
-  echo ""
-  echo "Or inline:"
-  echo "  NOSTR_SECRET_KEY=nsec1... ./publish.sh"
+  echo "Options:"
+  echo "  1. Place your nsec in ~/.nostr/secret.key"
+  echo "  2. Set NOSTR_SECRET_KEY=nsec1..."
+  echo "  3. Set NOSTR_SECRET_KEY_FILE=/path/to/key"
   exit 1
 fi
-SEC_FLAG="--sec $NOSTR_SECRET_KEY"
 
 # ── Insert diagram image before first mermaid block ──────────────────────────
 
