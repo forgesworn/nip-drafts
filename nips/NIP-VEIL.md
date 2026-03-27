@@ -33,6 +33,10 @@ NIP-85 handles the common case well: a reputation service with a known pubkey pu
 
 Standard NIP-85 remains the right choice for public, attributable reputation services.
 
+### Why not NIP-32 (Labels)?
+
+NIP-32 label events allow any pubkey to attach labels to any content. While labels can express sentiment or categorisation, they have no threshold concept, no ring membership, and fully expose the labeller's identity. They do not provide anonymity or collective assessment.
+
 ### Why not NIP-44 encrypted assertions?
 
 NIP-44 encrypted assertions hide content from relays but not from the designated recipient. The subject still knows exactly who rated them once they decrypt. Veil provides a fundamentally different property: even the subject, with full access to the event and unlimited computation, cannot determine which circle members contributed. This is unconditional anonymity, not just transport-layer encryption.
@@ -85,7 +89,7 @@ sequenceDiagram
 | **Circle ID** | SHA-256 hash of the colon-joined sorted member pubkeys -- uniquely identifies a circle |
 | **Contribution** | A single member's LSAG-signed metrics for a specific subject |
 | **Key image** | An LSAG-derived value that is unique per signer per election, enabling double-sign detection without revealing the signer |
-| **Election ID** | A string binding an LSAG signature to a specific circle and subject, preventing signature transplant |
+| **Election ID** | A domain separator string binding an LSAG signature to a specific circle and subject, preventing signature transplant. (The term originates from the ring-signature literature where LSAG is used for anonymous voting.) |
 | **Ring** | The ordered set of public keys against which an LSAG signature is verified |
 | **Aggregator** | The entity (any circle member or delegate) that collects contributions, verifies signatures, and publishes the combined event |
 
@@ -299,19 +303,22 @@ Implementations MAY support alternative aggregation functions (mean, trimmed mea
 
 Verifying a Veil-enhanced NIP-85 event:
 
-1. Extract the `veil-ring` tag. Validate that all entries are 64-character lowercase hex strings.
-2. Validate ring size is between 2 and 1000 (inclusive).
-3. Extract the `veil-threshold` tag. Parse `count` and `total`. Verify `total` matches the ring size. Verify `count` is between 1 and `total` (inclusive).
-4. Compute the expected circle ID: `SHA-256(ring_members.join(':'))`.
-5. Extract the `d` tag. Compute the expected election ID: `veil:v1:<circleId>:<d-tag-value>`.
-6. For each `veil-sig` tag:
+1. Extract the `d` tag. If absent, reject the event. (The `d` tag is inherited from NIP-85 as REQUIRED; without it, election ID binding cannot protect against signature transplant.)
+2. Extract the `veil-ring` tag. Validate that all entries are 64-character lowercase hex strings.
+3. Validate ring size is between 2 and 1000 (inclusive).
+4. Validate that the pubkeys in `veil-ring` are in strict lexicographic order. Reject if not. (Implementations MUST NOT silently re-sort the ring, as this would mask malformed events.)
+5. Extract the `veil-threshold` tag. If absent, reject the event. Parse `count` and `total`. Verify `total` matches the ring size. Verify `count` is between 1 and `total` (inclusive).
+6. Compute the expected circle ID: `SHA-256(ring_members.join(':'))`.
+7. Compute the expected election ID (domain separator): `veil:v1:<circleId>:<d-tag-value>`.
+8. For each `veil-sig` tag:
     - a. Parse the JSON signature data from element 1.
     - b. Extract the key image from element 2.
     - c. Reconstruct the full LSAG signature object by adding `ring` (from `veil-ring`) and `keyImage` (from element 2) to the parsed JSON.
     - d. Verify the LSAG signature.
     - e. Verify the `electionId` field matches the expected election ID. Missing `electionId` MUST be treated as failure.
-    - f. Check the key image has not appeared in a previous `veil-sig` tag within this event.
-7. Count valid signatures. The event is valid if `valid_signatures >= threshold_count`.
+    - f. Verify that the `circleId` and `subject` in the `message` field match the derived circle ID and `d` tag value respectively.
+    - g. Check the key image has not appeared in a previous `veil-sig` tag within this event.
+9. Count valid signatures. The event is valid if `valid_signatures >= threshold_count`.
 
 ```mermaid
 flowchart TD
@@ -393,7 +400,7 @@ Clients SHOULD post-filter results to distinguish Veil-enhanced events (presence
 | V-VL-02 | Every pubkey in `veil-ring` MUST be a 64-character lowercase hex string. |
 | V-VL-03 | Pubkeys in `veil-ring` MUST be sorted lexicographically. Implementations MUST reject unsorted rings. |
 | V-VL-04 | Pubkeys in `veil-ring` MUST be unique. Duplicate pubkeys MUST cause rejection. |
-| V-VL-05 | The `veil-threshold` tag MUST have exactly 3 elements: tag name, count, total. |
+| V-VL-05 | The `veil-threshold` tag MUST be present and MUST have exactly 3 elements: tag name, count, total. If absent, the event MUST be rejected. |
 | V-VL-06 | The `total` in `veil-threshold` MUST equal the number of pubkeys in `veil-ring`. |
 | V-VL-07 | The `count` in `veil-threshold` MUST be a positive integer between 1 and `total` (inclusive). |
 | V-VL-08 | The number of `veil-sig` tags MUST equal the `count` in `veil-threshold`. |
@@ -405,6 +412,8 @@ Clients SHOULD post-filter results to distinguish Veil-enhanced events (presence
 | V-VL-14 | All key images across `veil-sig` tags within a single event MUST be unique. |
 | V-VL-15 | The `message` field in each signature MUST be valid deterministic JSON with alphabetically sorted keys at every nesting level. |
 | V-VL-16 | All metric values in the canonical message MUST be finite numbers. |
+| V-VL-17 | The `d` tag MUST be present. Events without a `d` tag MUST be rejected. |
+| V-VL-18 | The `circleId` and `subject` in the `message` field of each `veil-sig` MUST match the derived circle ID and `d` tag value respectively. |
 
 ## Security Considerations
 
@@ -468,9 +477,11 @@ The following test vectors use these deterministic private keys:
 
 **Election ID:** `veil:v1:beadfbfe37bae31a7e2ba78c9d1565f2cb52903fdea6b98f424e0656fa7cd0d2:1b84c5567b126440995d3ed5aaba0565d71e1834604819ff9c17f5e9d5dd078f`
 
-### Vector 1: Valid event (3 members, 2 contributors)
+### Vector 1: Valid event structure (3 members, 2 contributors)
 
-Members A and B each contribute metrics for subject A. Member C does not contribute. The aggregator verifies both LSAG signatures, confirms unique key images, computes the median of the contributed metrics, and publishes:
+Members A and B each contribute metrics for subject A. Member C does not contribute. The aggregator verifies both LSAG signatures, confirms unique key images, computes the median of the contributed metrics, and publishes.
+
+Note: LSAG signatures are non-deterministic (they include random nonces), so the `veil-sig` values below are structural placeholders. Independent verification of Vector 1 should focus on the circle ID, election ID, and canonical message (see "Canonical Message Vector" below). The invalid vectors (2 and 3) demonstrate rejection behaviour using the structural format.
 
 ```json
 {
