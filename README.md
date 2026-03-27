@@ -1,6 +1,6 @@
 # NIP Drafts
 
-This repository contains **29 Nostr protocol extensions** for service coordination, trust, payments, dispute resolution, key hierarchy, resource curation, and paid API discovery. Each file is written in [nostr-protocol/nips](https://github.com/nostr-protocol/nips) format and defines patterns useful to any Nostr application.
+This repository contains **30 Nostr protocol extensions** for service coordination, trust, payments, dispute resolution, key hierarchy, resource curation, paid API discovery, and encrypted access control. Each file is written in [nostr-protocol/nips](https://github.com/nostr-protocol/nips) format and defines patterns useful to any Nostr application.
 
 > **These NIPs are designed to work independently. They do not require adoption of any specific platform or framework.**
 
@@ -34,13 +34,14 @@ All drafts are `draft` `optional` unless noted otherwise.
 | [NIP-SLA](NIP-SLA.md) | Service Level Agreements (Composition Guide) | ecosystem | `draft` `composition-guide` | none | NIP-EVIDENCE, NIP-APPROVAL, NIP-DISPUTES |
 | [NIP-PROVENANCE](NIP-PROVENANCE.md) | Product & Supply Chain Provenance | ecosystem | `draft` | 30404 | NIP-01, NIP-32, NIP-40, NIP-44, NIP-VA, NIP-CUSTODY, NIP-EVIDENCE |
 | [NIP-CRAFTS](NIP-CRAFTS.md) | Craft Technique Documentation | ecosystem | `draft` | 30401 | NIP-01, NIP-32, NIP-40, NIP-44, NIP-PROVIDER-PROFILES |
-| [NIP-MENTORSHIP](NIP-MENTORSHIP.md) | Mentorship Pipelines & Training Progression | ecosystem | `draft` | 30517 (ext) | NIP-01, NIP-40, NIP-44, NIP-TRUST, NIP-REPUTATION, NIP-EVIDENCE |
-| [NIP-SCARCITY](NIP-SCARCITY.md) | Workforce & Resource Scarcity Signals | ecosystem | `draft` | 30599 | NIP-01, NIP-40, NIP-TRUST, NIP-REPUTATION, NIP-PROVENANCE |
+| [NIP-MENTORSHIP](NIP-MENTORSHIP.md) | Mentorship Pipelines & Training Progression | upstream | `draft` | 30517 (ext) | NIP-01, NIP-40, NIP-44, NIP-TRUST, NIP-REPUTATION, NIP-EVIDENCE |
+| [NIP-SCARCITY](NIP-SCARCITY.md) | Workforce & Resource Scarcity Signals | upstream | `draft` | 30599 | NIP-01, NIP-40, NIP-TRUST, NIP-REPUTATION, NIP-PROVENANCE |
 | [NIP-REFERRAL-ROUTING](NIP-REFERRAL-ROUTING.md) | Institutional Referral Routing (Composition Guide) | ecosystem | `draft` `composition-guide` | none | NIP-51, NIP-APPROVAL, NIP-44, NIP-59 |
 | [NIP-COMMUNITY-GOVERNANCE](NIP-COMMUNITY-GOVERNANCE.md) | Community Governance (Composition Guide) | ecosystem | `draft` `composition-guide` | none | NIP-51, NIP-CONSENSUS, NIP-EVIDENCE |
 | [NIP-PAID-SERVICES](NIP-PAID-SERVICES.md) | Paid API Service Announcements | upstream | `draft` | 31402 | NIP-01, NIP-40 |
 | [NIP-KEY-HIERARCHY](NIP-KEY-HIERARCHY.md) | Hierarchical Key Relationships | upstream | `draft` | 30594, 30595 | NIP-01, NIP-40, NIP-44, NIP-59 |
 | [NIP-RESOURCE-CURATION](NIP-RESOURCE-CURATION.md) | Structured Resource Listings, Reviews & Collections | upstream | `draft` | 30414, 30415, 30416 | NIP-01, NIP-22, NIP-32, NIP-40, NIP-51 |
+| [NIP-DOMINION](NIP-DOMINION.md) | Epoch-Based Encrypted Content Access | upstream | `draft` | 30480 | NIP-01, NIP-44, NIP-59, NIP-78 |
 
 ### Incubating
 
@@ -108,7 +109,7 @@ These NIPs use the following kind ranges:
 - **Regular (1xxx):** 1315, 1316 (NIP-SPATIAL-SIGNALS)
 - **Regular (7xxx):** 7543 (NIP-DISPUTES)
 - **Ephemeral (20xxx):** 20500-20502
-- **Addressable (30xxx):** 30401, 30404, 30414-30416, 30510-30511, 30515, 30517, 30520, 30527-30528, 30530-30533, 30535, 30543, 30545, 30547-30549, 30556, 30565, 30570-30572, 30574-30579, 30582-30584, 30588, 30594-30595, 30599
+- **Addressable (30xxx):** 30401, 30404, 30414-30416, 30480, 30510-30511, 30515, 30517, 30520, 30527-30528, 30530-30533, 30535, 30543, 30545, 30547-30549, 30556, 30565, 30570-30572, 30574-30579, 30582-30584, 30588, 30594-30595, 30599
 - **Addressable (31xxx):** 31402 (NIP-PAID-SERVICES)
 
 Kind numbers will need formal allocation when proposed to `nostr-protocol/nips`.
