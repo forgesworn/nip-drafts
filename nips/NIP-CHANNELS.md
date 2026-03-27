@@ -385,7 +385,7 @@ NIP-CHANNELS is a standalone NIP. Within the TROTT protocol, TROTT-08 extends th
 
 ## Reference Implementation
 
-The [`@trott/sdk`](https://github.com/TheCryptoDonkey/trott-sdk) TypeScript library provides builders and parsers for the kinds defined in this NIP. For standalone use without TROTT, implementers SHOULD refer to the kind definitions above.
+No public reference implementation exists yet. Implementors SHOULD refer to the kind definitions above.
 
 A minimal implementation requires:
 

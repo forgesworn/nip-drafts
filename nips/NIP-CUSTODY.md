@@ -358,7 +358,7 @@ Custody transfers MAY compose with [NIP-LOCATION](./NIP-LOCATION.md) for handoff
 
 ## Reference Implementation
 
-The [`@trott/sdk`](https://github.com/TheCryptoDonkey/trott-sdk) TypeScript library provides builders and parsers for the custody transfer kind defined in this NIP, as well as custody evidence composition with NIP-EVIDENCE. For standalone use without TROTT, implementors SHOULD refer to the kind definitions above.
+No public reference implementation exists yet. Implementors SHOULD refer to the kind definitions above.
 
 A minimal implementation requires:
 

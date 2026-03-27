@@ -633,9 +633,6 @@ All examples use timestamp `1709740800` (2024-03-06T12:00:00Z) and placeholder h
 * [NIP-17](https://github.com/nostr-protocol/nips/blob/master/17.md): Private direct messages (gift-wrapped payment details)
 * NIP-QUOTE: Structured pricing and payment terms (Quote + Payment Terms)
 
-## Reference Implementations
+## Reference Implementation
 
-* [@trott/sdk](https://github.com/TheCryptoDonkey/trott-sdk) -- TypeScript builders, parsers, and `TrustlessEscrow` orchestrator for Lock, Settlement, and Receipt
-* [trotters](https://github.com/TheCryptoDonkey/trotters) / [trotters-driver](https://github.com/TheCryptoDonkey/trotters-driver) -- Expo/React Native apps with Cashu NUT-14 HTLC locking
-* [trott-mcp](https://github.com/TheCryptoDonkey/trott-mcp) -- MCP server exposing escrow tools to AI agents
-* [TROTT Protocol](https://github.com/TheCryptoDonkey/trott) -- Full specification suite that composes NIP-ESCROW with lifecycle, discovery, reputation, and dispute resolution
+No public reference implementation exists yet. Implementors SHOULD refer to the kind definitions above.
