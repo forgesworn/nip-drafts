@@ -13,6 +13,7 @@ set -euo pipefail
 # Reads NOSTR_SECRET_KEY from environment or prompts via nak --prompt-sec.
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+NIPS_DIR="$(cd "$SCRIPT_DIR/../nips" && pwd)"
 IMAGES_BASE="https://raw.githubusercontent.com/forgesworn/nip-drafts/main/images"
 
 RELAYS=(
@@ -186,7 +187,7 @@ for entry in "${NIPS[@]}"; do
   if [[ -n "$ONLY" && "$slug" != "$ONLY" ]]; then continue; fi
   if [[ -n "$BATCH" && "$batch" != "$BATCH" ]]; then continue; fi
 
-  filepath="${SCRIPT_DIR}/${file}"
+  filepath="${NIPS_DIR}/${file}"
   if [[ ! -f "$filepath" ]]; then
     echo "  ✗ ${slug}: file not found: ${filepath}"
     ((failed++))
