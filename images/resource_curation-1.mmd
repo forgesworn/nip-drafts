@@ -1,0 +1,12 @@
+sequenceDiagram
+    participant A as Listing Author
+    participant Relay as Nostr Relay
+    participant RC as Reviewer / Curator
+
+    A->>Relay: kind 30414 (Resource Listing)
+
+    RC->>Relay: kind 30415 (Resource Review)
+
+    RC->>Relay: kind 30416 (Resource Collection)
+
+    RC->>Relay: kind 1111 (NIP-22 Comment on review)

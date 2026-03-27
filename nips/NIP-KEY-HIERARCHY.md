@@ -120,7 +120,7 @@ Published by a superior to declare authority over a subordinate within a defined
 | `p`                | Yes         | Subordinate's Nostr pubkey. The fourth element SHOULD be `"subordinate"` as a role marker. Additional `p` tags MAY reference witnesses (see [Witnessed Declarations](#witnessed-declarations)). |
 | `t`                | Yes         | Protocol family marker. MUST be `"hierarchy-declaration"`. |
 | `role_superior`    | Yes         | The superior's role in this relationship. Application-defined values. Recommended: `parent`, `guardian`, `organisation`, `project_lead`, `mentor`, `keeper`, `custodian`, `employer`. |
-| `role_subordinate` | Yes         | The subordinate's role. Application-defined values. Recommended: `child`, `ward`, `practitioner`, `team_member`, `apprentice`, `renegade`, `viewer`, `employee`. |
+| `role_subordinate` | Yes         | The subordinate's role. Application-defined values. Recommended: `child`, `ward`, `practitioner`, `team_member`, `apprentice`, `member`, `viewer`, `employee`. |
 | `scope`            | Yes         | Authority scope as a colon-separated path. Examples: `family:childcare`, `project:alpha:development`, `org:training:welding`. Enables hierarchical scope matching: a grant for `project:alpha` implicitly covers `project:alpha:development`. Scope matching is strictly prefix-based -- `project:alpha` matches `project:alpha:development` but not `project:alpha2`. Applications designing scope strings SHOULD avoid ambiguous prefixes and SHOULD use distinct top-level segments for unrelated authority domains. |
 | `permission`       | Yes         | One permission per tag. Repeatable. See [Permission Model](#permission-model). |
 | `valid_from`       | Optional    | Unix timestamp when authority begins. Defaults to `created_at`. |
@@ -351,7 +351,7 @@ A parent declares authority over a child's account with full signing and data ma
     "pubkey": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
     "created_at": 1707500000,
     "tags": [
-        ["d", "a1b2c3d4:hierarchy:b2c3d4e5:family:childcare"],
+        ["d", "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2:hierarchy:b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b200:family:childcare"],
         ["p", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b200", "", "subordinate"],
         ["alt", "Hierarchy declaration: parent over child (family)"],
         ["t", "hierarchy-declaration"],
@@ -383,7 +383,7 @@ The primary parent delegates read access to a co-parent. No signing authority â€
     "pubkey": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
     "created_at": 1707500000,
     "tags": [
-        ["d", "a1b2c3d4:hierarchy:c3d4e5f6:family:co-parent"],
+        ["d", "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2:hierarchy:c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c300:family:co-parent"],
         ["p", "c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c300", "", "subordinate"],
         ["alt", "Hierarchy declaration: co-parent read access (family)"],
         ["t", "hierarchy-declaration"],
@@ -411,10 +411,10 @@ When the child is old enough, the parent publishes a graduation revocation. The 
     "pubkey": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
     "created_at": 1770000000,
     "tags": [
-        ["d", "b2c3d4e5:revocation:family:childcare:1770000000"],
+        ["d", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b200:revocation:family:childcare:1770000000"],
         ["alt", "Hierarchy revocation: child graduated to sovereignty"],
         ["t", "hierarchy-revocation"],
-        ["a", "30594:a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2:a1b2c3d4:hierarchy:b2c3d4e5:family:childcare", "wss://relay.example.com"],
+        ["a", "30594:a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2:a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2:hierarchy:b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b200:family:childcare", "wss://relay.example.com"],
         ["p", "b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b200"],
         ["revocation_reason", "graduation"],
         ["effective_at", "1882915200"],
@@ -439,7 +439,7 @@ A project lead grants a developer scoped authority within a project. The develop
     "pubkey": "d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5",
     "created_at": 1707500000,
     "tags": [
-        ["d", "d4e5f6a1:hierarchy:e5f6a1b2:project:alpha:development"],
+        ["d", "d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5:hierarchy:e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6:project:alpha:development"],
         ["p", "e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6", "", "subordinate"],
         ["alt", "Hierarchy declaration: project lead assigns developer to Project Alpha"],
         ["t", "hierarchy-declaration"],

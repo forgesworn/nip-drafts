@@ -43,6 +43,10 @@ NIP-32 (kind 1985) attaches categorical labels to events. Its specification expl
 
 The Reviews NIP (staab, open PR #879 to nostr-protocol/nips) defines kinds 31985-31987 for reviewing events, URLs, and other content. It uses a `rating` tag with values between 0 and 1. NIP-RESOURCE-CURATION's Resource Review kind differs in three ways: (1) reviews always target a Resource Listing via an `a` tag, creating a listing-review relationship that clients can traverse; (2) reviews use multi-criteria ratings (quality, relevance, accessibility, engagement) rather than a single overall score; (3) reviews include audience suitability assessments (content warnings, age ratings, skip lists) that the Reviews NIP does not address. If the Reviews NIP merges, NIP-RESOURCE-CURATION's `rating` tag format could be aligned with it. The two NIPs can coexist: the Reviews NIP covers general-purpose reviews of any Nostr content, while NIP-RESOURCE-CURATION provides a structured listing-review-collection workflow for resource directories.
 
+### Why not NIP-100 (Decentralised Stars & Reviews, PR #2115)?
+
+NIP-100 (kind 30016) provides simple star ratings with a single score per entity and optional free-text content. NIP-RESOURCE-CURATION provides multi-criteria structured ratings (quality, relevance, accessibility, engagement, suitability), audience suitability assessments (content warnings, age ratings, skip lists), and a listing-review-collection workflow that connects resource description, evaluation, and curation into a coherent directory.
+
 ### Why not Pinboards (NostrHub)?
 
 The Pinboards community NIP (kinds 30067/39067) defines visual content collections. Pinboards are presentation-oriented (visual layout, collaborative editing) while Resource Collections are metadata-oriented (ordered references with per-item curation notes, structured category labels). A pinboard organises visual content for display; a collection organises resources for discovery and use. The two could complement each other: a client could render a Resource Collection as a pinboard.
@@ -417,21 +421,19 @@ The order of `a` tags in the event defines the resource order within the collect
 
 ## Protocol Flow
 
-```
-  Listing Author          Relay              Reviewer / Curator
-      |                     |                     |
-      |-- kind:30414 ------>|  (Resource Listing) |
-      |   Listing           |                     |
-      |                     |                     |
-      |                     |<--- kind:30415 -----|  (Resource Review)
-      |                     |     Review          |
-      |                     |                     |
-      |                     |<--- kind:30416 -----|  (Resource Collection)
-      |                     |     Collection      |
-      |                     |                     |
-      |                     |<--- kind:1111 ------|  (NIP-22 Comment on review)
-      |                     |     Response        |
-      |                     |                     |
+```mermaid
+sequenceDiagram
+    participant A as Listing Author
+    participant Relay as Nostr Relay
+    participant RC as Reviewer / Curator
+
+    A->>Relay: kind 30414 (Resource Listing)
+
+    RC->>Relay: kind 30415 (Resource Review)
+
+    RC->>Relay: kind 30416 (Resource Collection)
+
+    RC->>Relay: kind 1111 (NIP-22 Comment on review)
 ```
 
 1. **Listing:** Anyone publishes `kind:30414` to describe a resource with structured metadata.
@@ -448,6 +450,10 @@ A home education co-operative maintains a shared resource directory. Parents and
 ### Heritage Skills Training Directory
 
 A heritage conservation body curates training providers across the country. Each provider is listed as a Resource Listing with location, cost, and accreditation details. Practitioners who have attended courses publish Resource Reviews. The body publishes Collections by region and specialism, with editorial notes on each provider's strengths.
+
+### Podcast Directory
+
+A podcast network publishes Resource Listings for each show and notable episode, tagged with subject labels, language, and media type. Listeners publish Reviews with structured ratings for production quality, content depth, and engagement. Network curators publish Collections organised by topic (e.g. "Best Bitcoin Privacy Episodes", "Beginner-Friendly Tech Podcasts"), each with per-item notes explaining why the episode was selected. Content warnings flag episodes covering sensitive topics so listeners can make informed choices.
 
 ### Community Health Resource Hub
 

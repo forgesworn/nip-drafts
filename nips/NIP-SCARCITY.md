@@ -30,17 +30,22 @@ NIP-SCARCITY provides a minimal, discoverable primitive for broadcasting and con
 
 ## Cross-Domain Evidence
 
-This NIP was promoted from `incubating` after demonstrating demand across 5 unrelated domains:
+This NIP was promoted from `incubating` after demonstrating demand across 10 unrelated domains spanning 7 categories:
 
 | Domain | Use case | Category |
 | ------ | -------- | -------- |
-| Heritage conservation | 86,500 heritage workers needed annually until 2050; scarcity IS the sector crisis | Built environment |
-| Green retrofit | 230K additional skilled retrofit workers needed by 2030 for UK net-zero targets | Construction |
-| Outdoor education | 30 outdoor education centres closed since 2017; provision gap heat maps needed | Education |
-| SEND education | Nationwide shortage of Educational Psychologists, Speech & Language Therapists, Occupational Therapists | Healthcare/education |
-| Music events | 35% of grassroots music venues closed since 2007; venue and promoter scarcity | Culture |
+| Heritage conservation | 86,500 heritage workers needed annually until 2050; 165 endangered crafts on Red List | Built environment |
+| Green retrofit | 230K additional skilled retrofit workers needed by 2030; 46x gap between current and required retrofit rate | Construction |
+| SEND education | 88% of local authorities cannot recruit educational psychologists; 600K+ children with EHCPs | Healthcare / education |
+| Music events | 74% of UK nightclubs closed in 20 years; 125+ grassroots venues closed since 2020 | Culture |
+| Veteran support | 2 million veterans, 2,200+ charities, yet 13-year waits for mental health help; geographic service deserts | Social services |
+| Outdoor education | 30 outdoor education centres closed since 2017; Forest School Level 3 leader shortage | Education |
+| Homelessness | 134,760 in temporary accommodation; outreach worker and shelter bed shortages by region | Social services |
+| Local food | 10.2M tonnes wasted while 7.3M adults go hungry; community food infrastructure gaps | Food / agriculture |
+| Drug treatment | 5,565 drug deaths in 2024 (highest ever); harm reduction service geographic scarcity | Healthcare |
+| Craft livelihood | 88% of UK artists cannot live from their craft; teaching craftspeople scarce | Creative arts |
 
-These domains span built environment, construction, education, healthcare, and culture, confirming the pattern is domain-agnostic.
+These domains span built environment, construction, healthcare, education, culture, social services, food/agriculture, and creative arts. All `scarcity_type` values are exercised: `workforce` (heritage, retrofit, outdoor education, SEND), `skill` (heritage, retrofit), and `capacity` (music venues, veteran services, homelessness shelters, food infrastructure, harm reduction).
 
 ## Kinds
 

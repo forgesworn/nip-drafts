@@ -30,16 +30,20 @@ NIP-MENTORSHIP extends Kind 30517 with optional tags that transform a simple end
 
 ## Cross-Domain Evidence
 
-This NIP was promoted from `incubating` after demonstrating demand across 4+ unrelated domains:
+This NIP was promoted from `incubating` after demonstrating demand across 8 unrelated domains spanning 5 categories:
 
 | Domain | Use case | Category |
 | ------ | -------- | -------- |
-| Outdoor education | Cascade mentor networks; one qualified instructor trains multiple trainees across disciplines (Forest School, climbing, water sports) | Education |
 | Heritage conservation | Master→apprentice chains for 165 endangered crafts requiring multi-year succession planning | Built environment |
-| Craft/making (therapeutic) | Craftsperson→learner progression tracking for pottery, weaving, metalwork, woodcraft | Creative arts |
+| Outdoor education | Cascade mentor networks; one qualified instructor trains multiple trainees across disciplines (Forest School, climbing, water sports) | Education |
+| Green retrofit | Retrofit Coordinators training apprentices through PAS 2035 role progression (6 distinct roles, each with qualification paths) | Construction |
 | Veteran support | Veteran buddy/peer support networks; experienced veterans mentoring recently transitioned service leavers | Social services |
+| Craft/making (therapeutic) | Craftsperson→learner progression tracking for pottery, weaving, metalwork, woodcraft; therapeutic supervision pathways | Creative arts / healthcare |
+| Learning & development | Tutor-student relationships with progression tracking, CPD recording, and adult professional development | Education |
+| SEND education | SENCO-to-SENCO mentoring across multi-academy trusts; educational psychologist training of teaching assistants | Healthcare / education |
+| School readiness | Early years practitioner induction mentoring; experienced staff supporting newly qualified practitioners | Early years education |
 
-These domains span education, built environment, creative arts, and social services, confirming the pattern is domain-agnostic.
+These domains span built environment, education, construction, social services, creative arts, healthcare, and early years education, confirming the pattern is domain-agnostic. No new event kinds are required; mentorship is expressed through enriched endorsement tags on the existing Kind 30517.
 
 ## Kind
 
