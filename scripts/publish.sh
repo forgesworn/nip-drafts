@@ -56,6 +56,11 @@ NIPS=(
   "nip-community-governance|NIP-COMMUNITY-GOVERNANCE: Community Governance (Composition Guide)|NIP-COMMUNITY-GOVERNANCE.md||2"
   "nip-referral-routing|NIP-REFERRAL-ROUTING: Institutional Referral Routing (Composition Guide)|NIP-REFERRAL-ROUTING.md||2"
   "nip-oracle|NIP-ORACLE: Oracle Dispute Resolution|NIP-ORACLE.md|30543,30547,30548,30549|2"
+  # Batch 3 (identity, trust, access)
+  "nip-va|NIP-VA: Verifiable Attestations|NIP-VA.md|31000|3"
+  "nip-signet|NIP-SIGNET: Progressive Identity Verification|NIP-SIGNET.md||3"
+  "nip-veil|NIP-VEIL: Anonymous Trust Assertions|NIP-VEIL.md||3"
+  "nip-dominion|NIP-DOMINION: Epoch-Based Encrypted Content Access|NIP-DOMINION.md|30480|3"
 )
 
 # ── Image insertion map ──────────────────────────────────────────────────────
