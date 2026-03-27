@@ -68,6 +68,68 @@ This approach enables relay discovery of available pathways using standard NIP-5
 }
 ```
 
+### Example: US Insurance Pre-Authorisation Pathway
+
+```json
+{
+    "kind": 30000,
+    "pubkey": "<insurer-hex-pubkey>",
+    "created_at": 1709280000,
+    "tags": [
+        ["d", "referral-pathway:us_insurance_preauth_v1"],
+        ["t", "referral-pathway"],
+        ["title", "Insurance Pre-Authorisation Referral Pathway"],
+        ["alt", "Referral pathway: Insurance Pre-Authorisation"],
+        ["referral:step", "0", "primary_care_physician"],
+        ["referral:step_credential", "0", "nip-credentials:medical:pcp"],
+        ["referral:step_condition", "0", "Patient requires specialist consultation or procedure"],
+        ["referral:step", "1", "utilisation_reviewer"],
+        ["referral:step_credential", "1", "nip-credentials:insurance:utilisation_review"],
+        ["referral:step_condition", "1", "Pre-authorisation review of clinical necessity"],
+        ["referral:step", "2", "specialist"],
+        ["referral:step_credential", "2", "nip-credentials:medical:specialist"],
+        ["referral:step_condition", "2", "Pre-authorisation approved; specialist visit authorised"],
+        ["referral:escalation", "1", "2", "flag:expedited", "Bypass utilisation review for emergency or pre-approved procedure codes"],
+        ["referral:jurisdiction", "US", "National"],
+        ["expiration", "1740902400"]
+    ],
+    "content": "Standard insurance pre-authorisation pathway. Primary care physician refers to utilisation review; approved cases proceed to specialist. Expedited pathways exist for emergency procedure codes.",
+    "id": "<32-byte-hex>",
+    "sig": "<64-byte-hex>"
+}
+```
+
+### Example: Legal Aid Referral Pathway
+
+```json
+{
+    "kind": 30000,
+    "pubkey": "<legal-aid-org-hex-pubkey>",
+    "created_at": 1709280000,
+    "tags": [
+        ["d", "referral-pathway:legal_aid_housing_v1"],
+        ["t", "referral-pathway"],
+        ["title", "Housing Legal Aid Referral Pathway"],
+        ["alt", "Referral pathway: Housing Legal Aid"],
+        ["referral:step", "0", "intake_worker"],
+        ["referral:step_credential", "0", "nip-credentials:legal:intake"],
+        ["referral:step_condition", "0", "Client presents with housing issue (eviction, disrepair, homelessness)"],
+        ["referral:step", "1", "housing_solicitor"],
+        ["referral:step_credential", "1", "nip-credentials:legal:solicitor"],
+        ["referral:step_condition", "1", "Case assessed as having legal merit; client eligible for legal aid"],
+        ["referral:step", "2", "barrister"],
+        ["referral:step_credential", "2", "nip-credentials:legal:barrister"],
+        ["referral:step_condition", "2", "Case requires court representation"],
+        ["referral:escalation", "0", "1", "flag:urgent", "Direct solicitor referral for imminent eviction or possession hearing"],
+        ["referral:jurisdiction", "GB", "England and Wales"],
+        ["expiration", "1740902400"]
+    ],
+    "content": "Housing legal aid referral pathway. Covers intake assessment through to court representation. Urgent escalation for imminent possession proceedings.",
+    "id": "<32-byte-hex>",
+    "sig": "<64-byte-hex>"
+}
+```
+
 ### Tag reference (pathway)
 
 | Tag | Required | Description |
@@ -76,7 +138,7 @@ This approach enables relay discovery of available pathways using standard NIP-5
 | `t` | Yes | Protocol family marker. MUST be `"referral-pathway"`. |
 | `title` | Yes | Human-readable name for the pathway. |
 | `referral:step` | Yes (repeatable) | Step definition. Format: `["referral:step", "<step_index>", "<role_identifier>"]`. Steps are ordered by `step_index` (zero-based). |
-| `referral:step_credential` | Optional (repeatable) | Credential requirement for a step. Format: `["referral:step_credential", "<step_index>", "<credential_requirement>"]`. References a NIP-CREDENTIALS credential type that the referrer at this step must hold. |
+| `referral:step_credential` | Optional (repeatable) | Credential requirement for a step. Format: `["referral:step_credential", "<step_index>", "<credential_requirement>"]`. References a NIP-CREDENTIALS credential type that the referrer at this step must hold. Namespace values (e.g. `nip-credentials:medical:gp`, `nip-credentials:legal:solicitor`) are illustrative examples. Applications define their own credential identifiers. |
 | `referral:step_condition` | Optional (repeatable) | Routing condition for a step. Format: `["referral:step_condition", "<step_index>", "<routing_condition>"]`. Describes when a referral to this step is appropriate. |
 | `referral:escalation` | Optional (repeatable) | Escalation rule. Format: `["referral:escalation", "<from_step>", "<to_step>", "<trigger>", "<description>"]`. Defines conditions under which a step may be skipped: timeout, urgency flags, or clinical triggers. |
 | `referral:jurisdiction` | Optional | Geographic or institutional scope. Format: `["referral:jurisdiction", "<country_code>", "<institution_or_region>"]`. |
@@ -342,7 +404,7 @@ Schools can define SEND (Special Educational Needs and Disabilities) pathways fr
 ## Dependencies
 
 * [NIP-51](https://github.com/nostr-protocol/nips/blob/master/51.md): Lists (pathway definitions as Kind 30000)
-* [NIP-APPROVAL](./NIP-APPROVAL.md): Approval Gates and Responses (Kind 30570 / 30571)
+* [NIP-APPROVAL](./NIP-APPROVAL.md): Approval Gates and Responses (Kind 30570 / 30571) - OPTIONAL composition for structured accept/reject workflows
 * [NIP-44](https://github.com/nostr-protocol/nips/blob/master/44.md): Versioned encrypted payloads (referral reason encryption)
 * [NIP-59](https://github.com/nostr-protocol/nips/blob/master/59.md): Gift wrapping (full metadata protection for sensitive referrals)
-* [NIP-CREDENTIALS](./NIP-CREDENTIALS.md): Credential verification (referrer authority gating)
+* [NIP-CREDENTIALS](./NIP-CREDENTIALS.md): Credential verification (referrer authority gating) - OPTIONAL

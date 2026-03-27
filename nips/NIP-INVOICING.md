@@ -8,7 +8,7 @@ Structured Invoicing
 
 One addressable event kind for formal invoicing on Nostr. Payment recording composes with NIP-ESCROW Receipt; expense reimbursement composes with NIP-APPROVAL.
 
-> **Standalone usability:** This NIP works independently on any Nostr application. Invoice publishing and payment tracking require only NIP-01 and NIP-ESCROW Receipt (kind 30535). Expense reimbursement optionally composes with NIP-APPROVAL and NIP-EVIDENCE.
+> **Standalone.** This NIP works independently on any Nostr application. Invoices MAY be linked to NIP-ESCROW receipts for payment tracking and NIP-APPROVAL gates for expense approval, but NIP-INVOICING works independently as a billing record format.
 
 > **Design principle:** This event records billing state; it does not execute payments. The invoice says "you owe me X". Actual money moves on whatever rail the parties choose. Payment confirmation uses NIP-ESCROW Receipt (kind 30535). Expense reimbursement uses NIP-APPROVAL Gate (kind 30570).
 
@@ -347,6 +347,8 @@ Once approved, the client records reimbursement using a NIP-ESCROW Receipt (kind
 
 ### Expense Categories
 
+Expense categories are application-defined. Common examples include:
+
 | Category         | Description                                   |
 |------------------|-----------------------------------------------|
 | `materials`      | Physical materials and supplies                |
@@ -357,6 +359,8 @@ Once approved, the client records reimbursement using a NIP-ESCROW Receipt (kind
 | `accommodation`  | Accommodation costs                            |
 | `meals`          | Meal and sustenance costs                      |
 | `other`          | Other costs (describe in description field)    |
+
+Applications MAY define additional categories as needed for their domain.
 
 ---
 

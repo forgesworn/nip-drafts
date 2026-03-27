@@ -25,8 +25,8 @@ This NIP fills that gap. It is payment-rail agnostic and works with any originat
 
 - **NIP-15 / NIP-99:** Those NIPs define listings and storefronts. This NIP defines the pricing conversation that follows. A Quote references (via `e` tag) whatever event initiated the transaction.
 - **NIP-57 (Zaps):** Zaps are tips and donations on Lightning. Quotes are structured price proposals with breakdowns, rate units, and validity periods. The two serve fundamentally different purposes.
-- **NIP-MATCHING (kind 30576):** Matching Offers are competitive bids for a posted request. A Quote is a direct price proposal from provider to requester. They compose: a NIP-MATCHING Offer MAY reference a NIP-QUOTE Quote for detailed pricing and breakdown. See NIP-MATCHING for competitive selection workflows.
-- **NIP-ESCROW:** Quotes and Payment Terms are the pricing layer; NIP-ESCROW handles fund locking and settlement. They compose naturally: a Lock (kind 30532) references Payment Terms (kind 30531).
+- **NIP-MATCHING (kind 30576):** Composition with NIP-MATCHING is OPTIONAL. Matching Offers are competitive bids for a posted request. A Quote is a direct price proposal from provider to requester. They compose: a NIP-MATCHING Offer MAY reference a NIP-QUOTE Quote for detailed pricing and breakdown. See NIP-MATCHING for competitive selection workflows.
+- **NIP-ESCROW:** Composition with NIP-ESCROW is OPTIONAL. Quotes and Payment Terms are the pricing layer; NIP-ESCROW handles fund locking and settlement. They compose naturally: a Lock (kind 30532) references Payment Terms (kind 30531).
 - **NIP-69 (Peer-to-Peer Order Events):** NIP-69 defines order events for fungible asset exchange (buy/sell fiat for bitcoin) with fixed pricing. NIP-QUOTE is for service and goods pricing with line-item breakdowns, rate units (hourly, daily, per-item), validity periods, and multi-currency support. NIP-69 orders are take-it-or-leave-it; NIP-QUOTE supports negotiation via quote revision.
 
 ## Kinds
@@ -340,24 +340,24 @@ All examples use timestamp `1709740800` (2024-03-06T12:00:00Z) and placeholder h
 
 No public reference implementation exists yet. Implementors SHOULD refer to the kind definitions above.
 
-## Appendix: Operator Fee Collection Models
+## Appendix: Platform Fee Collection Models
 
-When a coordinator or platform facilitates transactions, they may charge fees. Operator fees are OPTIONAL; peer-to-peer transactions require no fees.
+When an intermediary or platform facilitates transactions, they may charge fees. Platform fees are OPTIONAL; peer-to-peer transactions require no fees.
 
 ### Model A: Pre-deducted (Most Common)
-The coordinator deducts their fee before releasing funds to the provider.
+The platform deducts their fee before releasing funds to the provider.
 - Quote (kind:30530) shows gross amount
-- Payment Terms (kind:30531) include `operator_fee` and `operator_fee_basis` tags
+- Payment Terms (kind:30531) include `platform_fee` and `platform_fee_basis` tags
 - Downstream settlement amount = gross - fee
 
 ### Model B: Surcharge
-The coordinator adds their fee on top of the provider's price.
+The platform adds their fee on top of the provider's price.
 - Quote (kind:30530) shows provider's net amount
-- Payment Terms (kind:30531) include `total_amount` (net + fee) and `operator_fee` tags
+- Payment Terms (kind:30531) include `total_amount` (net + fee) and `platform_fee` tags
 - Customer pays `total_amount`; provider receives net
 
 ### Model C: Subscription
-The coordinator charges a flat periodic fee, not per-transaction.
+The platform charges a flat periodic fee, not per-transaction.
 - No fee tags on individual events
 - Fee relationship managed outside the protocol
 
@@ -365,9 +365,9 @@ The coordinator charges a flat periodic fee, not per-transaction.
 
 | Tag | Value | Description |
 |-----|-------|-------------|
-| `operator_fee` | Amount in smallest unit | Fee amount charged by the coordinator |
-| `operator_fee_basis` | `gross` or `net` | Whether fee is deducted from gross or added on top |
-| `operator_fee_pct` | Percentage as string | Fee as percentage (e.g., `"5.0"` for 5%) |
+| `platform_fee` | Amount in smallest unit | Fee amount charged by the platform |
+| `platform_fee_basis` | `gross` or `net` | Whether fee is deducted from gross or added on top |
+| `platform_fee_pct` | Percentage as string | Fee as percentage (e.g., `"5.0"` for 5%) |
 
 ## Standalone Usage
 

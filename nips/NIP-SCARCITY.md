@@ -44,8 +44,11 @@ This NIP was promoted from `incubating` after demonstrating demand across 10 unr
 | Local food | 10.2M tonnes wasted while 7.3M adults go hungry; community food infrastructure gaps | Food / agriculture |
 | Drug treatment | 5,565 drug deaths in 2024 (highest ever); harm reduction service geographic scarcity | Healthcare |
 | Craft livelihood | 88% of UK artists cannot live from their craft; teaching craftspeople scarce | Creative arts |
+| US nursing shortage | US projects 195K nursing vacancies annually through 2034; rural areas disproportionately affected | Healthcare |
+| Cybersecurity (global) | 3.5M unfilled cybersecurity positions worldwide; ISC2 Workforce Study 2023 | Technology |
+| Skilled trades (US/Canada) | Electrician, plumber, and HVAC technician shortages across North America; median age of tradespeople rising | Construction |
 
-These domains span built environment, construction, healthcare, education, culture, social services, food/agriculture, and creative arts. All `scarcity_type` values are exercised: `workforce` (heritage, retrofit, outdoor education, SEND), `skill` (heritage, retrofit), and `capacity` (music venues, veteran services, homelessness shelters, food infrastructure, harm reduction).
+These domains span built environment, construction, healthcare, education, culture, social services, food/agriculture, creative arts, technology, and international labour markets. All `scarcity_type` values are exercised: `workforce` (heritage, retrofit, outdoor education, SEND, nursing, cybersecurity), `skill` (heritage, retrofit, skilled trades), and `capacity` (music venues, veteran services, homelessness shelters, food infrastructure, harm reduction).
 
 ## Kinds
 
@@ -264,9 +267,11 @@ This NIP uses several multi-letter tags (`scarcity_type`, `skill`, `specialism`,
 
 * [NIP-01](https://github.com/nostr-protocol/nips/blob/master/01.md): Basic protocol flow, addressable events
 * [NIP-40](https://github.com/nostr-protocol/nips/blob/master/40.md): Expiration timestamps (signal expiry)
-* [NIP-TRUST](./NIP-TRUST.md): Publisher authority verification (optional, recommended)
-* [NIP-REPUTATION](./NIP-REPUTATION.md): Publisher reputation weighting (optional)
-* [NIP-PROVENANCE](./NIP-PROVENANCE.md): Material scarcity composition (optional)
+**Potential compositions (OPTIONAL):**
+
+* [NIP-TRUST](./NIP-TRUST.md): Publisher authority verification (OPTIONAL, recommended for signal weighting)
+* [NIP-REPUTATION](./NIP-REPUTATION.md): Publisher reputation weighting (OPTIONAL)
+* [NIP-PROVENANCE](./NIP-PROVENANCE.md): Material scarcity composition (OPTIONAL)
 
 ## Reference Implementation
 

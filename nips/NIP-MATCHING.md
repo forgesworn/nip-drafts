@@ -10,7 +10,7 @@ Two addressable event kinds for competitive offer-and-selection workflows on Nos
 
 > **Design principle:** Matching events coordinate selection — they do not enforce exclusivity or payment. The consuming application decides what happens after selection (task creation, payment initiation, contract signing).
 
-> **Standalone usability:** This NIP works independently on any Nostr application. Within the TROTT protocol (v0.9), it is pattern P4 in TROTT-00: Core Patterns. TROTT composes matching with task lifecycle states, provider discovery, and payment commitment — but adoption of TROTT is not required.
+> **Standalone.** This NIP works independently on any Nostr application.
 
 ## Motivation
 
@@ -42,7 +42,7 @@ When used alongside a state machine protocol (such as [AtoB](https://git.nostrde
 
 - **State machine transitions (e.g. AtoB kind 7501 with `offer` trigger):** Use for competitive offers **within** an active lifecycle — the offer is a state transition that the state machine tracks, guards, and audits.
 
-An implementation MAY use NIP-MATCHING to collect offers and then initiate a state machine lifecycle with the selected provider. The Kind 30577 (Selection) event MAY reference the state machine's initial transition event via an `e` tag.
+An implementation MAY compose NIP-MATCHING with task lifecycle protocols. The Kind 30577 (Selection) event MAY reference an external lifecycle event via an `e` tag.
 
 ## Kinds
 
@@ -207,7 +207,7 @@ sequenceDiagram
     end
 ```
 
-## Use Cases Beyond TROTT
+## Example Applications
 
 ### Nostr Bounty Boards
 

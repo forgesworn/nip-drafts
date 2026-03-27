@@ -8,7 +8,7 @@ Structured Reputation & Reviews
 
 One addressable event kind for completion-verified ratings on Nostr. Credential attestations use [NIP-VA](https://github.com/forgesworn/nostr-attestations/blob/main/NIP-VA.md) kind 31000 (Verifiable Attestation) with `type: credential`.
 
-> **Standalone usability:** This NIP works independently on any Nostr application. Within the TROTT protocol (v0.9), these kinds are defined in TROTT-03: Reputation. TROTT extends them with cross-domain reputation portability, levelled credentials, and domain-specific rating criteria, but adoption of TROTT is not required.
+> **Standalone.** This NIP works independently on any Nostr application.
 
 ## Motivation
 
@@ -44,7 +44,7 @@ Uses [NIP-02](https://github.com/nostr-protocol/nips/blob/master/02.md) (Contact
 | ----- | ----------------------- |
 | 30520 | Rating                  |
 
-> Credential attestations use NIP-VA kind 31000 with `type: credential`. Application-specific tags (credential_type, issuer_type, etc.) are carried on the NIP-VA event. See the [NIP-VA specification](https://github.com/forgesworn/nostr-attestations/blob/main/NIP-VA.md) and TROTT-03 Credential Attestation for details.
+> Credential attestations use NIP-VA kind 31000 with `type: credential`. Application-specific tags (credential_type, issuer_type, etc.) are carried on the NIP-VA event. See the [NIP-VA specification](https://github.com/forgesworn/nostr-attestations/blob/main/NIP-VA.md) for details.
 
 ---
 
@@ -80,7 +80,7 @@ Published by a participant after transaction completion to rate the counterparty
 
 Tags:
 
-* `d` (REQUIRED): Format `<transaction_id>:rating:<rater_role>`. Ensures one rating per role per transaction via addressable event semantics. Valid roles: `requester`, `provider`, `beneficiary`.
+* `d` (REQUIRED): Format `<transaction_id>:rating:<rater_role>`. Ensures one rating per role per transaction via addressable event semantics. Role values are application-defined. Common conventions include `buyer`/`seller`, `client`/`contractor`, `requester`/`provider`, or `reviewer`/`subject`. For three-party transactions, a third role (e.g. `beneficiary`, `recipient`) enables three ratings per transaction.
 * `p` (REQUIRED): Pubkey of the party being rated.
 * `e` (REQUIRED): References a completion/confirmation event. Verifiable proof the rater participated. Implementations SHOULD verify: the event exists with a valid signature, the rater's pubkey appears as a participant, and the transaction reached a terminal state.
 * `domain` (RECOMMENDED): Category this transaction belonged to. This is a multi-letter tag; relays cannot filter on it. Clients MUST post-filter by `domain` after retrieval.
@@ -233,7 +233,9 @@ The protocol deliberately does not prescribe a scoring algorithm; implementation
 
 Ratings carry different weight based on the economic stake of the underlying transaction. A 5-star rating from a 500,000-sat job is more meaningful than one from a 100-sat micro-task.
 
-### Algorithm
+### Informational: Reference Weighting Algorithm
+
+This algorithm is illustrative. Applications SHOULD define their own weighting logic suited to their domain and trust requirements.
 
 ```
 weight(rating) = log2(1 + amount_sats) * recency_factor * completion_factor
@@ -244,15 +246,15 @@ Where:
 - `recency_factor` - `1.0` for ratings < 30 days old, decaying by `0.95^months` thereafter
 - `completion_factor` - `1.0` if rating references a verified completion or settlement event, `0.5` otherwise
 
-### Aggregation
+### Informational: Reference Aggregation
 
-A provider's aggregate score for criterion `c` is:
+A provider's aggregate score for criterion `c` could be computed as:
 
 ```
 score(c) = sum(rating_c * weight) / sum(weight)
 ```
 
-This weighted average naturally surfaces ratings backed by significant transactions while still counting smaller ones.
+This weighted average naturally surfaces ratings backed by significant transactions while still counting smaller ones. Applications MAY use alternative aggregation strategies.
 
 ### Why Stake Weighting Matters
 
@@ -281,7 +283,7 @@ sequenceDiagram
 
 ---
 
-## Use Cases Beyond Task Coordination
+## Example Applications
 
 ### Marketplace Seller Ratings
 

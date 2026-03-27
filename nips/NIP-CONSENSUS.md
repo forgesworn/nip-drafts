@@ -10,7 +10,7 @@ Two addressable event kinds for gathering agreement from multiple parties on Nos
 
 > **Design principle:** Consensus proposals are a coordination primitive for group decisions. They record who agreed and who did not — they do not enforce outcomes. The consuming application decides what happens when consensus is reached or fails.
 
-> **Standalone usability:** This NIP works independently on any Nostr application. Within the TROTT protocol (v0.9), it is pattern P3 in TROTT-00: Core Patterns. TROTT composes consensus proposals with multi-party task coordination, dispute resolution panels, and provider collective governance — but adoption of TROTT is not required.
+> **Standalone.** This NIP works independently on any Nostr application.
 
 ## Motivation
 
@@ -70,12 +70,12 @@ Published by a proposer to initiate a multi-party decision. Lists all required v
 
 Tags:
 
-* `d` (REQUIRED): Format `<context_id>:consensus:<sequence>`. Addressable event identifier.
+* `d` (REQUIRED): Addressable event identifier. RECOMMENDED format: `<context_id>:consensus:<sequence>`. Applications MAY use any d-tag format that ensures uniqueness.
 * `t` (REQUIRED): Protocol family marker. MUST be `"consensus-proposal"`.
 * `p` (REQUIRED, multiple): One `p` tag per required voter. Each voter's hex pubkey.
 * `threshold` (REQUIRED): Integer string — minimum number of `agree` votes required for the proposal to pass.
 * `expiration` (RECOMMENDED): Unix timestamp — voting deadline. Clients SHOULD use NIP-40 `expiration` for relay-level enforcement.
-* `consensus_type` (RECOMMENDED): Category of decision. Suggested values: `timeline`, `scope`, `budget`, `design`, `terms`, `governance`, `moderation`.
+* `consensus_type` (RECOMMENDED): Category of decision. Primary values: `budget`, `governance`, `moderation`. Applications MAY define additional types such as `timeline`, `scope`, `terms`, `design`, or other domain-specific values.
 * `ref` (OPTIONAL): External reference.
 * `e` (OPTIONAL): Event ID of the item requiring consensus (e.g. the content, transaction, or action being voted on).
 
@@ -185,7 +185,7 @@ flowchart TD
     DEADLINE -- "No" --> VOTING
 ```
 
-## Use Cases Beyond TROTT
+## Use Cases
 
 ### DAO Governance
 

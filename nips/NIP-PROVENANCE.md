@@ -95,7 +95,7 @@ Tags:
 
 * `d` (REQUIRED): Unique identifier for this product certificate.
 * `t` (REQUIRED): Protocol family marker. MUST be `"product-certificate"`.
-* `provenance:item_type` (REQUIRED): Machine-readable type of the finished product (e.g. `wrought_iron_gate`, `oak_chair`, `sourdough_loaf`).
+* `provenance:item_type` (REQUIRED): Machine-readable type of the finished product (e.g. `wrought_iron_gate`, `oak_chair`, `sourdough_loaf`, `single_origin_coffee`, `custom_dining_table`, `restored_engine`).
 * `provenance:completed_date` (REQUIRED): ISO 8601 date when the product was completed (e.g. `2026-02-28`).
 * `provenance:item_name` (OPTIONAL): Human-readable name or title of the product.
 * `provenance:description` (OPTIONAL): Short description of the product; dimensions, features, notable characteristics.
@@ -374,6 +374,15 @@ The `provenance:certification` tag uses `<scheme>:<status>` format. The followin
 | `kosher` | Kosher certification (various bodies) |
 | `msc` | Marine Stewardship Council (sustainable seafood) |
 
+### Quality & Safety Standards
+
+| Scheme identifier | Description |
+| ----------------- | ----------- |
+| `iso_9001` | ISO 9001 Quality Management Systems |
+| `iso_14001` | ISO 14001 Environmental Management Systems |
+| `fda_approved` | US Food and Drug Administration Approved |
+| `ul_listed` | Underwriters Laboratories Listed |
+
 ### Timber & Materials
 
 | Scheme identifier | Description |
@@ -421,6 +430,18 @@ Construction projects use provenance evidence records to demonstrate regulatory 
 ### Art Authentication
 
 Galleries and restorers publish provenance evidence records for art materials (canvas type, pigment composition, frame timber species). Combined with photographic evidence, this builds a material authentication record that adds value and supports conservation decisions.
+
+### Artisan Food Production
+
+A specialty coffee roaster publishes a product certificate for each single-origin roast, documenting the bean source (`origin_region`), roast profile (`provenance:technique`), and roast date (`provenance:completed_date`). Certifications like `usda_organic:certified` or `fairtrade:certified` are recorded in `provenance:certification` tags. Customers can trace the complete journey from farm to cup.
+
+### Custom Furniture
+
+A furniture maker publishes a product certificate for a bespoke dining table, documenting timber species and source (`provenance:material`), joinery techniques (`provenance:technique`), and finishing methods. The `provenance:material_source` tag links to evidence records proving FSC-certified timber sourcing. Delivery creates a custody transfer to the buyer.
+
+### Automotive Restoration
+
+A classic car restorer publishes product certificates for each major component rebuilt during a restoration. Engine blocks, gearboxes, and body panels each get certificates documenting original specifications, replacement parts used, and restoration techniques. Combined with NIP-EVIDENCE material records for sourced parts, this creates a complete, verifiable restoration history that adds value at resale.
 
 ### Luxury Goods
 
@@ -568,12 +589,14 @@ High-value products combine all three composition patterns. The maker publishes 
 * [NIP-32](https://github.com/nostr-protocol/nips/blob/master/32.md): Labelling - craft category and subcategory labels on product certificates
 * [NIP-40](https://github.com/nostr-protocol/nips/blob/master/40.md): Expiration timestamps (time-limited certifications, attestation validity)
 * [NIP-44](https://github.com/nostr-protocol/nips/blob/master/44.md): Versioned encrypted payloads (sensitive sourcing data, private transaction details)
-* [NIP-VA](https://github.com/nostr-protocol/nips/blob/master/VA.md): Verifiable Attestations (kind 31000) - authenticity attestation composition
-* [NIP-CRAFTS](./NIP-CRAFTS.md): Provider Profile with craft extensions (kind 30510, via NIP-PROVIDER-PROFILES) and Technique Record (kind 30401) - soft dependency for product certificate cross-references. Clients that do not implement NIP-CRAFTS SHOULD ignore `provenance:maker_profile` and `provenance:technique_record` tags
-* [NIP-CUSTODY](./NIP-CUSTODY.md): Chain-of-custody tracking (kind 30572) - ownership transfer composition
-* [NIP-EVIDENCE](./NIP-EVIDENCE.md): Timestamped evidence recording (kind 30578) - material provenance composition
-* [NIP-VARIATION](./NIP-VARIATION.md): Material substitution approval flows (optional composition)
-* [NIP-APPROVAL](./NIP-APPROVAL.md): Multi-party sign-off on material choices (optional composition)
+* [NIP-VA](https://github.com/nostr-protocol/nips/blob/master/VA.md): Verifiable Attestations (kind 31000) - authenticity attestation composition (OPTIONAL)
+* [NIP-CRAFTS](./NIP-CRAFTS.md): Provider Profile with craft extensions (kind 30510, via NIP-PROVIDER-PROFILES) and Technique Record (kind 30401) - soft dependency for product certificate cross-references (OPTIONAL). Clients that do not implement NIP-CRAFTS SHOULD ignore `provenance:maker_profile` and `provenance:technique_record` tags
+* [NIP-CUSTODY](./NIP-CUSTODY.md): Chain-of-custody tracking (kind 30572) - ownership transfer composition (OPTIONAL)
+* [NIP-EVIDENCE](./NIP-EVIDENCE.md): Timestamped evidence recording (kind 30578) - material provenance composition (OPTIONAL)
+* [NIP-VARIATION](./NIP-VARIATION.md): Material substitution approval flows (OPTIONAL)
+* [NIP-APPROVAL](./NIP-APPROVAL.md): Multi-party sign-off on material choices (OPTIONAL)
+
+Composition with NIP-VA, NIP-CRAFTS, NIP-CUSTODY, NIP-EVIDENCE, NIP-VARIATION, and NIP-APPROVAL is OPTIONAL. NIP-PROVENANCE works independently as a standalone product certificate format.
 
 ## Reference Implementation
 

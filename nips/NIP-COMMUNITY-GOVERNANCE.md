@@ -19,7 +19,9 @@ Consider the difference:
 - **NIP-CONSENSUS:** "Should we allocate 500,000 sats to relay hosting?", vote, done.
 - **Community Governance:** "We are a collective. We have members, roles, a treasury, and rules for how decisions get made. This month's proposal is relay hosting. Next month it might be membership changes. The collective persists."
 
-NIP-02 contact lists are flat. NIP-51 lists provide flexible grouping but no governance machinery. NIP-CONSENSUS handles one-off decisions but not persistent democratic structures. By composing NIP-51 lists (member rosters with governance metadata), NIP-CONSENSUS proposals and votes (democratic decision-making), and NIP-EVIDENCE records (treasury audit trails), applications can build full governance systems for:
+NIP-02 contact lists are flat. NIP-51 lists provide flexible grouping but no governance machinery. NIP-CONSENSUS handles one-off decisions but not persistent democratic structures. NIP-CONSENSUS and NIP-EVIDENCE are currently draft NIPs. This composition guide will be most useful once those NIPs are accepted.
+
+By composing NIP-51 lists (member rosters with governance metadata), NIP-CONSENSUS proposals and votes (democratic decision-making), and NIP-EVIDENCE records (treasury audit trails), applications can build full governance systems for:
 
 - **DAOs and cooperatives** with transparent voting and treasury management
 - **Community land trusts** with democratic stewardship decisions
@@ -76,8 +78,8 @@ Tags:
 
 * `d` (REQUIRED): MUST use `collective:<name>` prefix. The name portion SHOULD be a human-readable slug.
 * `title` (REQUIRED): Human-readable collective name.
-* `governance_model` (REQUIRED): One of `direct_democracy`, `delegated`, `consensus_threshold`, `supermajority`.
-* `voting_threshold` (REQUIRED): Minimum participation threshold as a decimal between 0.0 and 1.0. A threshold of `0.6` means at least 60% of members must vote in favour for a proposal to pass.
+* `governance_model` (RECOMMENDED): One of `direct_democracy`, `delegated`, `consensus_threshold`, `supermajority`. If omitted, applications SHOULD assume `direct_democracy`.
+* `voting_threshold` (RECOMMENDED): Minimum participation threshold as a decimal between 0.0 and 1.0. A threshold of `0.6` means at least 60% of members must vote in favour for a proposal to pass. If omitted, applications SHOULD assume `0.5`.
 * `p` (REQUIRED, repeatable): Member pubkey with role in position 2. At least one member is required.
 * `treasury_pubkey` (OPTIONAL): Pubkey controlling the collective's shared treasury. Multi-sig or threshold keys are RECOMMENDED.
 * `charter` (OPTIONAL): URI linking to the collective's governance charter document.
@@ -165,7 +167,7 @@ Tags (in addition to standard NIP-CONSENSUS tags):
 | `role_rotation` | Rotate steward, treasurer, or other roles | Default |
 | `dissolution` | Dissolve the collective entirely | Supermajority |
 
-Clients SHOULD enforce supermajority requirements for sensitive proposal types (`membership_remove`, `policy_change`, `dissolution`) regardless of the collective's default governance model.
+Collectives MAY configure supermajority requirements for sensitive proposal types (`membership_remove`, `policy_change`, `dissolution`). Enforcement is an application concern.
 
 ### REQ Filters
 
@@ -327,7 +329,7 @@ Neighbours pool emergency funds. Any member can propose an allocation for a memb
 
 * **Sybil attacks on voting.** Membership is explicit in the NIP-51 collective list. Only votes from listed member pubkeys are counted. An attacker cannot inject votes without first being added through a governance proposal.
 * **Treasury key management.** A single-key treasury is a trust risk. Multi-sig or threshold keys (e.g. 2-of-3 steward/treasurer signatures) are RECOMMENDED. Applications SHOULD warn users when a collective's treasury relies on a single key.
-* **Governance capture.** A majority faction could add sympathetic members and remove dissenters. Clients SHOULD enforce supermajority requirements for `membership_remove`, `policy_change`, and `dissolution` proposal types regardless of the collective's default governance model.
+* **Governance capture.** A majority faction could add sympathetic members and remove dissenters. Collectives MAY configure supermajority requirements for `membership_remove`, `policy_change`, and `dissolution` proposal types. Enforcement is an application concern.
 * **Vote privacy.** Votes are public by default. For sensitive proposals, vote content MAY be NIP-44 encrypted. Collectives SHOULD document their transparency expectations in the charter.
 * **Proposal spam.** Only collective members can create proposals, but a disruptive member could flood the collective with frivolous proposals. Clients SHOULD implement rate limiting and collectives MAY include proposal rate limits in their charter.
 * **Stale collectives.** Collectives without activity for extended periods may have abandoned treasuries. Clients SHOULD flag collectives with no proposals or ledger entries for more than 6 months. The `expiration` tag on the NIP-51 list provides a mechanism for forced renewal.

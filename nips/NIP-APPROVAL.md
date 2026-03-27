@@ -10,7 +10,7 @@ Two addressable event kinds for gating workflow progression on Nostr — a propo
 
 > **Design principle:** Approval gates are a coordination primitive. They communicate that sign-off is required and record decisions — they do not enforce access control. Enforcement is the responsibility of the consuming application.
 
-> **Standalone usability:** This NIP works independently on any Nostr application. Within the TROTT protocol (v0.9), it is pattern P1 in TROTT-00: Core Patterns. TROTT composes approval gates with task lifecycle states, domain-specific inspection requirements, and operator integration — but adoption of TROTT is not required.
+> **Standalone.** This NIP works independently on any Nostr application.
 
 ## Motivation
 
@@ -66,9 +66,9 @@ Published by a proposer to create a gate requiring one or more reviewers to sign
 
 Tags:
 
-* `d` (REQUIRED): Format `<context_id>:gate:<sequence>`. Addressable event identifier.
-* `t` (REQUIRED): Protocol family marker. MUST be `"approval-gate"`.
-* `gate_type` (REQUIRED): Type of gate. One of `regulatory`, `inspection`, `approval`, `review`. These are RECOMMENDED values; applications MAY define additional gate types as needed.
+* `d` (REQUIRED): Addressable event identifier. RECOMMENDED format: `<context_id>:gate:<sequence>`. Applications MAY use any d-tag format that ensures uniqueness.
+* `t` (RECOMMENDED): Protocol family marker. RECOMMENDED value: `"approval-gate"`.
+* `gate_type` (REQUIRED): Type of gate. Primary values: `review`, `approval`. Applications MAY define additional gate types such as `regulatory`, `inspection`, or other domain-specific values.
 * `gate_authority` (REQUIRED, one or more): Hex pubkey of a required reviewer. Multiple `gate_authority` tags indicate that all listed reviewers must respond (see Multi-Reviewer Gates below).
 * `gate_status` (REQUIRED): MUST be `"pending"` on creation.
 * `expiration` (RECOMMENDED): Unix timestamp — deadline for the review. Clients SHOULD use NIP-40 `expiration` for relay-level enforcement.
@@ -181,7 +181,7 @@ flowchart TD
 
 When multiple reviewers must approve, the proposer publishes multiple `gate_authority` tags on the Kind 30570 event. Each reviewer publishes their own Kind 30571 response. The gate is considered approved only when **all** listed authorities have published `approved` responses. If any reviewer publishes `rejected`, the gate is rejected. Clients SHOULD track the set of outstanding approvals and display progress.
 
-## Use Cases Beyond TROTT
+## Use Cases
 
 ### Code Review & Merge Gating
 

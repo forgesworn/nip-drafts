@@ -8,7 +8,7 @@ Craft Technique Documentation
 
 One addressable event kind for craft technique documentation on Nostr. Practitioner skill identity composes with NIP-PROVIDER-PROFILES.
 
-> **Standalone usability:** This NIP works independently on any Nostr application. Craft technique documentation and practitioner skill identity compose with NIP-PROVIDER-PROFILES, NIP-MENTORSHIP, NIP-SCARCITY, and NIP-REPUTATION but do not require any of them.
+> **Standalone.** This NIP works independently on any Nostr application. Composition with NIP-PROVIDER-PROFILES, NIP-MENTORSHIP, NIP-SCARCITY, and NIP-REPUTATION is OPTIONAL.
 
 ## Motivation
 
@@ -31,8 +31,11 @@ This NIP was promoted from `incubating` after demonstrating demand across 4+ unr
 | Craft/making (therapeutic) | Craft skill identity and technique documentation for pottery, weaving, metalwork, woodcraft | Creative arts |
 | Outdoor education | Skill progressions across 20+ National Governing Bodies (Forest School, Mountain Training, RYA, BCU) | Education |
 | Veteran support | Military-to-civilian skills translation - mapping military qualifications and experience to civilian job descriptions | Social services |
+| Japanese woodworking | Traditional joinery techniques (kumiki, tsugite), temple carpentry traditions, Living National Treasure preservation | Built environment |
+| Italian marble sculpting | Carrara marble sculpting traditions, apprenticeship lineages, tool technique documentation | Creative arts |
+| Nordic boat-building | Clinker-built boat traditions (Viking-era revival), Scandinavian maritime craft preservation | Maritime |
 
-These domains span built environment, creative arts, education, and social services, confirming the pattern is domain-agnostic.
+These domains span built environment, creative arts, education, social services, and maritime, confirming the pattern is domain-agnostic.
 
 ## Kinds
 
@@ -204,7 +207,7 @@ Certain techniques (e.g. conservation methods that could enable theft if publish
 
 ## Craft Taxonomy
 
-Top-level categories for `craft:category`. Extensible; implementations MAY add custom categories.
+Top-level categories for `craft:category`. This taxonomy is extensible. Applications MAY define additional categories for their domain.
 
 | Category | Description | Example skills |
 | -------- | ----------- | -------------- |
@@ -281,19 +284,19 @@ NIP-23 (Long-form Content) is generic article publishing. Kind 30401 Technique R
 
 ### NIP-PROVIDER-PROFILES (Kind 30510)
 
-NIP-PROVIDER-PROFILES defines general-purpose provider profiles for service discovery. Craft practitioner identity composes directly with Provider Profiles using `craft:*` extension tags. This NIP does **not** define a separate Skill Profile kind; the Provider Profile is the canonical home for practitioner identity. See [Composing with NIP-PROVIDER-PROFILES](#composing-with-nip-provider-profiles) above for the full tag vocabulary and example.
+Composition with NIP-PROVIDER-PROFILES is OPTIONAL. NIP-PROVIDER-PROFILES defines general-purpose provider profiles for service discovery. Craft practitioner identity composes directly with Provider Profiles using `craft:*` extension tags. This NIP does **not** define a separate Skill Profile kind; the Provider Profile is the canonical home for practitioner identity. See [Composing with NIP-PROVIDER-PROFILES](#composing-with-nip-provider-profiles) above for the full tag vocabulary and example.
 
 ### NIP-MENTORSHIP (Kind 30517)
 
-NIP-MENTORSHIP defines mentorship endorsements via enriched NIP-TRUST Provider Endorsements. Provider Profiles with craft extensions MAY reference mentorship endorsements using the `craft:mentorship_ref` tag, linking a practitioner's training lineage to their declared skills. NIP-CRAFTS does **not** duplicate lineage tracking; that is NIP-MENTORSHIP's responsibility.
+Composition with NIP-MENTORSHIP is OPTIONAL. NIP-MENTORSHIP defines mentorship endorsements via enriched NIP-TRUST Provider Endorsements. Provider Profiles with craft extensions MAY reference mentorship endorsements using the `craft:mentorship_ref` tag, linking a practitioner's training lineage to their declared skills. NIP-CRAFTS does **not** duplicate lineage tracking; that is NIP-MENTORSHIP's responsibility.
 
 ### NIP-SCARCITY (Kind 30599)
 
-NIP-SCARCITY defines workforce and skill endangerment signals. Provider Profiles with craft extensions MAY reference scarcity signals using the `craft:scarcity_signal` tag, connecting an individual practitioner to broader endangerment data for their skills. The `craft:endangerment` tag on profiles and Technique Records provides a lightweight alternative for cases where no formal scarcity signal exists.
+Composition with NIP-SCARCITY is OPTIONAL. NIP-SCARCITY defines workforce and skill endangerment signals. Provider Profiles with craft extensions MAY reference scarcity signals using the `craft:scarcity_signal` tag, connecting an individual practitioner to broader endangerment data for their skills. The `craft:endangerment` tag on profiles and Technique Records provides a lightweight alternative for cases where no formal scarcity signal exists.
 
 ### NIP-REPUTATION (NIP-VA kind 31000)
 
-NIP-REPUTATION defines Credential Attestations for third-party verification of qualifications. Provider Profiles with craft extensions MAY reference credential attestations using the `craft:certification_ref` tag, linking self-declared certifications to independently verified credentials. The `craft:certification` tag provides the self-declared reference; `craft:certification_ref` provides the verifiable attestation.
+Composition with NIP-REPUTATION is OPTIONAL. NIP-REPUTATION defines Credential Attestations for third-party verification of qualifications. Provider Profiles with craft extensions MAY reference credential attestations using the `craft:certification_ref` tag, linking self-declared certifications to independently verified credentials. The `craft:certification` tag provides the self-declared reference; `craft:certification_ref` provides the verifiable attestation.
 
 ---
 
