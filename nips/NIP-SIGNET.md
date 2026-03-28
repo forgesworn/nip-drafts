@@ -94,6 +94,24 @@ No new event kinds are introduced.
 | 31000 | NIP-VA | Credentials, vouches, verifier registrations, challenges |
 | 30078 | NIP-78 | Community verification policies |
 
+## Attestation Patterns
+
+Each attestation type uses the NIP-VA pattern that matches its speech act. Credentials respond to the subject's identity claim (assertion-first). Vouches report the voucher's own experience (direct). Verifier registrations are self-declarations.
+
+| Attestation | Who speaks? | About what? | NIP-VA pattern | d-tag |
+|---|---|---|---|---|
+| Tier 1 self-declaration | Subject about self | "I exist" | Self-attestation | `credential:<own-pubkey>` |
+| Vouch | Voucher about their experience | "I met this person" | Direct claim | `vouch:<subject-pubkey>` |
+| Tier 2 aggregate credential | Aggregator about a threshold | "3+ vouches reached" | Assertion-first | `assertion:<tier-1-event-id>` |
+| Tier 3 credential | Verifier about subject's identity | "I verified their claim" | Assertion-first | `assertion:<tier-1-event-id>` |
+| Tier 4 credential | Verifier about subject's identity + child | "I verified their claim" | Assertion-first | `assertion:<tier-1-event-id>` |
+| Verifier registration | Verifier about self | "I am a solicitor" | Self-attestation | `verifier:<own-pubkey>` |
+| Challenge | Challenger about verifier behaviour | "This verifier is suspicious" | Direct claim | `challenge:<verifier-pubkey>` |
+
+**Assertion-first credentials** reference the subject's Tier 1 self-declaration via `e` tag with the `"assertion"` marker. The `type: credential` tag is included for relay-side filtering and graceful degradation (hybrid pattern per NIP-VA). If the referenced self-declaration cannot be fetched, Signet-aware clients can still render the credential from its tags.
+
+**Direct claims** (vouches, challenges) originate from the attestor. The voucher reports their own experience of meeting someone. The challenger reports observed behaviour. Neither is a response to a prior assertion from the subject.
+
 ## Verification Tiers
 
 | Tier | Name | What it proves | How |
@@ -111,15 +129,42 @@ Tiers are progressive: each tier subsumes the trust of lower tiers. A Tier 3 acc
 
 A verification credential attests that a subject has been verified at a specific tier.
 
+**Tier 1 (self-declaration)** uses the direct claim pattern -- the subject signs their own credential (`pubkey` equals the `p` tag value):
+
+```json
+{
+  "kind": 31000,
+  "pubkey": "<subject-pubkey>",
+  "created_at": 1711540800,
+  "tags": [
+    ["d", "credential:<subject-pubkey>"],
+    ["p", "<subject-pubkey>"],
+    ["type", "credential"],
+    ["tier", "1"],
+    ["verification-type", "self"],
+    ["scope", "adult"],
+    ["method", "self-declaration"],
+    ["L", "signet"],
+    ["alt", "Signet Tier 1 self-declaration"]
+  ],
+  "content": "",
+  "id": "<tier-1-event-id>",
+  "sig": "<64-byte-hex>"
+}
+```
+
+**Tier 3 (professional verification)** uses the assertion-first hybrid pattern -- the verifier references the subject's Tier 1 self-declaration and includes `type: credential` for filtering and resilience:
+
 ```json
 {
   "kind": 31000,
   "pubkey": "<verifier-pubkey>",
   "created_at": 1711540800,
   "tags": [
-    ["d", "credential:<subject-pubkey>"],
-    ["p", "<subject-pubkey>"],
+    ["d", "assertion:<tier-1-event-id>"],
+    ["e", "<tier-1-event-id>", "wss://relay.example.com", "assertion"],
     ["type", "credential"],
+    ["p", "<subject-pubkey>"],
     ["tier", "3"],
     ["verification-type", "professional"],
     ["scope", "adult"],
@@ -136,11 +181,14 @@ A verification credential attests that a subject has been verified at a specific
 }
 ```
 
+The `e` tag with the `"assertion"` marker references the subject's Tier 1 self-declaration event. The `type: credential` tag is a hybrid override for relay-side filtering -- clients that cannot fetch the referenced assertion can still parse the credential from its tags.
+
 ### Tags
 
 | Tag | Status | Description |
 |-----|--------|-------------|
-| `d` | REQUIRED | `credential:<subject-hex-pubkey>` |
+| `d` | REQUIRED | Tier 1: `credential:<subject-hex-pubkey>`. Tier 2-4: `assertion:<tier-1-event-id>` |
+| `e` | REQUIRED (Tier 2-4) | `<tier-1-event-id>`, `<relay-hint>`, `"assertion"` -- references the subject's Tier 1 self-declaration |
 | `p` | REQUIRED | Subject's hex pubkey |
 | `type` | REQUIRED | `credential` |
 | `L` | RECOMMENDED | `signet` -- namespace label for filtering |
@@ -161,11 +209,11 @@ A verification credential attests that a subject has been verified at a specific
 
 ### Tier-Specific Requirements
 
-**Tier 1 (self-declared):** `verification-type` MUST be `self`. `method` MUST be `self-declaration`. The `pubkey` (author) and `p` tag (subject) MUST be the same keypair -- the subject signs their own credential.
+**Tier 1 (self-declared):** `verification-type` MUST be `self`. `method` MUST be `self-declaration`. The `pubkey` (author) and `p` tag (subject) MUST be the same keypair -- the subject signs their own credential. Uses the direct claim pattern: `d` tag is `credential:<subject-hex-pubkey>`. No assertion reference.
 
-**Tier 2 (peer-vouched):** `verification-type` MUST be `peer`. The credential is published after the subject accumulates sufficient vouches (see [Vouch Threshold](#vouch-threshold)). A client or aggregation service publishes the Tier 2 credential referencing the qualifying vouches.
+**Tier 2 (peer-vouched):** `verification-type` MUST be `peer`. The credential is published after the subject accumulates sufficient vouches (see [Vouch Threshold](#vouch-threshold)). A client or aggregation service publishes the Tier 2 credential referencing the subject's Tier 1 self-declaration via `e` tag with `"assertion"` marker. `d` tag is `assertion:<tier-1-event-id>`.
 
-**Tier 3 (professional):** `verification-type` MUST be `professional`. `method` MUST be `in-person-id`. `profession` and `jurisdiction` SHOULD be present. The verifier MUST be a registered professional (see [Attestation Type: `verifier`](#attestation-type-verifier)).
+**Tier 3 (professional):** `verification-type` MUST be `professional`. `method` MUST be `in-person-id`. `profession` and `jurisdiction` SHOULD be present. The verifier MUST be a registered professional (see [Attestation Type: `verifier`](#attestation-type-verifier)). MUST reference the subject's Tier 1 self-declaration via `e` tag with `"assertion"` marker. `d` tag is `assertion:<tier-1-event-id>`.
 
 **Tier 4 (professional + child):** All Tier 3 requirements, plus `scope` MUST be `adult+child` and `age-range` SHOULD be present.
 
@@ -449,15 +497,19 @@ Professional credential issuance, verifier lifecycle management, community polic
 | V-SIG-01 | `type` tag MUST be one of: `credential`, `vouch`, `verifier`, `challenge` | Reject unknown types silently |
 | V-SIG-02 | `tier` MUST be `1`, `2`, `3`, or `4` | Reject credentials with invalid tiers |
 | V-SIG-03 | Tier 1 credential: `pubkey` MUST equal `p` tag value | Self-declaration must be self-signed |
-| V-SIG-04 | Tier 3-4 credential: `verification-type` MUST be `professional` | Professional tiers require professional verification |
-| V-SIG-05 | Tier 4 credential: `scope` MUST be `adult+child` | Child safety tier requires child scope |
-| V-SIG-06 | `expiration` tag, if present, MUST be a valid future unix timestamp at time of creation | Reject pre-expired credentials |
-| V-SIG-07 | `nullifier` tag, if present, MUST be a 64-character hex string (SHA-256) | Malformed nullifiers indicate tampering |
-| V-SIG-08 | `method` on vouch MUST be `in-person` or `online` | Reject unknown vouch methods |
-| V-SIG-09 | Verifier: `profession`, `jurisdiction`, `licence`, `body` all REQUIRED | Incomplete verifier registrations are invalid |
-| V-SIG-10 | Challenge: `reason` MUST be a defined reason code | Reject unknown challenge reasons |
-| V-SIG-11 | Policy `d` tag MUST begin with `signet:policy:` | Policies with other d-tag prefixes are not Signet policies |
-| V-SIG-12 | Policy tier values MUST be `1`-`4` if present | Reject out-of-range tier requirements |
+| V-SIG-04 | Tier 1 credential: `d` tag MUST be `credential:<subject-pubkey>` | Self-declarations use direct claim d-tag |
+| V-SIG-05 | Tier 2-4 credential: `d` tag MUST start with `assertion:` | Higher-tier credentials reference the subject's Tier 1 |
+| V-SIG-06 | Tier 2-4 credential: MUST have an `e` tag with `"assertion"` marker | The assertion reference is required, not optional |
+| V-SIG-07 | Tier 3-4 credential: `verification-type` MUST be `professional` | Professional tiers require professional verification |
+| V-SIG-08 | Tier 4 credential: `scope` MUST be `adult+child` | Child safety tier requires child scope |
+| V-SIG-09 | `expiration` tag, if present, MUST be a valid future unix timestamp at time of creation | Reject pre-expired credentials |
+| V-SIG-10 | `nullifier` tag, if present, MUST be a 64-character hex string (SHA-256) | Malformed nullifiers indicate tampering |
+| V-SIG-11 | `method` on vouch MUST be `in-person` or `online` | Reject unknown vouch methods |
+| V-SIG-12 | Vouch: `d` tag MUST be `vouch:<subject-pubkey>` | Vouches use direct claim pattern |
+| V-SIG-13 | Verifier: `profession`, `jurisdiction`, `licence`, `body` all REQUIRED | Incomplete verifier registrations are invalid |
+| V-SIG-14 | Challenge: `reason` MUST be a defined reason code | Reject unknown challenge reasons |
+| V-SIG-15 | Policy `d` tag MUST begin with `signet:policy:` | Policies with other d-tag prefixes are not Signet policies |
+| V-SIG-16 | Policy tier values MUST be `1`-`4` if present | Reject out-of-range tier requirements |
 
 ## Security Considerations
 
@@ -528,13 +580,55 @@ Valid when `pubkey` equals the `p` tag value.
 
 Valid when `pubkey` differs from the `p` tag value (you cannot vouch for yourself).
 
-### Invalid: Self-Signed Tier 3
+### Minimal Valid Tier 3 Credential (Assertion-First Hybrid)
+
+```json
+{
+  "kind": 31000,
+  "tags": [
+    ["d", "assertion:ff00ff00..."],
+    ["e", "ff00ff00...", "wss://relay.example.com", "assertion"],
+    ["type", "credential"],
+    ["p", "aabbccdd..."],
+    ["tier", "3"],
+    ["verification-type", "professional"],
+    ["scope", "adult"],
+    ["method", "in-person-id"]
+  ],
+  "content": ""
+}
+```
+
+Valid when `pubkey` differs from the `p` tag value (verifier signs, not the subject). The `e` tag references the subject's Tier 1 self-declaration event (`ff00ff00...`). The `d` tag uses the `assertion:` prefix.
+
+### Invalid: Tier 3 Without Assertion Reference
 
 ```json
 {
   "kind": 31000,
   "tags": [
     ["d", "credential:aabbccdd..."],
+    ["p", "aabbccdd..."],
+    ["type", "credential"],
+    ["tier", "3"],
+    ["verification-type", "professional"],
+    ["scope", "adult"],
+    ["method", "in-person-id"]
+  ],
+  "content": ""
+}
+```
+
+INVALID: Tier 3 credentials MUST reference the subject's Tier 1 self-declaration via `e` tag with `"assertion"` marker. The `d` tag MUST start with `assertion:`, not `credential:`.
+
+### Invalid: Self-Signed Tier 3
+
+```json
+{
+  "kind": 31000,
+  "tags": [
+    ["d", "assertion:ff00ff00..."],
+    ["e", "ff00ff00...", "", "assertion"],
     ["p", "aabbccdd..."],
     ["type", "credential"],
     ["tier", "3"],
