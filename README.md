@@ -42,6 +42,7 @@ All drafts are `draft` `optional` unless noted otherwise.
 | [NIP-KEY-HIERARCHY](nips/NIP-KEY-HIERARCHY.md) | Hierarchical Key Relationships | upstream | `draft` | 30594, 30595 | NIP-01, NIP-40, NIP-44, NIP-59 |
 | [NIP-RESOURCE-CURATION](nips/NIP-RESOURCE-CURATION.md) | Structured Resource Listings, Reviews & Collections | upstream | `draft` | 30414, 30415, 30416 | NIP-01, NIP-22, NIP-32, NIP-40, NIP-51 |
 | [NIP-DOMINION](nips/NIP-DOMINION.md) | Epoch-Based Encrypted Content Access | upstream | `draft` | 30480 | NIP-01, NIP-44, NIP-59, NIP-78 |
+| [NIP-IDENTITY-TREES](nips/NIP-IDENTITY-TREES.md) | Purpose-Tagged Identity Derivation (nsec-tree) | upstream | `draft` | none (client-side) | NIP-01, NIP-06 (complementary) |
 
 ### Incubating
 
