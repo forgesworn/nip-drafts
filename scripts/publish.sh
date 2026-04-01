@@ -105,6 +105,8 @@ IMAGES=(
   "NIP-SIGNET.md|sequenceDiagram|signet-1|Progressive Verification Flow"
   "NIP-VEIL.md|sequenceDiagram|veil-1|Anonymous Trust Assertion Flow"
   "NIP-DOMINION.md|sequenceDiagram|dominion-1|Epoch-Based Access Flow"
+  # Batch 4
+  "NIP-IDENTITY-TREES.md|flowchart TD|identity_trees-1|Purpose-Tagged Identity Derivation Flow"
 )
 
 # ── CLI parsing ──────────────────────────────────────────────────────────────
