@@ -62,6 +62,8 @@ NIPS=(
   "nip-signet|NIP-SIGNET: Progressive Identity Verification|NIP-SIGNET.md||3"
   "nip-veil|NIP-VEIL: Anonymous Trust Assertions|NIP-VEIL.md||3"
   "nip-dominion|NIP-DOMINION: Epoch-Based Encrypted Content Access|NIP-DOMINION.md|30480|3"
+  # Batch 4 (Heartwood / identity derivation)
+  "nip-identity-trees|NIP-IDENTITY-TREES: Purpose-Tagged Identity Derivation (nsec-tree)|NIP-IDENTITY-TREES.md||4"
 )
 
 # ── Image insertion map ──────────────────────────────────────────────────────
