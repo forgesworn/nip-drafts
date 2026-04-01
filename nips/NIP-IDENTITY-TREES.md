@@ -27,6 +27,36 @@ Each child is scoped to a human-readable **purpose string** and a numeric index.
 | `0x00` | Single null byte |
 | `secp256k1_x_only(sk)` | BIP-340 x-only public key from private key `sk` |
 
+## Overview
+
+The following diagram illustrates the derivation flow:
+
+```mermaid
+flowchart TD
+    classDef green fill:#1b3d2d,stroke:#16c79a,color:#f0f0f0
+    classDef yellow fill:#2d2d1b,stroke:#f5a623,color:#f0f0f0
+    classDef blue fill:#1b2d3d,stroke:#0f3460,color:#f0f0f0
+    classDef red fill:#3d1b1b,stroke:#e94560,color:#f0f0f0
+    classDef purple fill:#2d1b3d,stroke:#9b59b6,color:#f0f0f0
+
+    MNEMONIC([BIP-39 Mnemonic<br/>12 or 24 words]):::blue
+    NSEC([Existing nsec]):::blue
+
+    MNEMONIC -- "BIP-32 at<br/>m/44'/1237'/727'/0'/0'" --> ROOT
+    NSEC -- "HMAC-SHA256<br/>key=nsec, msg='nsec-tree-root'" --> ROOT
+
+    ROOT[Tree Root Secret<br/>+ Master Pubkey]:::purple
+
+    ROOT -- "HMAC-SHA256<br/>purpose='social', index=0" --> SOCIAL([Social Identity<br/>npub1abc...]):::green
+    ROOT -- "HMAC-SHA256<br/>purpose='commerce', index=0" --> COMMERCE([Commerce Identity<br/>npub1def...]):::green
+    ROOT -- "HMAC-SHA256<br/>purpose='nostr:persona:work', index=0" --> PERSONA([Work Persona<br/>npub1ghi...]):::green
+
+    ROOT -. "Blind proof<br/>BIP-340 Schnorr" .-> PROOF{Linkage Proof<br/>master owns child}:::yellow
+    SOCIAL -. "verified" .-> PROOF
+
+    style ROOT stroke-width:3px
+```
+
 ## Tree Root Derivation
 
 Two entry points produce a 32-byte **tree root secret**. The tree root is a valid secp256k1 private key; its x-only public key (BIP-340) is the **master pubkey**, used in linkage proofs and recovery.
