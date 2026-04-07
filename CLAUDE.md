@@ -14,12 +14,11 @@
 
 These NIPs are PUBLIC. Before committing, verify:
 
-- **No personal names** (or real identities of contributors)
-- **No private GitHub org or repo references** in NIPs submitted to nostr-protocol/nips — use `forgesworn/*` for public repos only
-- **No internal project names** (as role names or identifiers) — use generic equivalents
-- **No private repo links**
+- **No personal names** or real identities of contributors
+- **No private GitHub org or repo references** — use `forgesworn/*` for public repos only
+- **No internal project names** as role names or identifiers — use generic equivalents
 - **forgesworn/* links are fine** — this is the public GitHub org
-- Run `the privacy check from ~/.claude/CLAUDE.md` before pushing
+- Run the privacy check from `~/.claude/CLAUDE.md` before pushing
 
 ## NIP format conventions
 
