@@ -28,6 +28,14 @@ Specification
 
 Kind `31000` (Attestation) — an addressable event per [NIP-01](01.md). The number is unassigned in the official kind table and was chosen as a memorable, round number in the addressable range (30000–39999).
 
+### Scope
+
+This NIP defines the attestation **record format** only. It does not specify how attestations are requested, negotiated, or fulfilled. Workflow mechanics (who initiates an attestation, how requests are routed, how proficiency is declared) are application-defined and intentionally outside this spec.
+
+Applications MAY use any workflow layer that suits their use case: automated issuance, user-initiated requests, DVM-based attestation services (NIP-90), or complex multi-step flows managed at the application layer. All of these can produce kind `31000` events as their output record.
+
+Kind `31871` provides one such workflow layer, well-suited to event-verification scenarios with explicit request/response mechanics. Kind `31000` and kind `31871` are complementary: kind `31871` handles the workflow; kind `31000` is the record that workflow produces.
+
 ### Patterns
 
 **Assertion-first (recommended).** The individual publishes their own claim as any Nostr event. The attestor validates it by referencing it via an `e` or `a` tag with the `"assertion"` marker. The type is inherited from the referenced event — no `type` tag is needed on the attestation. This pattern puts the individual at the centre: they own their claim, the attestor merely stamps it.
@@ -130,6 +138,17 @@ Guarantees:
 1. **One per publisher per claim.** Addressable semantics mean latest version wins.
 2. **Relay-side filtering.** Query by `d`-tag prefix for all attestations of a type.
 3. **No collisions.** Different types and assertion references occupy separate `d`-tag slots.
+
+### Type Conventions
+
+Generic type values (`credential`, `endorsement`, `vouch`, `provenance`, `verifier`) are shared vocabulary and SHOULD be used when the attestation fits a common meaning. Applications that need domain-specific types SHOULD prefix them with a reverse-domain namespace to avoid collision:
+
+```
+com.example:professional-licence
+io.example:wallet-verification
+```
+
+Generic types without a namespace prefix are considered shared and any application MAY use them. Namespaced types are owned by the declaring application and carry application-specific semantics.
 
 ### Revocation
 
@@ -328,16 +347,72 @@ Relationship to Existing NIPs
 | [NIP-32](32.md) (Labels) | Labels (kind `1985`) are **regular** events. Attestations (kind `31000`) are **addressable** events. This creates four structural differences: (1) Labels have no "latest version wins" — a query returns every label ever published, not the current state. Attestations replace in-place: one event per publisher per d-tag. (2) Labels cannot be individually revoked — deleting a label event ([NIP-09](09.md)) removes all labels in that event, not a specific one. Attestations support granular revocation via `["status", "revoked"]` on the specific d-tag. (3) Labels have no scoped d-tag — there is no way to query "the current label from pubkey X about subject Y of type Z." Attestation d-tags (`<type>:<identifier>` or `assertion:<ref>`) give exactly this. (4) Labels carry no temporal validity — no expiration, no validity windows, no lifecycle. Attestations compose with [NIP-40](40.md) expiration and support status-based lifecycle. Labels are observations; attestations are living, updatable, revocable claims. |
 | [NIP-58](58.md) (Badges) | Badges are display-oriented — no structured claims, no expiration, no revocation. Attestations carry typed, structured, revocable claims. |
 | [NIP-85](85.md) (Trusted Assertions) | NIP-85 outputs computed metrics. Attestations record human claims. NIP-85 is downstream — it can ingest attestations as input data. |
-| Kind 31871 (Community NIP) | Both address attestations between Nostr identities. Kind 31871 uses three specialised kinds (31871 definition, 31872 claim, 31873 attestation) with an assertion-first workflow where the individual's claim is central. NIP-VA generalises this to a single kind that supports both assertion-first and direct-claim patterns. The assertion-first pattern in NIP-VA was directly influenced by 31871's design philosophy — putting the individual at the centre. Where 31871 separates definitions, claims, and attestations into distinct kinds, NIP-VA collapses them into one kind differentiated by tags, following Nostr's preference for fewer kinds with richer tag semantics. The two can coexist: a client could consume both kinds during a transition period. |
+| Kind 31871 (Community NIP) | Kind 31871 pioneered the assertion-first philosophy: the individual publishes their own claim, and third parties attest to it rather than making independent statements about them. NIP-VA incorporates this pattern directly — the `"assertion"` marker and assertion-first d-tag format are a direct expression of that philosophy. Kind 31871 also defines explicit workflow mechanics (request, recommendation, proficiency declaration) suited to event-verification scenarios where strangers need to coordinate. NIP-VA focuses on the attestation record itself and leaves workflow to the application layer, making it a natural complement: kind 31871 handles the coordination, kind 31000 records the outcome. The two address different layers of the same problem. |
 | NIP-91 / Service Attestations (38383–38384) | NIP-91 was closed and redirected to NIP-32. Service Attestations (kinds 38383–38384) address a narrower scope: service completion attestations with Namecoin anchoring. NIP-VA subsumes the attestation primitive (a signed claim about a pubkey) while leaving domain-specific features like blockchain anchoring to application profiles built on top. |
 | TSM Assertion Services (37574–37576) | TSM assertions are computed outputs from trust service machines — algorithmic WoT scores, not human-originated claims. NIP-VA records first-person or third-party claims. The two are complementary: TSM services could ingest NIP-VA attestations as input signals for trust computation. |
 | Agent Reputation Attestations (PR #2285, kind 30085) | Proposes structured reputation scoring specifically for AI agents. NIP-VA provides the general attestation layer (a signed claim about a pubkey); agent-specific scoring algorithms are application logic that can be expressed as NIP-VA attestation content or application-specific tags. |
 | NIP-A1 Testimonials (PR #2198) | Proposes user endorsements via gift-wrapped signed events. NIP-VA's `endorsement` type covers the same use case with addressable semantics — endorsements are publicly discoverable, individually revocable, and queryable by relay filters, while gift-wrapped testimonials are private by default. The two serve different privacy models. |
 
+HTTP Discovery (Informational)
+------------------------------
+
+Services running with NIP-VA provenance attestations MAY advertise them over HTTP using these conventions. This section is informational — not a protocol requirement.
+
+### Response Header
+
+    X-Nostr-Attestation: <hex-event-id>
+
+Every HTTP response from an attested service includes this header. For direct attestations, the value is the attestation event ID. For assertion-first attestations, the value is the assertion event ID. The well-known endpoint disambiguates.
+
+### Well-Known Endpoint
+
+`GET /.well-known/nostr-attestation.json` returns a JSON object describing the service's attestation.
+
+**Direct pattern** — the attestation is a first-party claim by an authority:
+
+```json
+{
+  "pattern": "direct",
+  "event_id": "<hex-event-id>",
+  "relays": ["wss://relay.example.com"],
+  "verify": "https://njump.me/nevent1..."
+}
+```
+
+Verification: fetch the event by ID from a listed relay, verify the signature, parse with a NIP-VA library.
+
+**Assertion-first pattern** — the service published a self-declaration, third parties attest to it:
+
+```json
+{
+  "pattern": "assertion-first",
+  "assertion_id": "<hex-assertion-event-id>",
+  "relays": ["wss://relay.example.com"],
+  "verify": "https://njump.me/nevent1..."
+}
+```
+
+Verification: fetch the assertion event, then query for kind `31000` events with `#e` filter matching the assertion ID. Each result is a third-party attestation. Trust depends on who attested (web of trust), not how many.
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `pattern` | `"direct"` \| `"assertion-first"` | Yes | Verification flow |
+| `event_id` | hex string | Direct only | Attestation event ID |
+| `assertion_id` | hex string | Assertion-first only | Self-declaration event ID |
+| `relays` | string[] | Yes | Relay URLs for fetching |
+| `verify` | URL | No | Human-readable verification link |
+
+Responses SHOULD include `Cache-Control: public, max-age=3600`. The attestation changes only on deploy.
+
 Implementation Evidence
 -----------------------
 
 This pattern emerged independently across six application domains before the NIP was drafted: identity verification (attestation types with ring signature proofs), professional licensing (regulatory credentials), service reputation (bilateral endorsements), product provenance (chain of custody), trust networks (peer endorsement graphs), and wallet verification (build reproducibility). Two independent reference implementations exist with a combined 150+ tests and 20 frozen conformance vectors.
+
+Known Limitations
+-----------------
+
+**Multi-party attestation.** Kind `31000` represents a single attestor's claim. Scenarios requiring consensus from multiple attestors (e.g. N-of-M credential approval) are not modelled at the protocol level. Applications requiring multi-party consensus SHOULD aggregate multiple kind `31000` events and apply their own threshold logic. Applications that require cryptographic multi-party proof without revealing individual signers MAY use ring signatures in the `content` field. A future extension may standardise threshold aggregation patterns.
 
 Backwards Compatibility
 -----------------------
