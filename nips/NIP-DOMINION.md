@@ -58,7 +58,7 @@ sequenceDiagram
 |------|-----------|
 | **Content Key (CK)** | A 256-bit AES key used to encrypt content for a specific epoch and tier |
 | **Epoch** | A time period (default: one ISO 8601 week) during which a single CK is used |
-| **Epoch ID** | Identifier for the epoch, format: `YYYY-Www` (e.g. `2026-W10`) |
+| **Epoch ID** | Identifier for the epoch, ISO 8601 string. Daily: `YYYY-MM-DD`, Weekly: `YYYY-Www`, Monthly: `YYYY-MM` |
 | **Vault share** | A gift-wrapped event containing a CK for a specific recipient |
 | **Tier** | An audience level (e.g. `family`, `connections`) that determines CK distribution |
 | **Vault config** | A self-encrypted NIP-78 event storing the author's tier memberships and settings |
@@ -82,7 +82,15 @@ The `info` string includes both epoch ID and tier name, ensuring that each epoch
 
 ### Epoch ID Format
 
-Epochs use ISO 8601 week format: `YYYY-Www` (e.g. `2026-W10`). Implementations SHOULD default to weekly epochs. Implementations MAY support configurable epoch lengths (`daily`, `weekly`, `monthly`) per tier.
+Epoch IDs are ISO 8601 strings whose format depends on the configured length:
+
+| Length | Format | Example | Meaning |
+|--------|--------|---------|---------|
+| Daily | `YYYY-MM-DD` | `2026-04-13` | 13 April 2026 |
+| Weekly | `YYYY-Www` | `2026-W15` | Week 15 of 2026 (6–12 Apr) |
+| Monthly | `YYYY-MM` | `2026-04` | April 2026 |
+
+The three formats are visually distinct (the `W` prefix disambiguates weekly from monthly) and each maps to a single calendar period in UTC. Implementations SHOULD default to weekly epochs and MAY support daily or monthly per tier. Daily epochs minimise the forward-only revocation window (24h exposure); monthly epochs reduce key-rotation overhead for slow-moving tiers.
 
 ## Content Encryption
 
@@ -348,7 +356,7 @@ NIP-112 (Encrypted Group Events) uses shared-secret group encryption with key ro
 | ID | Rule |
 |----|------|
 | V-DM-01 | The `vault` tag on encrypted events MUST have exactly 3 elements: tag name, epoch_id, tier. |
-| V-DM-02 | Epoch IDs MUST match ISO 8601 week format `YYYY-Www`. |
+| V-DM-02 | Epoch IDs MUST match one of three ISO 8601 formats: daily `YYYY-MM-DD`, weekly `YYYY-Www`, or monthly `YYYY-MM`. |
 | V-DM-03 | Kind 30480 MUST include tags: `d` (format `{epoch_id}:{tier}`), `p` (recipient pubkey), `tier`, `algo`. |
 | V-DM-04 | Kind 30480 `content` MUST be a 64-character lowercase hex string (32-byte CK). |
 | V-DM-05 | Kind 30480 MUST be NIP-44 encrypted and NIP-59 gift-wrapped before publishing. Implementations MUST NOT publish kind 30480 events in plaintext. |
