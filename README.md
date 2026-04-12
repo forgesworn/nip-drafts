@@ -1,5 +1,7 @@
 # NIP Drafts
 
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/TheCryptoDonkey?logo=githubsponsors&color=ea4aaa&label=Sponsor)](https://github.com/sponsors/TheCryptoDonkey)
+
 This repository contains **30 Nostr protocol extensions** for service coordination, trust, payments, dispute resolution, key hierarchy, resource curation, paid API discovery, and encrypted access control. Each file is written in [nostr-protocol/nips](https://github.com/nostr-protocol/nips) format and defines patterns useful to any Nostr application.
 
 > **These NIPs are designed to work independently. They do not require adoption of any specific platform or framework.**
