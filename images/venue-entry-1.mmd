@@ -1,0 +1,21 @@
+sequenceDiagram
+    participant H as Holder app
+    participant Q as QR display
+    participant S as Scanner
+    participant B as Blossom server
+
+    H->>H: Build kind 21235 event<br/>(pubkey, t, x, blossom, photo_key)
+    H->>H: Sign (BIP-340 Schnorr)
+    H->>Q: Render as QR
+    Note over H,Q: Auto-refresh every 30s
+    S->>Q: Scan QR
+    S->>S: Parse JSON event
+    S->>S: Verify signature (NIP-01)
+    S->>S: Check freshness (60s window)
+    S->>S: Check replay (id seen)
+    opt Photo verification
+        S->>B: GET /<x> using photo_key
+        B->>S: Encrypted photo blob
+        S->>S: Decrypt + display for human match
+    end
+    S->>S: Allow or deny entry

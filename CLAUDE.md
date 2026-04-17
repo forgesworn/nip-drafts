@@ -55,8 +55,9 @@ All scripts require `NOSTR_SECRET_KEY=nsec1...` env var.
 
 - `scripts/publish.sh` — publish NIP content to relays
 - `scripts/announce.sh <topic>` — publish announcement notes (summary, location, etc.)
-- `scripts/publish-attestations.sh` — publish NIP-VA authorship attestations
 - `scripts/tombstone-and-fix.sh` — tombstone and republish events
+
+For NIP-VA authorship attestations, use the `bray` MCP `publish` command instead of a local script.
 
 Use `--dry-run` flag to preview without publishing.
 

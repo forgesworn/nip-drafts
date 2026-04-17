@@ -1,0 +1,16 @@
+sequenceDiagram
+    participant G as Group publisher
+    participant R as Relay
+    participant C as Consumer app
+    participant M as Member
+
+    G->>G: Build kind 31920 event<br/>(d, p tags with role + name)
+    G->>G: Sign
+    G->>R: Publish (replaces previous)
+    C->>R: REQ {kinds: [31920], authors: [G.pubkey], '#d': ['staff-roster']}
+    R->>C: Latest roster event
+    C->>C: Parse p-tags into local cache
+    M->>C: Performs role-restricted action (signed by M.pubkey)
+    C->>C: Look up M.pubkey in cached roster
+    C->>C: Check role permits action
+    C->>M: Allow or deny
