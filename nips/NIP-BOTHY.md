@@ -2,7 +2,6 @@
 
 > Proposed from `forgesworn/bothy` (source of truth: `docs/2026-08-30-bothy-events-draft.md`, v0.6, 2026-08-31).
 > Draft for joint review; the reference implementation is `forgesworn/bothy-node` (`crates/bothy-core/src/events/`, frozen vectors in `vectors/events/`).
-
 =========
 
 Bothy Node Events — claim, status, grant, pin, tombstone, report, command
@@ -83,8 +82,14 @@ NIPs (which stop at 30599 and 31402) and by any NIP known at the date above;
 10640 avoids NIP-51's 10000–10030, NIP-17's 10050/10051, BUD-03's 10063 and
 NIP-66's 10166. The rumor kinds sit in the ephemeral range beside `roost-kit`'s
 20078/24078 and Blossom's 24242 deliberately: a rumor that escapes its wrapper
-through a bug is then not stored by a conformant relay. Allocation must be
-re-checked before upstreaming. A bothy also publishes an unmodified **kind
+through a bug is then not stored by a conformant relay. Allocation was
+re-checked 2026-08-31 (Tally: the canonical NIPs table, all 100 NIP bodies,
+the registry-of-kinds schema, and code search — no collision; ranges
+semantically right). **`30641` is deliberately reserved**, unused between
+claim and grant, for a future node-scoped addressable kind — do not
+allocate it elsewhere. Once this draft stabilises, a small PR to
+`nostr-protocol/registry-of-kinds` reserves the block durably (the
+Wildbloom side offered to file it). A bothy also publishes an unmodified **kind
 10063** (BUD-03) server list pointing at its bridge URL, so a vanilla Nostr
 client still resolves blobs; that event is not defined here.
 
