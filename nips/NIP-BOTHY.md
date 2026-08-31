@@ -1,7 +1,21 @@
 # NIP-BOTHY — the Bothy shelter events
 
-> Proposed from `forgesworn/bothy` (source of truth: `docs/2026-08-30-bothy-events-draft.md`, v0.6, 2026-08-31).
-> Draft for joint review; the reference implementation is `forgesworn/bothy-node` (`crates/bothy-core/src/events/`, frozen vectors in `vectors/events/`).
+> **⚠️ SUPERSEDED — DO NOT IMPLEMENT THIS REVISION (2026-08-31).**
+> This file is at v0.6 and is behind the canonical source, which has moved to
+> **v0.7** in `forgesworn/bothy` `docs/2026-08-30-bothy-events-draft.md`. The
+> v0.7 additions are **security-relevant**, so implementing this stale text
+> would carry known holes: **V2.12** (a status binds to the accepted claim's
+> event id — closes the split-view attribution attack); **V3.12 / V5.10**
+> future-skew (a far-future grant/tombstone can otherwise lock a coordinate);
+> **V3.13 / V3.14** (grant-id stability and revocation-lifetime); **strict
+> unknown-tag rejection** on claim/grant/tombstone (V1.13 / V3.11 / V5.9), with
+> pin and status deliberately forward-compatible; the **pin reason cap**
+> (V4.11); and the **provisional pairing** framing (the `0x03` tag is
+> reachability-only, the constant-time `X-Bothy-Pairing-Secret` check is the
+> authenticator). This branch is re-synced from the canonical draft after its
+> full v0.7 NIP review; until then treat `bothy`'s events draft as authoritative.
+> The reference implementation is `forgesworn/bothy-node`
+> (`crates/bothy-core/src/events/`, vectors in `vectors/events/`).
 =========
 
 Bothy Node Events — claim, status, grant, pin, tombstone, report, command
