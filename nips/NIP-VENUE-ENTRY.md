@@ -1,5 +1,5 @@
-NIP-XX
-======
+NIP-VENUE-ENTRY
+===============
 
 Venue Entry QR
 --------------

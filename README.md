@@ -2,7 +2,7 @@
 
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/TheCryptoDonkey?logo=githubsponsors&color=ea4aaa&label=Sponsor)](https://github.com/sponsors/TheCryptoDonkey)
 
-This repository contains **33 Nostr protocol extensions** for service coordination, trust, payments, dispute resolution, key hierarchy, resource curation, paid API discovery, identity verification, anonymous trust assertions, and encrypted access control. Each file is written in [nostr-protocol/nips](https://github.com/nostr-protocol/nips) format and defines patterns useful to any Nostr application.
+This repository contains **38 Nostr protocol extensions** for service coordination, trust, payments, dispute resolution, key hierarchy, resource curation, paid API discovery, identity verification, anonymous trust assertions, encrypted access control, live activities, geospatial signals, venue entry, and group rosters. Each file is written in [nostr-protocol/nips](https://github.com/nostr-protocol/nips) format and defines patterns useful to any Nostr application.
 
 > **These NIPs are designed to work independently. They do not require adoption of any specific platform or framework.**
 
@@ -47,6 +47,11 @@ All drafts are `draft` `optional` unless noted otherwise.
 | [NIP-SIGNET](nips/NIP-SIGNET.md) | Progressive Identity Verification | upstream | `draft` | 31000 (ext), 30078 (ext) | NIP-01, NIP-40, NIP-44, NIP-VA, NIP-78 |
 | [NIP-VEIL](nips/NIP-VEIL.md) | Anonymous Trust Assertions | upstream | `draft` | 30382-30385 (ext) | NIP-01, NIP-85 |
 | [NIP-IDENTITY-TREES](nips/NIP-IDENTITY-TREES.md) | Purpose-Tagged Identity Derivation (nsec-tree) | upstream | `draft` | none (client-side) | NIP-01, NIP-06 (complementary) |
+| [NIP-ROSTER](nips/NIP-ROSTER.md) | Named-Group Roster | upstream | `draft` | 31920 | NIP-01, NIP-51 |
+| [NIP-SPATIAL-SIGNALS](nips/NIP-SPATIAL-SIGNALS.md) | Spatial Signals & Corroboration | upstream | `draft` | 1315, 1316 | NIP-01, NIP-40, NIP-LOCATION |
+| [NIP-VENUE-ENTRY](nips/NIP-VENUE-ENTRY.md) | Venue Entry QR | ecosystem | `draft` | 21235 | NIP-01, NIP-98 |
+| [NIP-LIVEFRAME](nips/NIP-LIVEFRAME.md) | Ephemeral State Frames for Live Activities | upstream | `draft` | 22769 | NIP-01, NIP-53, NIP-STREAMKEY |
+| [NIP-STREAMKEY](nips/NIP-STREAMKEY.md) | Ephemeral Session Keys for Live Streaming Activities | upstream | `draft` | 30311 (ext) | NIP-01, NIP-07, NIP-46, NIP-53 |
 
 ### Incubating
 

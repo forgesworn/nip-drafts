@@ -1,5 +1,5 @@
-NIP-XX
-======
+NIP-ROSTER
+==========
 
 Named-Group Roster
 ------------------
