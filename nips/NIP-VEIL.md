@@ -1,12 +1,12 @@
-NIP-XX
-======
+NIP-VEIL
+========
 
-Anonymous Trust Assertions (Veil)
-----------------------------------
+Anonymous Trust Assertions
+--------------------------
 
 `draft` `optional`
 
-Authors: [forgesworn](https://github.com/forgesworn)
+Authors: [ForgeSworn](https://github.com/forgesworn)
 
 This NIP extends [NIP-85](https://github.com/nostr-protocol/nips/blob/master/85.md) trusted assertion events with three tags that enable ring-signature-backed anonymous endorsements. Circle members contribute signed metrics without revealing which members contributed. The result is a standard NIP-85 event that non-aware clients process normally, while Veil-aware clients additionally verify the cryptographic proofs.
 
@@ -450,6 +450,14 @@ The aggregator sees all contributions before publishing. A malicious aggregator 
 - The aggregator cannot forge signatures (LSAG unforgeability)
 
 The aggregator cannot learn which member produced which contribution (the contributions arrive with ring signatures, not identity-linked signatures).
+
+### LSAG scheme and cryptographic conservatism
+
+The linkable ring signature used by this NIP is the LSAG scheme of Liu, Wei, and Wong (2004) -- "Linkable Spontaneous Anonymous Group Signature for Ad Hoc Groups" -- implemented over secp256k1 for compatibility with Nostr's native keypairs. LSAG is peer-reviewed and works on any prime-order discrete-log group; the secp256k1 instantiation is less commonly deployed than ed25519 variants (for example, Monero's CLSAG), but the underlying cryptographic primitives used here ([`@noble/curves`](https://github.com/paulmillr/noble-curves), [`@noble/hashes`](https://github.com/paulmillr/noble-hashes)) have received external audit.
+
+The specific implementation at [`@forgesworn/ring-sig`](https://github.com/forgesworn/ring-sig) has not received independent cryptographic review at time of writing. A formal scheme specification document (pseudocode, domain separators, deterministic test vectors for byte-exact cross-implementation testing) is planned as a companion to this NIP; the `@forgesworn/ring-sig` `SECURITY.md` notes the academic references (Rivest-Shamir-Tauman 2001; Liu-Wei-Wong 2004) that the construction follows.
+
+Implementers should treat the secp256k1 instantiation as pending external review for high-stakes deployments. Applications requiring externally-audited ring-signature primitives should consider ed25519-based alternatives (CLSAG on Curve25519) until the secp256k1 instance is independently reviewed.
 
 ### Kind 10040 collision
 

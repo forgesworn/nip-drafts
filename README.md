@@ -2,7 +2,7 @@
 
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/TheCryptoDonkey?logo=githubsponsors&color=ea4aaa&label=Sponsor)](https://github.com/sponsors/TheCryptoDonkey)
 
-This repository contains **30 Nostr protocol extensions** for service coordination, trust, payments, dispute resolution, key hierarchy, resource curation, paid API discovery, and encrypted access control. Each file is written in [nostr-protocol/nips](https://github.com/nostr-protocol/nips) format and defines patterns useful to any Nostr application.
+This repository contains **33 Nostr protocol extensions** for service coordination, trust, payments, dispute resolution, key hierarchy, resource curation, paid API discovery, identity verification, anonymous trust assertions, and encrypted access control. Each file is written in [nostr-protocol/nips](https://github.com/nostr-protocol/nips) format and defines patterns useful to any Nostr application.
 
 > **These NIPs are designed to work independently. They do not require adoption of any specific platform or framework.**
 
@@ -44,6 +44,8 @@ All drafts are `draft` `optional` unless noted otherwise.
 | [NIP-KEY-HIERARCHY](nips/NIP-KEY-HIERARCHY.md) | Hierarchical Key Relationships | upstream | `draft` | 30594, 30595 | NIP-01, NIP-40, NIP-44, NIP-59 |
 | [NIP-RESOURCE-CURATION](nips/NIP-RESOURCE-CURATION.md) | Structured Resource Listings, Reviews & Collections | upstream | `draft` | 30414, 30415, 30416 | NIP-01, NIP-22, NIP-32, NIP-40, NIP-51 |
 | [NIP-DOMINION](nips/NIP-DOMINION.md) | Epoch-Based Encrypted Content Access | upstream | `draft` | 30480 | NIP-01, NIP-44, NIP-59, NIP-78 |
+| [NIP-SIGNET](nips/NIP-SIGNET.md) | Progressive Identity Verification | upstream | `draft` | 31000 (ext), 30078 (ext) | NIP-01, NIP-40, NIP-44, NIP-VA, NIP-78 |
+| [NIP-VEIL](nips/NIP-VEIL.md) | Anonymous Trust Assertions | upstream | `draft` | 30382-30385 (ext) | NIP-01, NIP-85 |
 | [NIP-IDENTITY-TREES](nips/NIP-IDENTITY-TREES.md) | Purpose-Tagged Identity Derivation (nsec-tree) | upstream | `draft` | none (client-side) | NIP-01, NIP-06 (complementary) |
 
 ### Incubating

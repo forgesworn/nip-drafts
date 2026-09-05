@@ -1,12 +1,12 @@
-NIP-XX
-======
+NIP-DOMINION
+============
 
-Epoch-Based Encrypted Content Access (Dominion)
-------------------------------------------------
+Epoch-Based Encrypted Content Access
+-------------------------------------
 
 `draft` `optional`
 
-Authors: [decented](https://github.com/decented)
+Authors: [Decented](https://github.com/decented)
 
 This NIP defines a mechanism for encrypting Nostr content with epoch-based Content Keys (CKs) and distributing those keys to tiered audiences via gift-wrapped events. It enables revocable, scalable content access control on standard Nostr relays without custom relay software or new cryptographic primitives.
 
@@ -277,7 +277,7 @@ Revocation is forward-only: stop distributing CKs for new epochs to the revoked 
 | Weekly | 7 days |
 | Monthly | 30 days |
 
-The revoked recipient retains any CKs they already received. Content from those epochs remains accessible. This is the same model used by Signal, WhatsApp, and Matrix for group key management.
+The revoked recipient retains any CKs they already received. Content from those epochs remains accessible. This is a weaker property than protocols with forward secrecy (Signal's Double Ratchet, MLS ratchet trees in Matrix), where removing a member cryptographically forces key rotation and past epoch keys cannot be re-derived. In Dominion, the same identity key derives every epoch's CK, so a past CK cannot be invalidated without rotating the identity itself. See [Security Considerations](#no-forward-secrecy-critical-property).
 
 Revoked pubkeys are tracked in the vault config. During epoch rotation, the distribution loop MUST skip any pubkey in `revokedPubkeys`.
 
@@ -295,7 +295,7 @@ Content events contain no recipient information. Recipients are managed entirely
 
 ## Expiration
 
-Implementations MAY use NIP-40 `expiration` tags on outer gift-wrap events to facilitate relay cleanup of expired epoch shares. The inner kind 30480 event SHOULD NOT carry an expiration tag, as it is never seen by relays directly.
+NIP-40 `expiration` semantics in Dominion differ from credential or assertion contexts (where expiration signals validity). Implementations MAY use `expiration` tags on outer gift-wrap events to facilitate relay cleanup of expired epoch shares; there is no validity implication for the inner CK material. The inner kind 30480 event SHOULD NOT carry an expiration tag, as it is never seen by relays directly.
 
 ## Relationship to Existing NIPs
 
@@ -368,9 +368,13 @@ NIP-112 (Encrypted Group Events) uses shared-secret group encryption with key ro
 
 ## Security Considerations
 
-### No forward secrecy
+### No forward secrecy (critical property)
 
-CKs are derived from the author's private key via HKDF. If the private key is compromised, all past and future CKs for all epochs and tiers are derivable. This is a conscious trade-off for stateless derivation. High-security applications SHOULD use short epoch lengths (daily) and consider MLS-based alternatives (NIP-EE/Marmot) for forward secrecy.
+CKs are derived from the author's identity private key via HKDF. Compromise of the identity key retroactively decrypts **every past and future epoch for every tier** -- every piece of Dominion-encrypted content the author has ever produced or will produce. This is categorically weaker than per-recipient NIP-44 encryption (which exposes only content encrypted with the compromised keypair) and categorically weaker than protocols with forward secrecy (Signal's Double Ratchet, MLS ratchet trees).
+
+Applications with adversarial threat models SHOULD NOT rely on Dominion as the sole confidentiality layer. Dominion is a convenience layer for audience tiering at scale; for adversarial confidentiality use MLS-based alternatives (NIP-EE/Marmot) or per-recipient NIP-44. Short epoch lengths (daily) reduce the *revocation* window after a member leaves but do not provide forward secrecy.
+
+If nip4e (separate encryption keys from identity keys, PR #1647) merges, Dominion implementations SHOULD derive CKs from the nip4e encryption key rather than the Nostr identity key, which would narrow the blast radius of key compromise without changing the epoch or distribution model.
 
 ### Epoch granularity vs revocation speed
 

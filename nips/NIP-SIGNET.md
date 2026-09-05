@@ -6,9 +6,9 @@ Progressive Identity Verification
 
 `draft` `optional`
 
-Authors: [forgesworn](https://github.com/forgesworn)
+Authors: [ForgeSworn](https://github.com/forgesworn)
 
-Tag conventions on kind 31000 ([NIP-VA](https://github.com/nostr-protocol/nips/blob/master/va.md)) for progressive identity verification, plus a community policy format on kind 30078 ([NIP-78](https://github.com/nostr-protocol/nips/blob/master/78.md)). No new event kinds.
+Tag conventions on kind 31000 ([NIP-VA](https://github.com/forgesworn/nostr-attestations/blob/main/NIP-VA.md), proposed) for progressive identity verification, plus a community policy format on kind 30078 ([NIP-78](https://github.com/nostr-protocol/nips/blob/master/78.md)). No new event kinds.
 
 > **Design principle:** Identity verification should be progressive (start low, build over time), privacy-preserving (no PII in events), and decentralised (no single authority). Nostr's censorship resistance is meaningless if every feed is 40% spam bots.
 > **Standalone.** This NIP works independently on any Nostr application. It builds on NIP-VA's generic attestation format and NIP-78's app-specific data storage. The reference implementation is [`signet-protocol`](https://github.com/forgesworn/signet) (TypeScript).
@@ -52,7 +52,7 @@ NIP-91 defines attestations of service completion between identities. It was red
 
 ### TSM (Trust Service Machines)
 
-TSM (kinds 37570-37572) defines infrastructure for trust computation services -- service announcements, output standards, and service requests. NIP-SIGNET provides the raw trust signals (credentials, vouches) that a TSM service could consume to compute aggregate scores. TSM computes; NIP-SIGNET records.
+TSM defines infrastructure for trust computation services -- service announcements, output standards, and service requests. NIP-SIGNET provides the raw trust signals (credentials, vouches) that a TSM service could consume to compute aggregate scores. TSM computes; NIP-SIGNET records.
 
 ### NIP-VEIL (Anonymous Trust Assertions) -- OPTIONAL Composition
 
@@ -301,7 +301,7 @@ A verifier registration declares that a professional is available to perform ide
 | `type` | REQUIRED | `verifier` |
 | `profession` | REQUIRED | Professional title (e.g. `solicitor`, `notary`, `doctor`, `attorney`, `pharmacist`, `chartered_accountant`) |
 | `jurisdiction` | REQUIRED | ISO 3166-1 alpha-2 country code |
-| `licence` | REQUIRED | Hash of licence/registration number (not the raw number) |
+| `licence` | REQUIRED | Licence or registration number, or a cryptographic hash thereof. Professional licence spaces are typically low-entropy (often publicly enumerable via the issuing body's registry); a bare hash is not confidential. See [Security Considerations: Licence number hashing](#licence-number-hashing). |
 | `body` | REQUIRED | Professional body name (e.g. `Law Society`, `GMC`, `Notary Commission`, `American Bar Association`, `Ordre des Médecins`, `CPA Australia`) |
 | `alt` | RECOMMENDED | Human-readable summary |
 
@@ -541,6 +541,10 @@ A user could ignore community policies. Client-side enforcement is advisory; rel
 
 Credentials SHOULD include an `expiration` tag. Clients MUST check expiration before displaying badges. Expired credentials SHOULD be visually distinguished (e.g. greyed out) rather than hidden, to preserve the audit trail.
 
+### Licence Number Hashing
+
+Professional licence numbers typically occupy low-entropy spaces (for example, approximately 200,000 UK solicitor roll numbers, or comparable US state medical-board registries). A bare SHA-256 hash of such a number is not confidential -- it is trivially recoverable by iterating the issuing body's public registry. Implementations that hash the `licence` tag value SHOULD treat the hash as an integrity or consistency signal, not as a privacy protection. Clients verifying a professional verifier's credentials SHOULD cross-reference against the issuing body's public registry rather than attempt to recover the number from the hash. Applications requiring confidentiality for licence identifiers SHOULD use a salted construction or omit the tag entirely and rely on challenge-response verification out of band.
+
 ## Test Vectors
 
 ### Minimal Valid Tier 1 Credential
@@ -661,7 +665,7 @@ INVALID: `method` must be `in-person` or `online`.
 
 ## Dependencies
 
-- [NIP-VA](https://github.com/nostr-protocol/nips/blob/master/va.md) (Kind 31000 -- Verifiable Attestations) -- REQUIRED
+- [NIP-VA](https://github.com/forgesworn/nostr-attestations/blob/main/NIP-VA.md) (Kind 31000 -- Verifiable Attestations, proposed) -- REQUIRED
 - [NIP-78](https://github.com/nostr-protocol/nips/blob/master/78.md) (Kind 30078 -- App-Specific Data) -- REQUIRED for community policies
 - [NIP-40](https://github.com/nostr-protocol/nips/blob/master/40.md) (Expiration Timestamp) -- RECOMMENDED for credential expiration
 - [NIP-42](https://github.com/nostr-protocol/nips/blob/master/42.md) (Authentication of Clients to Relays) -- OPTIONAL for relay-side policy enforcement

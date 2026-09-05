@@ -366,3 +366,108 @@ https://github.com/forgesworn/nip-drafts/blob/main/NIP-REFERRAL-ROUTING.md
 https://github.com/forgesworn/nip-drafts/blob/main/NIP-ORACLE.md
 
 Tags: #nostr #nip #protocol #sla #governance #oracle #nostrdev
+
+---
+
+# Batch 3 Announcements
+
+Published April 2026. Three new NIPs plus a refreshed NIP-VA, addressing the identity layer Nostr has been missing. Post the summary, then one themed post per day for the three new NIPs.
+
+Schedule: summary > NIP-SIGNET (Day 1) > NIP-VEIL (Day 2) > NIP-DOMINION (Day 3)
+
+---
+
+## Batch 3 Summary
+
+Four NIPs published on NostrHub, all addressing the identity layer Nostr has been missing.
+
+NIP-SIGNET: progressive four-tier identity verification, from self-declared to professional in-person, with zero-knowledge age proofs, professional verifier accountability, and guardian delegation for under-18s. Designed to satisfy the UK Online Safety Act, US COPPA, EU eIDAS 2.0, and Australia's under-16 rules without central data collection.
+
+NIP-VEIL: anonymous trust assertions extending NIP-85. Ring-signature-backed. A known trust circle contributes metrics where individual contributors are cryptographically hidden. Solves retaliation risk, cartel pressure, and single-point-of-trust in reputation services.
+
+NIP-DOMINION: epoch-based encrypted content access. Cryptographic right-to-erasure via epoch rotation. Multi-party key distribution. Access control that accommodates membership change without re-encrypting the past.
+
+Plus a refreshed NIP-VA: the generic verifiable attestation primitive all three build on.
+
+No new kinds in SIGNET or VEIL -- tag conventions on existing kinds (31000, 30078, 30382-30385). DOMINION uses kind 30480.
+
+Authorship verified with NIP-VA attestations.
+
+https://github.com/forgesworn/nip-drafts
+
+Tags: #nostr #nip #protocol #identity #privacy #verification #nostrdev
+
+---
+
+## Day 1: NIP-SIGNET
+
+Nostr has no identity layer. Anyone can claim to be anyone. This matters for child safety (a predator can create a fake child account), for trust (no way to prove "I met this person"), and for regulation (age verification laws are coming worldwide, and most solutions on the market are centralised data honeypots).
+
+NIP-SIGNET defines a four-tier progressive verification model on kind 31000 (NIP-VA):
+
+Tier 1: self-declared. Costs nothing.
+Tier 2: web-of-trust vouches from other verified users.
+Tier 3: professional in-person verification by a licensed solicitor, notary, or equivalent statutory regulator.
+Tier 4: professional verification plus child-protection attestation.
+
+At every tier, the credential is a standard Nostr event. Pedersen range proofs prove age ranges (~700 bytes) without revealing date of birth. Document nullifiers detect duplicate accounts without ever storing an ID. Professional verifiers have six layers of accountability: challenge, revocation, slashing, peer-review, cross-signing, community policy.
+
+A two-credential ceremony issues a Natural Person credential (high-assurance, real identity with Merkle-bound attributes) alongside a Persona credential (anonymous, age-range only). The Persona is what apps see; the Natural Person stays private. No correlation between gaming handle and passport.
+
+Community policies (kind 30078) let each relay, client, or community set its own minimum verification requirements. One credential, every community picks its bar.
+
+Regulatory fit: Tier 4 exceeds Ofcom's "highly effective age assurance" standard under the UK Online Safety Act. Compatible with US COPPA, EU eIDAS 2.0, ISO/IEC 27566-1:2025, Australia's under-16 social media ban. No central database. No honeypot. Professional bodies as trust anchors, not corporations.
+
+Build with this: a child-safe Nostr community that requires Tier 2+. An age-gated platform that accepts ZKP proofs instead of ID uploads. A professional community (doctors, lawyers) verified by their statutory regulator. A parental guardian system for family-safe messaging where the child's identity is never exposed.
+
+Spec: https://github.com/forgesworn/nip-drafts/blob/main/nips/NIP-SIGNET.md
+Reference implementation: https://github.com/forgesworn/signet
+
+Tags: #nostr #nip #protocol #identity #ageverification #privacy #zkp #childsafety #nostrdev
+
+---
+
+## Day 2: NIP-VEIL
+
+NIP-85 lets reputation services publish trusted assertions about subjects. The problem: every assertion is signed by one pubkey. The service that produced the rating is identifiable, and so is the person who gave a low score.
+
+Three failure modes: retaliation against honest raters, cartel pressure to inflate scores for favoured subjects, and a single point of trust that cannot aggregate independent observers.
+
+NIP-VEIL extends NIP-85 with three tags that enable LSAG-ring-signature-backed anonymous endorsements. A "trust circle" has public membership: anyone can see who could have contributed. But which members actually contributed is cryptographically hidden.
+
+The result is a standard NIP-85 event. Non-aware clients process it normally (they see the aggregated metrics). Veil-aware clients additionally verify the ring-signature proofs and confirm the contribution came from circle members without learning which ones.
+
+Use cases where individual attribution is harmful:
+
+- Peer review among competing service providers
+- Whistleblower-style trust revocations within professional groups
+- Collective endorsements from industry bodies where individual votes must remain private
+- Reputation inputs where contributors need plausible deniability
+
+Standard NIP-85 remains the right choice for public, attributable reputation services. Veil is the supplementary layer for when anonymity matters.
+
+Build with this: a professional body endorsing a member where individual votes stay private. A whistleblower layer for trade directories. A peer-review aggregation where competitors can rate each other honestly. A Signet Tier 2 web-of-trust where vouches are anonymous within a verified circle.
+
+https://github.com/forgesworn/nip-drafts/blob/main/nips/NIP-VEIL.md
+
+Tags: #nostr #nip #protocol #reputation #privacy #ringsignatures #anonymity #nostrdev
+
+---
+
+## Day 3: NIP-DOMINION
+
+Groups change. Employees leave, family members reach adulthood, collaborators part ways. Encrypted content needs access control that accommodates membership changes without re-encrypting everything.
+
+NIP-DOMINION defines kind 30480 for epoch-based encrypted content access. Each epoch has its own key distribution (daily, weekly, monthly, configurable). When someone leaves the group, the next epoch rotates keys and they lose access automatically. When someone joins, they get keys for the current and future epochs, not past ones.
+
+The GDPR angle: epoch rotation is right-to-erasure at the cryptographic layer. Old encrypted content becomes unreadable by design when the epoch keys are retired. No "delete from database" flag to forget to flip. No backup tape to recover from.
+
+Multi-party key distribution is via NIP-59 gift wraps, so the coordinator does not see the content. Subscribe to epoch announcements via kind 30078 policies. Decrypt content via NIP-44.
+
+Composes with NIP-SIGNET (tier-gated access) and NIP-VEIL (anonymous participation). An access policy can require "NIP-SIGNET Tier 3 held at the time of the epoch" without ever learning which specific credential the user presented.
+
+Build with this: a family photo vault where teenagers graduate to separate access at 18. A consulting team where project access auto-expires when the contract ends. A research collaboration where removed members lose access to new discussions without losing the ability to verify their past contributions. A community archive where data retention is enforced cryptographically, not contractually.
+
+https://github.com/forgesworn/nip-drafts/blob/main/nips/NIP-DOMINION.md
+
+Tags: #nostr #nip #protocol #encryption #accesscontrol #gdpr #privacy #nostrdev
