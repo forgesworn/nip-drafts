@@ -38,11 +38,13 @@ published.
 
 ## 1. Shape
 
-A card is a signed Nostr event of kind 30641, encoded as unpadded base64url
+A card is a signed Nostr event of kind 21641, encoded as unpadded base64url
 of its JSON, carried after `#` in a link or as the whole content of a QR
 code. Nothing before `#` is needed and an HTTP server never sees the
-fragment. A card is never published to a relay; the kind is reserved so
-that a client which meets one by mistake does nothing with it. A card is at
+fragment. A card is never published to a relay. Its kind is in the
+ephemeral range so that a relay which meets one by mistake does not store
+it: a card carries a rendezvous key, a fresh ephemeral and a bond nonce,
+and a leaked one should not sit on a relay for thirty days. A card is at
 most 16 KiB.
 
 The event's `pubkey` is the person's key `p`, its `created_at` is `issued`,
@@ -54,10 +56,10 @@ makes has to be the card's signature.
 
 ```json
 {
-  "kind": 30641,
+  "kind": 21641,
   "pubkey": "<64 hex, x-only public key of the person or persona: p>",
   "created_at": <unix seconds: issued>,
-  "tags": [["d", "card"], ["expiration", "<unix seconds: expires>"]],
+  "tags": [["expiration", "<unix seconds: expires>"]],
   "content": "<the JSON object below, as a string>",
   "id": "<64 hex, NIP-01 id>",
   "sig": "<128 hex, BIP-340 signature over the id, by p>"
@@ -86,10 +88,9 @@ The content, before it is a string:
 }
 ```
 
-The event carries exactly two tags, `d` with the value `card` and
-`expiration`, and no other: a tag is inside the signature, and a third one
-could carry what a card may not. `p`, `issued` and `expires` live on the
-event and nowhere in the content.
+The event carries exactly one tag, `expiration`, and no other: a tag is
+inside the signature, and a second one could carry what a card may not.
+`p`, `issued` and `expires` live on the event and nowhere in the content.
 
 Field rules:
 
@@ -193,11 +194,11 @@ In this order, and the first failure rejects the card:
 1. the part after the last `#` is at most 16 KiB (the cap is the card's,
    not the link's); base64url decodes; the bytes are valid UTF-8 with no
    byte-order mark (a reader never repairs bytes to U+FFFD); JSON parses
-   to an object whose `kind` is 30641; its `content` parses to an object
+   to an object whose `kind` is 21641; its `content` parses to an object
    whose `v` is 1;
 2. the event's `pubkey`, `id` and `sig` are hex of the right length, lower
-   case after normalisation; its `tags` are exactly `["d","card"]` and
-   one `expiration`; and every field of the content has the shape and
+   case after normalisation; its `tags` are exactly one `expiration`; and
+   every field of the content has the shape and
    bounds §1 gives it: `rz` and `eph`, names and labels, relays, boxes,
    carriers, `attest`, `bond`;
 3. `issued` is the event's `created_at` and `expires` the `expiration`
@@ -321,20 +322,23 @@ keys with a person.
   BIP-340 signatures, forgesworn-link `FSL-CARD-1` and rendezvous
   derivation, the box's own claim and status events, the bond handshake
   and ceremony, and whatever attestation `attest` points at.
-- Kind 30641 is reserved for the card event, beside the box's own kinds, and
-  never appears on a relay; `d` and `expiration` are NIP-01 and NIP-40
-  tags with their ordinary meaning. No other tag name is reserved.
+- Kind 21641 is the card event's, in the ephemeral range (NIP-01), and
+  never appears on a relay; `expiration` is the NIP-40 tag with its
+  ordinary meaning. No other tag name is reserved. An earlier revision
+  used 30641, an addressable kind beside the box's own kinds; it moved on the
+  box's co-author's point that a kind a relay never stores is the safer
+  home for a bearer nonce, and 30641 goes back to the box's reservation.
 
 ## Vectors
 
-`vectors/contact-card.json` in this repository carries thirty-two cards using the same test
+`vectors/contact-card.json` in this repository carries thirty-three cards using the same test
 keys as forgesworn-link: cards that pass with a box, a
 Link card and a bond; with none of those; with unnamed keys on the event
 and inside the signed content, which the reader must strip; with an
 emoji sequence in the name; with upper-case bond hex, which the reader
 normalises; and cards failing at each of steps 1 to 5, including the
-wrong kind or content version, an extra tag, an expiration that is not a
-number, a tampered name, a tampered box, a tampered time, a foreign key
+wrong kind or content version, the earlier addressable shape (kind 30641
+with a `d` tag), an extra tag, an expiration that is not a number, a tampered name, a tampered box, a tampered time, a foreign key
 on the event, an expired Link card inside, a name with a format
 character, too long, or holding a lone surrogate, a box card outside
 base64url, an empty carrier list, an empty attest, a malformed bond, a
