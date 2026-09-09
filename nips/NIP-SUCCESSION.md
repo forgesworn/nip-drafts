@@ -139,11 +139,25 @@ they differ.
 
 A `kind 1361` is **valid** only if all of these hold, checked in order:
 
-1. it is signed by the key named in the `p` tag of the `kind 1360` its
-   `e` tag names, and that `kind 1360` is itself validly signed;
-2. `successor-sig` verifies as above;
-3. it is the first `kind 1361` the verifier has seen from that migration
-   key. A second one, whatever it says, makes both manual (§4).
+1. it is a validly signed `kind 1361` whose `created_at` is a non-negative
+   integer below 2^53, and the `kind 1360` its `e` tag names is itself
+   validly signed and carries exactly one `p` tag. Verifiers MUST verify
+   both signatures themselves, never trust a "verified" mark a library
+   attached earlier;
+2. `p`, `e` and `successor-sig` each appear exactly once and `linkage` at
+   most once. A duplicate of any of them is invalid, not "first wins";
+3. it is signed by the key named in the `kind 1360`'s `p` tag, and that
+   key is not the identity key itself. A `kind 1360` naming its own author
+   as migration key is invalid;
+4. the successor named in `p` is neither the identity key nor the
+   migration key;
+5. all pubkeys and `successor-sig` are lower-case hex of the exact length.
+   Upper-case or padded forms are invalid, so one event has one wire form;
+6. `successor-sig` verifies as above.
+
+Validity says nothing about whether to follow. A second `kind 1361` from
+the same migration key is just as valid as the first; its existence makes
+every migration by that key manual, the first included (§4).
 
 `linkage`, when present, is the JSON form of an NIP-IDENTITY-TREES full
 proof whose child is the successor. A client that cannot verify it MUST
@@ -175,27 +189,39 @@ signed by others is not re-signed.
 On a valid `kind 1361`, a client MUST choose one of two paths and MUST show
 which it took.
 
+**Never automatic** if the client has seen a second, different
+`kind 1360` from the identity, or a second `kind 1361` from the same
+migration key. Either one contests the move and every path below is off.
+
+Let `seen` be the earlier of the `kind 1361`'s `created_at` and the time
+this client first saw it. The `kind 1361`'s own `created_at` is never
+enough on its own, because a signer can date it into the future; the
+client's own first sight caps it.
+
 **Automatic**, if at least one of these holds:
 
 1. the `kind 1360` was first seen by this client at least 7 days before
-   the `kind 1361` was, taking the earlier of the `kind 1361`'s
-   `created_at` and the time the client first saw it, or the `kind 1360`
-   carries a `kind 1040` attestation older than the `kind 1361`. The
-   `kind 1361`'s own `created_at` is never enough on its own, because a
-   signer can date it into the future;
-2. a `linkage` proof verifies against a root the client had already bound
-   to the identity at least 7 days earlier, the root being the master key
-   on the identity's own published linkage proof (kind 30078). A root binding for the identity
-   that appeared later is not trusted here, because an attacker holding the
-   identity key can publish a binding to a root of their own;
+   `seen`, or the `kind 1360` carries a `kind 1040` OpenTimestamps
+   attestation proving it existed at least 7 days before `seen`. The gap
+   applies to attestations too: an attestation made an hour ago proves the
+   `kind 1360` existed an hour ago, which an attacker holding the identity
+   key can arrange just as easily as they can publish the `kind 1360`;
+2. a `linkage` proof verifies, its purpose is `successor`, its child is
+   the `p` pubkey, and its master is the root this client had bound to the
+   identity at least 7 days before `seen`. The bound root is the master
+   key on the identity's own first published linkage proof (kind 30078);
+   the client keeps the first it ever bound and never replaces it, because
+   an attacker holding the identity key can publish a binding to a root of
+   their own;
 3. the user holds an out-of-band bond with the person, a shared secret
-   established in person, and a fresh bond ceremony with the successor
-   succeeds;
-4. someone the user trusts has published an attestation naming the pair,
-   in whatever form the client honours: a signed attestation from a named
-   friend, a ring-signed attestation from the user's circle in which the
-   attester is not named, or a ring-signed identity bridge tying the two
-   keys when they share no root.
+   established in person, and a fresh bond ceremony succeeds with the key
+   named in `p`. A bond with any other key proves nothing about this
+   migration;
+4. someone the user trusts has published an attestation naming the identity
+   and the key named in `p`, in whatever form the client honours: a signed
+   attestation from a named friend, a ring-signed attestation from the
+   user's circle in which the attester is not named, or a ring-signed
+   identity bridge tying the two keys when they share no root.
 
 Automatic means: follows, mutes, NIP-51 lists and local contact books are
 rewritten from the identity key to the successor; the old key is shown as
@@ -286,11 +312,19 @@ than an announcement. A client may honour all three.
 `vectors/succession.json` in this repository carries a test-only root (the same 32 bytes
 forgesworn-link uses for "nostr A"), its derived identity (`social`, 0),
 migration (`migration`, 0) and successor (`successor`, 0) keys under
-nsec-tree, a full linkage proof for the successor, a `kind 1360`, and seven
-`kind 1361` cases: one that passes on the automatic path, one that fails on
-`successor-sig`, one that fails on a `created_at` mismatch, two without
-linkage that land on manual and automatic by the age of the pre-commitment,
-one hijack by a holder of the migration key (valid, and the exposure this
-draft accepts), and a competing second migration that loses to the first.
-Signatures carry random auxiliary data, so a verifier checks them and does
-not compare bytes. Each case states the expected outcome and the reason.
+nsec-tree, a full linkage proof for the successor, a `kind 1360`, a second
+contesting `kind 1360`, and fourteen `kind 1361` cases. Two are invalid
+(a bad `successor-sig`, a consent made over a different `created_at`). The
+rest are valid and split by path: automatic with linkage and an old
+pre-commitment; manual and automatic without linkage by the age of the
+pre-commitment; a hijack by a holder of the migration key, automatic against
+an old pre-commitment (the exposure this draft accepts) and manual against a
+fresh one; a second migration by the same key, and the first migration once
+that second exists, both manual; an OpenTimestamps attestation thirty days
+old (automatic) and an hour old (manual); a future-dated migration; a
+linkage against a root bound an hour ago; and a contested identity. Each
+case carries the client's first-seen times and states the expected outcome
+and the reason. Signatures carry random auxiliary data, so a verifier checks
+them and does not compare bytes. Two independent implementations must agree
+on every case: a verifier written from this text alone, and the reference
+library.

@@ -107,7 +107,23 @@ Field rules:
   person bonds as (normally `p`), `nonce` is 16 fresh bytes as hex,
   `displayName` and `personas` (at most 16) are optional. It is carried
   verbatim so an in-person bond ceremony starts from the card with no second
-  exchange. Optional.
+  exchange. Optional. Its
+  `v` is 1 or absent, `pubkey` 64 lower-case hex, `nonce` 32 lower-case
+  hex, `displayName` and each persona `label` text as `name` is, each
+  persona `pubkey` 64 lower-case hex, at most 16 personas. Anything else
+  in it fails the card. The nonce is a bearer secret for the card's life:
+  whoever holds the card can start the ceremony.
+- `name`, and every other text a person will see (`displayName`, persona
+  labels), is at most 100 code points and carries no control, format,
+  line-separator or paragraph-separator character (Unicode categories
+  Cc, Cf, Zl, Zp). A reader refuses a card that breaks this rather than
+  cleaning it, because a cleaned name is not the one that was signed.
+- `card` in a box is unpadded base64url, nothing outside that alphabet;
+  each carrier name is 1 to 32 characters from `A-Z a-z 0-9 . _ -`, at
+  most 8 of them; `attest` carries no colon and no format character and
+  is at most 512 characters. These bounds are what makes the §2 digest
+  injective: no field can carry the character that separates it from the
+  next.
 
 ## 2. Signature
 
@@ -141,18 +157,34 @@ joined. A reader MUST reject a card whose
 
 In this order, and the first failure rejects the card:
 
-1. size at most 16 KiB; base64url decodes; JSON parses; `v` is 1;
-2. every hex field is the right length and lower case after normalisation;
+1. the part after the last `#` is at most 16 KiB (the cap is the card's,
+   not the link's); base64url decodes; JSON parses to an object; `v` is 1;
+2. every hex field is the right length and lower case after normalisation,
+   and every other field has the shape and bounds §1 gives it: names and
+   labels, relays, boxes, carriers, `attest`, `bond`;
 3. `expires > now` and `expires - issued <= 30 days` and `issued <= now +
    300`;
-4. the signature verifies under `p` over the digest in §2;
-5. each box's `card` decodes and passes Link SPEC §2.3, rules 1 to 8. The
-   node id inside is the one `p` endorsed by signing this card, so rule 9's
-   expected id is that node id, and the reader pins it to the box's `p`.
+4. the signature verifies under `p` over the digest in §2, computed from
+   the fields §1 names and nothing else;
+5. each box's `card` decodes and passes Link SPEC §2.3, rules 1 to 8,
+   verified strictly: RFC 8032 signature checks with no ZIP-215
+   encodings, a node id of small order refused before the signature is
+   looked at, relay hints valid UTF-8 `wss://` URLs, onion hints a
+   56-character base32 host and a non-zero port, and a serial that fits
+   in 53 bits. The node id inside is the one `p` endorsed by signing this
+   card, so rule 9's expected id is that node id, and the reader pins it
+   to the box's `p`.
 
 A card that passes steps 1 to 5 makes a contact, starts a bond, yields
 rendezvous material and names a box the reader may dial at once. Nothing
 outside the card is fetched to get there.
+
+What the reader returns is a card rebuilt from the fields §1 names. A key
+on the wire that §1 does not name, `__proto__` included, is outside the
+signature and MUST NOT reach the application under a verified result.
+Hex case is normalised and base64url padding tolerated, so one card has
+several wire forms; anything that caches or deduplicates a card MUST key
+on its fields, not its bytes.
 
 6. **Refresh.** The Link card inside expires within a week and the contact
    card within 30 days. To keep dialling after that, the reader fetches a
@@ -235,10 +267,19 @@ keys with a person.
 
 ## Vectors
 
-`vectors/contact-card.json` in this repository carries ten cards using the same test keys as
-forgesworn-link: one that passes with a box, a Link card
-and a bond; one that passes with none of those; and one failing at each of
-steps 1 to 5, including a tampered name, a tampered box and an expired Link
-card inside; and two refresh cases, a fresh Link card under the pinned node
-id that is accepted and one under a different node id that is refused. Signatures carry
-random auxiliary data, so a verifier checks them and does not compare bytes.
+`vectors/contact-card.json` in this repository carries nineteen cards using the same test
+keys as forgesworn-link: one that passes with a box, a
+Link card and a bond; one that passes with none of those; one that passes
+with unnamed keys on the wire, which the reader must strip; and cards
+failing at each of steps 1 to 5, including a tampered name, a tampered
+box, an expired Link card inside, a name with a format character or too
+long, a box card outside base64url, an empty carrier, a malformed bond, a
+future issue date, a non-`wss://` relay and a Link card whose relay hint
+is not a URL. Four refresh cases: a fresh Link card under the pinned node
+id that is accepted, one under a different node id, a stale one, and one
+under a small-order node id with a signature that ZIP-215 would accept,
+all refused. `vectors/verify-contact-card.mjs` is a reference reader for
+§2 and §3 written from this text and runs with `npm test`;
+`vectors/generate-contact-card.mjs` regenerates the file. Signatures carry
+random auxiliary data, so a verifier checks them and does not compare
+bytes. Two implementations must agree on every case.
