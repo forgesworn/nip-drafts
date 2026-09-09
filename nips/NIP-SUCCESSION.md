@@ -184,7 +184,8 @@ which it took.
    `kind 1361`'s own `created_at` is never enough on its own, because a
    signer can date it into the future;
 2. a `linkage` proof verifies against a root the client had already bound
-   to the identity at least 7 days earlier. A root binding for the identity
+   to the identity at least 7 days earlier, the root being the master key
+   on the identity's own published linkage proof (kind 30078). A root binding for the identity
    that appeared later is not trusted here, because an attacker holding the
    identity key can publish a binding to a root of their own;
 3. the user holds an out-of-band bond with the person, a shared secret
