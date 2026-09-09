@@ -67,15 +67,20 @@ A device holding a person credential acts for the identity in these
 places:
 
 - **Rooms.** The device presents the person credential where KithMoot's
-  roster expects a room credential. A room that admits the person admits
-  the device; the room's own per-room credential is issued from it by the
-  device rather than by a fresh signer prompt, so a new room does not wake
-  the hardware signer.
-- **DMs and dead drops.** The device derives rendezvous material with the
-  identity key's material handed to it once, in the sheltered lane, by the
-  root at credentialling time; it never holds the identity secret. Where a
-  derivation needs the identity secret itself, the device asks the root
-  over NIP-46 and shows that it did.
+  roster expects a room credential, and the room verifies it with the two
+  extra checks of §4 in place of the room-id check. A room that admits the
+  person admits the device. A device cannot mint a room credential, because
+  a room credential is signed by the participant key and the device does
+  not hold it; that is the point.
+- **DMs and dead drops.** Rendezvous material for a contact is an ECDH
+  between the identity's static key and the contact's, which the device
+  cannot compute without the identity secret. Two shapes are allowed and a
+  client says which it uses: the root hands the device the per-contact
+  shared secret (`static_x`) for each contact, at pairing and whenever a
+  contact is added, inside NIP-44; or the device asks the root for it over
+  NIP-46 when needed. The device never holds the identity secret in either
+  shape. **Open:** NIP-46 has no method that returns a raw shared secret,
+  and a client that wants the second shape has to add one.
 - **The box.** A box admits uploads and reads for the keeper's tier from
   any device holding a current person credential for the keeper's key, and
   logs the device, not the person, as the signer of what it stored.

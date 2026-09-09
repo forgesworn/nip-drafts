@@ -79,7 +79,9 @@ Field rules:
   the card has expired.
 - `relays` are public-lane relays, at most 8, `wss://` only, no commas.
 - `boxes` has at most 4 entries. `card` is opaque bytes exactly as Link
-  SPEC §2 intends, and is at most 4096 bytes decoded. `carriers` names the
+  SPEC §2 intends, and is at most 4096 bytes decoded. The 16 KiB cap on the
+  whole card wins: two full-size Link cards fit, four do not, and a client
+  building a card drops boxes from the end until it fits. `carriers` names the
   anonymous carriers the box speaks (for example `tor`, `i2p`); a reader
   ignores names it does not know.
 - `eph` is a fresh secp256k1 key for this card and MUST NOT be reused across
@@ -115,10 +117,12 @@ digest = sha256( utf8( "nostr-contact-card:v1"
 sig    = BIP-340 sign(digest, secret key of p)
 ```
 
-`handshakeBytes` is the UTF-8 JSON of the bond object with its keys in the
-order `v`, `pubkey`, `displayName`, `nonce`, `personas`, absent keys
-omitted. Fields that could carry a
-separator are hashed, not joined. A reader MUST reject a card whose
+`handshakeBytes` is the canonical form of the bond object: UTF-8 JSON with
+no whitespace, keys in exactly this order and absent keys omitted:
+`v`, `pubkey`, `displayName`, `nonce`, `personas`; inside `personas`, each
+entry's keys in the order `pubkey`, `label`. It is defined here so that a reader in any
+language reproduces it from parsed fields. Fields that could carry a separator are hashed, not
+joined. A reader MUST reject a card whose
 `relays` contain a comma or whose box fields contain `/`.
 
 ## 3. Reading a card
@@ -181,9 +185,13 @@ keys with a person.
 
 ## Security considerations
 
-- **A card is a capability.** Its holder can reach the named box and can
-  derive rendezvous material with `p`. It is not identity: the box still
-  decides admission by its own rules and a bond still needs the ceremony.
+- **A card is a capability, and a small one.** Its holder can reach the
+  named box and learns `p` and `eph`. They cannot derive rendezvous
+  material: the one-sided tag needs either the reader's own static secret
+  or the ephemeral's private half, and a card carries neither. A lost card
+  yields a box address and two public keys. It is not identity: the box
+  still decides admission by its own rules and a bond still needs the
+  ceremony.
 - **Replay.** `issued`, `expires` and the fresh `eph` bound a card in time;
   the Link card inside carries its own serial and expiry. An old card yields
   an expired Link card and stale rendezvous material, and nothing else.

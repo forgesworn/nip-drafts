@@ -75,6 +75,15 @@ Rules:
   outside the signer. At migration time the same root produces the same
   key. Nothing extra is written down, and a root on a hardware signer means
   the migration key was never on a networked machine.
+- The identity key MUST itself be a child of that root and MUST NOT be the
+  root. A tree rooted in the identity's own secret derives the migration
+  key from the very key a thief holds, and protects nothing. The vectors
+  show the right shape: root, then `social/0` as the identity.
+- A client MUST keep the first `kind 1360` it saw for an identity. If it
+  later sees a different `kind 1360` from the same identity, whatever its
+  `created_at`, the identity is **contested**: no migration for it is ever
+  automatic, and the client says so. `created_at` is chosen by the signer
+  and orders nothing; only first-seen and OpenTimestamps do.
 - A client SHOULD publish the pre-commitment at first run. A person who
   wants no migration path publishes one with no `p` tag.
 - The migration key MUST NOT be used for anything but signing one
@@ -122,6 +131,11 @@ msg = sha256( "nostr-succession/v1" || 0x00
 with the three pubkeys as 32 raw bytes, `identity_pubkey` taken from the
 referenced `kind 1360`'s author, and `created_at` the `kind 1361`'s own. A
 verifier recomputes `msg` and checks the signature under the `p` pubkey.
+The successor signs before the migration key does, over the `created_at`
+the event will carry; a signer that rewrites `created_at` (some NIP-46
+signers do) invalidates the consent, so a client MUST compare the returned
+event's `created_at` to the one it asked for and re-sign the consent if
+they differ.
 
 A `kind 1361` is **valid** only if all of these hold, checked in order:
 
@@ -164,10 +178,15 @@ which it took.
 **Automatic**, if at least one of these holds:
 
 1. the `kind 1360` was first seen by this client at least 7 days before
-   the `kind 1361`'s `created_at`, or carries a `kind 1040` attestation
-   older than the `kind 1361`;
-2. a `linkage` proof verifies and the client already trusted the identity
-   key as a derived key of the same root;
+   the `kind 1361` was, taking the earlier of the `kind 1361`'s
+   `created_at` and the time the client first saw it, or the `kind 1360`
+   carries a `kind 1040` attestation older than the `kind 1361`. The
+   `kind 1361`'s own `created_at` is never enough on its own, because a
+   signer can date it into the future;
+2. a `linkage` proof verifies against a root the client had already bound
+   to the identity at least 7 days earlier. A root binding for the identity
+   that appeared later is not trusted here, because an attacker holding the
+   identity key can publish a binding to a root of their own;
 3. the user holds an out-of-band bond with the person, a shared secret
    established in person, and a fresh bond ceremony with the successor
    succeeds;
@@ -183,8 +202,16 @@ has and does nothing until the person decides.
 
 A `successor-sig` alone is never enough, because an attacker holding the
 migration key can mint a successor and sign with it. What makes the move
-automatic is a commitment that demonstrably predates it, a shared root, or
-a person who checked out of band.
+automatic is a commitment that demonstrably predates it, a shared root
+bound before it, or a person who checked out of band.
+
+Filters a client uses:
+
+```json
+{"kinds": [1360], "authors": ["<identity pubkey>"]}
+{"kinds": [1361], "authors": ["<migration pubkey from the 1360>"]}
+{"kinds": [1361], "#e": ["<id of the 1360>"]}
+```
 
 ## 5. Where the events live
 
@@ -220,8 +247,26 @@ saw early. So:
   to publish early, which is why §1 says first run.
 - **Two migrations.** Only the first counts. A client that sees two treats
   both as manual.
+- **A compromised migration key that has not been used.** There is no
+  cancel. The person's remedy is to migrate first, to a fresh successor of
+  their own, before the attacker does; a client that learns a migration
+  key may be exposed SHOULD offer exactly that.
+- **A lost root with a live identity.** The person cannot migrate and
+  cannot replace the `kind 1360`, because the first one is forever. Choose
+  the root, and its recovery, before publishing.
 - **Replay and cross-protocol.** `successor-sig` binds all three pubkeys
   and `created_at` under a domain prefix, so it verifies nowhere else.
+
+## Relationship to community proposals
+
+Two entries on NostrHub cover the same ground. "Key Migration" claims kinds
+360, 361 and 362 for a pre-commitment, a migration and Shamir shards with
+OpenTimestamps and migration relays; "Simpler Social Key Migration" is a
+single announcement kind with comments. This draft shares no kind numbers
+with either. It differs from the first in carrying the successor's consent,
+deriving the migration key instead of sharding it, and defining an
+automatic path; it differs from the second in being a commitment rather
+than an announcement. A client may honour all three.
 
 ## Compatibility
 
