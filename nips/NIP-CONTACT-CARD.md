@@ -53,7 +53,7 @@ needed and an HTTP server never sees the fragment. A card is at most 16 KiB.
   "relays": ["wss://…", "wss://…"],
   "boxes": [
     {
-      "p": "<64 hex, the box's own key (bothy key)>",
+      "p": "<64 hex, the box's own key>",
       "claim": "<64 hex, event id of the keeper-signed claim that binds this box to the person>",
       "card": "<base64url FSL-CARD-1, carried opaquely>",
       "carriers": ["tor", "i2p"]
@@ -71,7 +71,7 @@ Field rules:
 - `p` is the key this relationship will use. A persona derived from a root
   (NIP-IDENTITY-TREES) is the normal case; the card carries no linkage proof
   and a reader MUST NOT ask for one. A linkage, if ever shared, travels on
-  the sheltered lane after a bond, never on a card.
+  a private channel after a bond, never on a card.
 - `rz` is the key every rendezvous with this person is computed against:
   Link tags and dead-drop keys use `ECDH(reader, rz)`, never
   `ECDH(reader, p)`. It is derived from the person's root with purpose
@@ -193,7 +193,7 @@ on a refreshed Link card.
 Two people in the same place show each other a QR: two cards cross, both
 sides reach the both-sided rendezvous case, and the bond ceremony runs. An
 introduction carries a card inside the introducer's sealed
-statement. A card sent as a sealed message on the sheltered lane is fine; a
+statement. A card sent as a sealed message is fine; a
 card posted to a public relay, a profile or a website is a mistake the
 client MUST refuse to make: it is a capability to reach a box and to derive
 keys with a person.
@@ -220,7 +220,7 @@ keys with a person.
   person moves to the next index, issues new cards, and their identity is
   untouched.
 - **Linkage.** Nothing on a card ties `p` to any other key. A reader that
-  wants that asks a bonded friend on the sheltered lane.
+  wants that asks a bonded friend privately.
 
 ## Compatibility
 
@@ -236,7 +236,7 @@ keys with a person.
 ## Vectors
 
 `vectors/contact-card.json` in this repository carries ten cards using the same test keys as
-forgesworn-link and nostr-deaddrop: one that passes with a box, a Link card
+forgesworn-link: one that passes with a box, a Link card
 and a bond; one that passes with none of those; and one failing at each of
 steps 1 to 5, including a tampered name, a tampered box and an expired Link
 card inside; and two refresh cases, a fresh Link card under the pinned node

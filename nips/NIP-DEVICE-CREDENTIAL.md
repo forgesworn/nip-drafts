@@ -102,7 +102,7 @@ places:
 - **Revoke.** The root signs a tombstone and, because the device held
   `rz`, moves `rz` to the next index and issues fresh contact cards to the
   people who should still reach it. The root signs the tombstone: a kind 5 naming the credential's
-  id, carried on the sheltered lane to every room, box and device the
+  id, carried inside encryption to every room, box and device the
   person has. A revoked device is refused everywhere the tombstone reaches
   and the person's identity does not change. A client MUST show the person
   their devices with labels and let them revoke any one of them, and MUST
