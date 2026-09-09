@@ -114,16 +114,32 @@ Field rules:
   in it fails the card. The nonce is a bearer secret for the card's life:
   whoever holds the card can start the ceremony.
 - `name`, and every other text a person will see (`displayName`, persona
-  labels), is at most 100 code points and carries no control, format,
-  line-separator or paragraph-separator character (Unicode categories
-  Cc, Cf, Zl, Zp). A reader refuses a card that breaks this rather than
+  labels), is 1 to 100 code points with at least one visible character
+  (a letter, number, symbol or punctuation mark), no control, surrogate,
+  unassigned or private-use character (Unicode categories Cc, Cs, Cn,
+  Co), no line or paragraph separator (Zl, Zp), no space other than
+  U+0020 and none at either end, no run of five combining marks, and none
+  of the invisible or direction-changing format characters (U+200B to
+  U+200F, U+202A to U+202E, U+2060 to U+2064, U+2066 to U+2069, U+FEFF,
+  U+00AD, U+061C, U+180E). The zero-width joiner U+200D is allowed only
+  beside a pictographic character and the tag characters U+E0020 to
+  U+E007F only after one, so an emoji family or a flag reads and a hidden
+  joiner does not. A reader refuses a card that breaks this rather than
   cleaning it, because a cleaned name is not the one that was signed.
+- `relays`: each is `wss://`, parses as a URL whose host is a DNS name or
+  an IP literal, carries no username, password or fragment, no comma and
+  no unprintable character; a port, path and query are allowed. This is
+  the same rule Link SPEC §2.2 gives a relay hint.
+- `expires` is after `issued`; `issued` may be up to 300 seconds after
+  the reader's clock.
 - `card` in a box is unpadded base64url, nothing outside that alphabet;
-  each carrier name is 1 to 32 characters from `A-Z a-z 0-9 . _ -`, at
-  most 8 of them; `attest` carries no colon and no format character and
-  is at most 512 characters. These bounds are what makes the §2 digest
+  `carriers`, when present, holds 1 to 8 names of 1 to 32 characters from
+  `A-Z a-z 0-9 . _ -`; `attest`, when present, is 1 to 512 characters
+  with no colon, no space or separator and no unprintable or format
+  character. An empty `name`, `attest` or `carriers` is refused rather
+  than read as absent. These bounds are what makes the §2 digest
   injective: no field can carry the character that separates it from the
-  next.
+  next, and nothing empty hashes the same as nothing there.
 
 ## 2. Signature
 
@@ -158,7 +174,9 @@ joined. A reader MUST reject a card whose
 In this order, and the first failure rejects the card:
 
 1. the part after the last `#` is at most 16 KiB (the cap is the card's,
-   not the link's); base64url decodes; JSON parses to an object; `v` is 1;
+   not the link's); base64url decodes; the bytes are valid UTF-8 with no
+   byte-order mark (a reader never repairs bytes to U+FFFD); JSON parses
+   to an object; `v` is 1;
 2. every hex field is the right length and lower case after normalisation,
    and every other field has the shape and bounds §1 gives it: names and
    labels, relays, boxes, carriers, `attest`, `bond`;
@@ -167,13 +185,19 @@ In this order, and the first failure rejects the card:
 4. the signature verifies under `p` over the digest in §2, computed from
    the fields §1 names and nothing else;
 5. each box's `card` decodes and passes Link SPEC §2.3, rules 1 to 8,
-   verified strictly: RFC 8032 signature checks with no ZIP-215
-   encodings, a node id of small order refused before the signature is
-   looked at, relay hints valid UTF-8 `wss://` URLs, onion hints a
-   56-character base32 host and a non-zero port, and a serial that fits
-   in 53 bits. The node id inside is the one `p` endorsed by signing this
-   card, so rule 9's expected id is that node id, and the reader pins it
-   to the box's `p`.
+   verified as that section now states them: the signature check is the
+   strict, cofactorless one (canonical encodings, no small-order node id
+   or nonce point, `S` below the group order, `[S]B = R + [k]A`), relay
+   hints pass the URL rule above with no byte-order mark, onion hints are
+   a 56-character base32 host and a non-zero port, an ephemeral hint
+   starts `0x02` or `0x03`, and a serial that does not fit in 53 bits
+   fails rule 3. The node id inside is the one `p` endorsed by signing
+   this card, so rule 9's expected id is that node id, and the reader pins
+   it to the box's `p`.
+
+A reader's clock must be a finite number of seconds, and the highest
+serial it holds for a node an integer; a reader given anything else
+refuses the card rather than skipping the check that needed it.
 
 A card that passes steps 1 to 5 makes a contact, starts a bond, yields
 rendezvous material and names a box the reader may dial at once. Nothing
@@ -192,9 +216,12 @@ on its fields, not its bytes.
    `p_box`, in whatever shape the box's own protocol publishes, whose Link
    card verifies under SPEC §2.3 with the pinned node id as the expected
    id. A fresh card with a different node id is refused until a new
-   contact card from `p` endorses it. `claim` names the box's own binding
-   event where the box publishes one; a reader that cannot fetch it loses
-   nothing but the box's self-reported facts.
+   contact card from `p` endorses it. Rule 8 is what stops an old card of
+   the same node replaying, and rule 8 needs the highest serial this
+   reader accepted for that node id: a reader persists it per node id
+   from the first read on, or accepts replays. `claim` names the box's
+   own binding event where the box publishes one; a reader that cannot
+   fetch it loses nothing but the box's self-reported facts.
 
 A client MUST show whether a box is dialled on the card's endorsement or
 on a refreshed Link card.
@@ -267,19 +294,24 @@ keys with a person.
 
 ## Vectors
 
-`vectors/contact-card.json` in this repository carries nineteen cards using the same test
-keys as forgesworn-link: one that passes with a box, a
-Link card and a bond; one that passes with none of those; one that passes
-with unnamed keys on the wire, which the reader must strip; and cards
+`vectors/contact-card.json` in this repository carries twenty-seven cards using the same
+test keys as forgesworn-link: cards that pass with a
+box, a Link card and a bond; with none of those; with unnamed keys on
+the wire, which the reader must strip; with an emoji sequence in the
+name; with upper-case bond hex, which the reader normalises; and cards
 failing at each of steps 1 to 5, including a tampered name, a tampered
-box, an expired Link card inside, a name with a format character or too
-long, a box card outside base64url, an empty carrier, a malformed bond, a
-future issue date, a non-`wss://` relay and a Link card whose relay hint
-is not a URL. Four refresh cases: a fresh Link card under the pinned node
-id that is accepted, one under a different node id, a stale one, and one
-under a small-order node id with a signature that ZIP-215 would accept,
-all refused. `vectors/verify-contact-card.mjs` is a reference reader for
-§2 and §3 written from this text and runs with `npm test`;
-`vectors/generate-contact-card.mjs` regenerates the file. Signatures carry
-random auxiliary data, so a verifier checks them and does not compare
-bytes. Two implementations must agree on every case.
+box, an expired Link card inside, a name with a format character, too
+long, or holding a lone surrogate, a box card outside base64url, an
+empty carrier list, an empty attest, a malformed bond, a future issue
+date, an expiry before the issue date, a non-`wss://` relay, a relay
+with credentials, and Link cards whose relay hint is not a URL or starts
+with a byte-order mark. Six refresh cases: a fresh Link card under the
+pinned node id that is accepted; one under a different node id, a stale
+one, one under a small-order node id with a signature that ZIP-215 would
+accept, one whose nonce point carries torsion so that only a cofactored
+check accepts it, and a replay with a serial no higher than the one
+already seen, all refused. `vectors/verify-contact-card.mjs` is a
+reference reader for §2 and §3 written from this text and runs with `npm
+test`; `vectors/generate-contact-card.mjs` regenerates the file.
+Signatures carry random auxiliary data, so a verifier checks them and
+does not compare bytes. Two implementations must agree on every case.
