@@ -1,0 +1,289 @@
+{
+  "format": "nostr-succession-known-answer-v1",
+  "note": "Signatures use random auxiliary data, so verify them; do not compare bytes. Ids and pubkeys are deterministic.",
+  "domain": "nostr-succession/v1",
+  "derivation": {
+    "library": "nsec-tree",
+    "identity": [
+      "social",
+      0
+    ],
+    "migration": [
+      "migration",
+      0
+    ],
+    "successor": [
+      "successor",
+      0
+    ]
+  },
+  "testOnlyKeys": {
+    "rootNsecHex": "4873374aacd9fbbdf073a29078b6cf9f27c137107530c521458d5d83118ae733",
+    "masterPubkey": "npub1ec2tmw2wj3vuz4wase23mepxlu424zycl4fjextrsz94038u6w6qxfz5la",
+    "identityPrivHex": "2c451ebec56095b48e801b73c5ef117f550ec5d621283eac429eb69e740d05fb",
+    "identityPub": "0be74a16455478d46bcb92e32995e4a235c3a4a6a69cca30ebacf1330e5c8915",
+    "migrationPrivHex": "b3950dda95cc165143e3d84d9f01424f09fe72b4c9d4625cee5256e38089d22e",
+    "migrationPub": "34aadb6ead1f5b2e888af61ad737dc708d388c3029aeb025fa788bc703d24e1c",
+    "successorPrivHex": "84433372b964c0da1836a85615f15a3162e0dbcd8848aff38c05346b4a5b8ad7",
+    "successorPub": "868569af77d2d17e38ef97c2a242b6c37aafef6e1f164041e250167aa4a55bb0",
+    "attackerPub": "28a0ac18e5ab34436a4818c34e81a306300a32a9afc27cda513e7d1fc28b2eb2"
+  },
+  "precommit": {
+    "kind": 360,
+    "created_at": 1793577600,
+    "tags": [
+      [
+        "p",
+        "34aadb6ead1f5b2e888af61ad737dc708d388c3029aeb025fa788bc703d24e1c"
+      ]
+    ],
+    "content": "",
+    "pubkey": "0be74a16455478d46bcb92e32995e4a235c3a4a6a69cca30ebacf1330e5c8915",
+    "id": "aeda9bb98a7a719a2638f7a702ab16616619505d4808e183a3341856dd1320ba",
+    "sig": "3af8ab08f0df94ac651fc331291cf1dff07f81625c85e54b98ee017f45ae0069a9d865d29b72aea2ee41fa28f8500fcbbdb4dfe88c762442590b17e25c1a3c83"
+  },
+  "linkage": {
+    "masterPubkey": "ce14bdb94e9459c155dd86551de426ff2aaa8898fd532c9963808b57c4fcd3b4",
+    "childPubkey": "868569af77d2d17e38ef97c2a242b6c37aafef6e1f164041e250167aa4a55bb0",
+    "purpose": "successor",
+    "index": 0,
+    "attestation": "nsec-tree:link|ce14bdb94e9459c155dd86551de426ff2aaa8898fd532c9963808b57c4fcd3b4|868569af77d2d17e38ef97c2a242b6c37aafef6e1f164041e250167aa4a55bb0|successor|0",
+    "signature": "120c85977777271147ebd5f6d6d49717efc7276d28f6c6bab455a59185f7b54f069d6336ac09aaff0bc5762a96bba43942b36ffc2e3462bb016a6df40f446371"
+  },
+  "cases": [
+    {
+      "name": "passes",
+      "expect": {
+        "valid": true,
+        "path": "automatic",
+        "reason": "kind 360 predates the kind 361 by 30 days and the linkage verifies"
+      },
+      "event": {
+        "kind": 361,
+        "created_at": 1796169600,
+        "tags": [
+          [
+            "p",
+            "868569af77d2d17e38ef97c2a242b6c37aafef6e1f164041e250167aa4a55bb0"
+          ],
+          [
+            "e",
+            "aeda9bb98a7a719a2638f7a702ab16616619505d4808e183a3341856dd1320ba",
+            "wss://relay.example.org"
+          ],
+          [
+            "successor-sig",
+            "4ce105f03a5a9fa2b59a59e0fdc28ecd1a0540dabbd43d06a0732248d242a2f207b4aa3f67af68ea7d52173ed2ea36abfd683bf14cfb9f8d79e2bad890aa85b2"
+          ],
+          [
+            "linkage",
+            "{\"masterPubkey\":\"ce14bdb94e9459c155dd86551de426ff2aaa8898fd532c9963808b57c4fcd3b4\",\"childPubkey\":\"868569af77d2d17e38ef97c2a242b6c37aafef6e1f164041e250167aa4a55bb0\",\"purpose\":\"successor\",\"index\":0,\"attestation\":\"nsec-tree:link|ce14bdb94e9459c155dd86551de426ff2aaa8898fd532c9963808b57c4fcd3b4|868569af77d2d17e38ef97c2a242b6c37aafef6e1f164041e250167aa4a55bb0|successor|0\",\"signature\":\"120c85977777271147ebd5f6d6d49717efc7276d28f6c6bab455a59185f7b54f069d6336ac09aaff0bc5762a96bba43942b36ffc2e3462bb016a6df40f446371\"}"
+          ]
+        ],
+        "content": "",
+        "pubkey": "34aadb6ead1f5b2e888af61ad737dc708d388c3029aeb025fa788bc703d24e1c",
+        "id": "4c0d4667fab4d58d4c313d7a59250797cc4da84d275b6f272bc092b925be5cdb",
+        "sig": "90a74fd2472c9d80a70acc8a2b369cdfe1356b9c29e604dfadc7129fd9d296088f17aaa2e1260087351dfcc0333861c681e8936b9dcb3daefffc8e4f6ab474f8"
+      },
+      "firstSeen360": 1793577600
+    },
+    {
+      "name": "bad-successor-sig",
+      "expect": {
+        "valid": false,
+        "reason": "successor-sig does not verify under the p tag"
+      },
+      "event": {
+        "kind": 361,
+        "created_at": 1796169600,
+        "tags": [
+          [
+            "p",
+            "868569af77d2d17e38ef97c2a242b6c37aafef6e1f164041e250167aa4a55bb0"
+          ],
+          [
+            "e",
+            "aeda9bb98a7a719a2638f7a702ab16616619505d4808e183a3341856dd1320ba",
+            "wss://relay.example.org"
+          ],
+          [
+            "successor-sig",
+            "6b73cbbd05414e9e62f890732f8a7858d3e57aa750dd5005639daad9d991bef3c752ad55c976d81508fede9de0ec6abd8c5b7c3cf4c9f1b9812a2e0eeac27e02"
+          ],
+          [
+            "linkage",
+            "{\"masterPubkey\":\"ce14bdb94e9459c155dd86551de426ff2aaa8898fd532c9963808b57c4fcd3b4\",\"childPubkey\":\"868569af77d2d17e38ef97c2a242b6c37aafef6e1f164041e250167aa4a55bb0\",\"purpose\":\"successor\",\"index\":0,\"attestation\":\"nsec-tree:link|ce14bdb94e9459c155dd86551de426ff2aaa8898fd532c9963808b57c4fcd3b4|868569af77d2d17e38ef97c2a242b6c37aafef6e1f164041e250167aa4a55bb0|successor|0\",\"signature\":\"120c85977777271147ebd5f6d6d49717efc7276d28f6c6bab455a59185f7b54f069d6336ac09aaff0bc5762a96bba43942b36ffc2e3462bb016a6df40f446371\"}"
+          ]
+        ],
+        "content": "",
+        "pubkey": "34aadb6ead1f5b2e888af61ad737dc708d388c3029aeb025fa788bc703d24e1c",
+        "id": "b1e154afc7edcaed6f68dbd1039901232134ee40f3adc3c9e4b925e1227a0ab1",
+        "sig": "5102d0518a08384db9ad5e60edea68fa3a42a04e2d0f4d7f0f2cf1925f1e6677198abd6fe5460d0fab608afc525eb69ce860159621471bb9bbd81b6b31a40fe1"
+      },
+      "firstSeen360": 1793577600
+    },
+    {
+      "name": "created-at-mismatch",
+      "expect": {
+        "valid": false,
+        "reason": "successor-sig was made over a different created_at"
+      },
+      "event": {
+        "kind": 361,
+        "created_at": 1796169601,
+        "tags": [
+          [
+            "p",
+            "868569af77d2d17e38ef97c2a242b6c37aafef6e1f164041e250167aa4a55bb0"
+          ],
+          [
+            "e",
+            "aeda9bb98a7a719a2638f7a702ab16616619505d4808e183a3341856dd1320ba",
+            "wss://relay.example.org"
+          ],
+          [
+            "successor-sig",
+            "2178181ea072754f89457182e54fde881349648246fab7c58bd8259aa2c6d3fcd8651f2204b095c81f2f9bc59d51041993a6e9e3a195d38306243d806a92f75b"
+          ],
+          [
+            "linkage",
+            "{\"masterPubkey\":\"ce14bdb94e9459c155dd86551de426ff2aaa8898fd532c9963808b57c4fcd3b4\",\"childPubkey\":\"868569af77d2d17e38ef97c2a242b6c37aafef6e1f164041e250167aa4a55bb0\",\"purpose\":\"successor\",\"index\":0,\"attestation\":\"nsec-tree:link|ce14bdb94e9459c155dd86551de426ff2aaa8898fd532c9963808b57c4fcd3b4|868569af77d2d17e38ef97c2a242b6c37aafef6e1f164041e250167aa4a55bb0|successor|0\",\"signature\":\"120c85977777271147ebd5f6d6d49717efc7276d28f6c6bab455a59185f7b54f069d6336ac09aaff0bc5762a96bba43942b36ffc2e3462bb016a6df40f446371\"}"
+          ]
+        ],
+        "content": "",
+        "pubkey": "34aadb6ead1f5b2e888af61ad737dc708d388c3029aeb025fa788bc703d24e1c",
+        "id": "e1bea908faaca0477effb2b2c80e9af9d61a5a3cd8fe54093cdd2354d1f36456",
+        "sig": "6dfeca57c5761cfaa4d13a1532a8859aeb3d0fcb206c5f21513995cb018475346d0483961783f37826b730c1a1079f266bb35d072be428698bca93b3c0651731"
+      },
+      "firstSeen360": 1793577600
+    },
+    {
+      "name": "no-linkage-precommit-fresh",
+      "expect": {
+        "valid": true,
+        "path": "manual",
+        "reason": "valid consent but the kind 360 was first seen under 7 days ago and there is no linkage"
+      },
+      "event": {
+        "kind": 361,
+        "created_at": 1796169600,
+        "tags": [
+          [
+            "p",
+            "868569af77d2d17e38ef97c2a242b6c37aafef6e1f164041e250167aa4a55bb0"
+          ],
+          [
+            "e",
+            "aeda9bb98a7a719a2638f7a702ab16616619505d4808e183a3341856dd1320ba",
+            "wss://relay.example.org"
+          ],
+          [
+            "successor-sig",
+            "5395a77a81e744e0843e688814484ab4775beb5056316ab25d5e4be4d0efb3580a3ca1654f42be28674ba85d25cf806e2c3c6728cc9ceb5bd423c61d8152a152"
+          ]
+        ],
+        "content": "",
+        "pubkey": "34aadb6ead1f5b2e888af61ad737dc708d388c3029aeb025fa788bc703d24e1c",
+        "id": "af49ab73dd89eeacfd1b3e72f050476ccb828822b804d7881e8628ad3f63cc6d",
+        "sig": "7f93ac791cb1cd9eeef9cbdade6bb7a6c7e37d84b6913180076d5abe280dbd167bfd5131c4c60fdbad77322e545f4052018250cb400dd1a873a5fa86d429f32e"
+      },
+      "firstSeen360": 1796166000
+    },
+    {
+      "name": "no-linkage-precommit-old",
+      "expect": {
+        "valid": true,
+        "path": "automatic",
+        "reason": "valid consent and the kind 360 was first seen 30 days earlier"
+      },
+      "event": {
+        "kind": 361,
+        "created_at": 1796169600,
+        "tags": [
+          [
+            "p",
+            "868569af77d2d17e38ef97c2a242b6c37aafef6e1f164041e250167aa4a55bb0"
+          ],
+          [
+            "e",
+            "aeda9bb98a7a719a2638f7a702ab16616619505d4808e183a3341856dd1320ba",
+            "wss://relay.example.org"
+          ],
+          [
+            "successor-sig",
+            "5395a77a81e744e0843e688814484ab4775beb5056316ab25d5e4be4d0efb3580a3ca1654f42be28674ba85d25cf806e2c3c6728cc9ceb5bd423c61d8152a152"
+          ]
+        ],
+        "content": "",
+        "pubkey": "34aadb6ead1f5b2e888af61ad737dc708d388c3029aeb025fa788bc703d24e1c",
+        "id": "af49ab73dd89eeacfd1b3e72f050476ccb828822b804d7881e8628ad3f63cc6d",
+        "sig": "7f93ac791cb1cd9eeef9cbdade6bb7a6c7e37d84b6913180076d5abe280dbd167bfd5131c4c60fdbad77322e545f4052018250cb400dd1a873a5fa86d429f32e"
+      },
+      "firstSeen360": 1793577600
+    },
+    {
+      "name": "hijack-with-migration-key",
+      "expect": {
+        "valid": true,
+        "path": "automatic-if-precommit-old",
+        "reason": "an attacker holding the migration key can mint a consenting successor; only a pre-commitment older than the migration makes this automatic, which is the exposure #2137 accepts"
+      },
+      "event": {
+        "kind": 361,
+        "created_at": 1796169600,
+        "tags": [
+          [
+            "p",
+            "28a0ac18e5ab34436a4818c34e81a306300a32a9afc27cda513e7d1fc28b2eb2"
+          ],
+          [
+            "e",
+            "aeda9bb98a7a719a2638f7a702ab16616619505d4808e183a3341856dd1320ba",
+            "wss://relay.example.org"
+          ],
+          [
+            "successor-sig",
+            "4a79e8dcdbc4f748a559ef1d54f8661713f6ec72abb185ec3c11275b6c06e449c7f055d251241a65b3f96682542b2079a32acdc2e584cd5dc8e543def1adfc5f"
+          ]
+        ],
+        "content": "",
+        "pubkey": "34aadb6ead1f5b2e888af61ad737dc708d388c3029aeb025fa788bc703d24e1c",
+        "id": "b376d661ab89de859d2f4756dc8bb48df0da10e4be6075ba18c2b1425f5addee",
+        "sig": "9e4f44d8aaa01bebfcc21ce047bdb416c0a752c2b61b13cecf46ecb795c804386f26a2b5495a094f1af9c7877f6678eb7d0f1df973269e286e8b034c73dee220"
+      },
+      "firstSeen360": 1793577600
+    },
+    {
+      "name": "second-migration-same-key",
+      "expect": {
+        "valid": false,
+        "reason": "only the first kind 361 by a migration key counts; a client that sees two treats both as manual"
+      },
+      "event": {
+        "kind": 361,
+        "created_at": 1796173200,
+        "tags": [
+          [
+            "p",
+            "28a0ac18e5ab34436a4818c34e81a306300a32a9afc27cda513e7d1fc28b2eb2"
+          ],
+          [
+            "e",
+            "aeda9bb98a7a719a2638f7a702ab16616619505d4808e183a3341856dd1320ba",
+            "wss://relay.example.org"
+          ],
+          [
+            "successor-sig",
+            "03a7851e65335377a4dd8af53b2465b30b81de61bffd9e757a584413a654861e55eb5c36b4d9a404653f217d1d60d0e2046cfacef72148e82002a2d689125eb5"
+          ]
+        ],
+        "content": "",
+        "pubkey": "34aadb6ead1f5b2e888af61ad737dc708d388c3029aeb025fa788bc703d24e1c",
+        "id": "33c067a1fd5517683e42a17b60f69b44a50c85cfd5ee53dc033ceac30af66789",
+        "sig": "d59a8b01dd262b69c8580502be521076a47d4c7018c523be4f79b7dc01986c25ab9bd3f03eca56b9f801b435d823d8dc29d017574f2c86fffeaa87f7811230cc"
+      },
+      "firstSeen360": 1793577600,
+      "competesWith": "passes"
+    }
+  ]
+}
