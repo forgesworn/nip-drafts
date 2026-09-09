@@ -191,7 +191,10 @@ which it took.
    established in person, and a fresh bond ceremony with the successor
    succeeds;
 4. someone the user trusts has published an attestation naming the pair,
-   in whatever form the client honours.
+   in whatever form the client honours: a signed attestation from a named
+   friend, a ring-signed attestation from the user's circle in which the
+   attester is not named, or a ring-signed identity bridge tying the two
+   keys when they share no root.
 
 Automatic means: follows, mutes, NIP-51 lists and local contact books are
 rewritten from the identity key to the successor; the old key is shown as
