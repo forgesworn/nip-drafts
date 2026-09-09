@@ -46,13 +46,14 @@ needed and an HTTP server never sees the fragment. A card is at most 16 KiB.
 {
   "v": 1,
   "p": "<64 hex, x-only public key of the person or persona>",
+  "rz": "<64 hex, x-only rendezvous public key, a child of the person's root>",
   "name": "<display name; sanitised on read, never trusted>",
   "issued": <unix seconds>,
   "expires": <unix seconds>,
   "relays": ["wss://…", "wss://…"],
   "boxes": [
     {
-      "p": "<64 hex, the box's own key>",
+      "p": "<64 hex, the box's own key (bothy key)>",
       "claim": "<64 hex, event id of the keeper-signed claim that binds this box to the person>",
       "card": "<base64url FSL-CARD-1, carried opaquely>",
       "carriers": ["tor", "i2p"]
@@ -71,6 +72,14 @@ Field rules:
   (NIP-IDENTITY-TREES) is the normal case; the card carries no linkage proof
   and a reader MUST NOT ask for one. A linkage, if ever shared, travels on
   the sheltered lane after a bond, never on a card.
+- `rz` is the key every rendezvous with this person is computed against:
+  Link tags and dead-drop keys use `ECDH(reader, rz)`, never
+  `ECDH(reader, p)`. It is derived from the person's root with purpose
+  `rendezvous` and an index, so its private half can be handed to the
+  person's devices and rotated by moving the index and issuing new cards,
+  while the identity secret never leaves the signer. It MUST NOT be
+  published anywhere but a card, and a reader MUST NOT try to link it to
+  `p`.
 - `name` is the person's own claim. A reader sanitises it as KithMoot does
   and shows it beside the npub, never instead of it.
 - `expires - issued` MUST be at most 30 days. The person, their relays and
@@ -79,7 +88,10 @@ Field rules:
   the card has expired.
 - `relays` are public-lane relays, at most 8, `wss://` only, no commas.
 - `boxes` has at most 4 entries. `card` is opaque bytes exactly as Link
-  SPEC §2 intends, and is at most 4096 bytes decoded. The 16 KiB cap on the
+  SPEC §2 intends, and is at most 4096 bytes decoded. Because the whole
+  contact card is signed by `p`, the box entry is the owner endorsement
+  Link SPEC §2.4 leaves open: `p` says "this node id is my box". No other
+  event is needed to trust the box for a first dial. The 16 KiB cap on the
   whole card wins: two full-size Link cards fit, four do not, and a client
   building a card drops boxes from the end until it fits. `carriers` names the
   anonymous carriers the box speaks (for example `tor`, `i2p`); a reader
@@ -106,7 +118,7 @@ recomputes it from what it has already validated:
 ```
 box_i  = p_i || "/" || claim_i || "/" || card_i || "/" || carriers_i.join("+")
 digest = sha256( utf8( "nostr-contact-card:v1"
-                       + ":" + p
+                       + ":" + p + ":" + rz
                        + ":" + issued + ":" + expires
                        + ":" + eph
                        + ":" + relays.join(",")
@@ -134,23 +146,26 @@ In this order, and the first failure rejects the card:
 3. `expires > now` and `expires - issued <= 30 days` and `issued <= now +
    300`;
 4. the signature verifies under `p` over the digest in §2;
-5. each box's `card` decodes and passes Link SPEC §2.3 with the card's
-   `node_id` as the expected id, **except rule 9**, which cannot be applied
-   until step 6.
+5. each box's `card` decodes and passes Link SPEC §2.3, rules 1 to 8. The
+   node id inside is the one `p` endorsed by signing this card, so rule 9's
+   expected id is that node id, and the reader pins it to the box's `p`.
 
-Then, and this MAY happen later or offline:
+A card that passes steps 1 to 5 makes a contact, starts a bond, yields
+rendezvous material and names a box the reader may dial at once. Nothing
+outside the card is fetched to get there.
 
-6. for each box, fetch the claim by id from `relays` and from the box
-   itself. It MUST be addressed to the box's `p`, MUST be signed by `p` or
-   by a key the claim lists as a keeper key for `p`, and MUST be active.
-   Fetch the box's status event, signed by the box's own key; it MUST name
-   that claim and MUST carry a Link node id equal to the Link card's
-   `node_id`. This is the box's own binding chain, defined with the box's
-   events, and the card adds nothing to it.
+6. **Refresh.** The Link card inside expires within a week and the contact
+   card within 30 days. To keep dialling after that, the reader fetches a
+   fresh Link card from the box: any event signed by the box's own key
+   `p_box`, in whatever shape the box's own protocol publishes, whose Link
+   card verifies under SPEC §2.3 with the pinned node id as the expected
+   id. A fresh card with a different node id is refused until a new
+   contact card from `p` endorses it. `claim` names the box's own binding
+   event where the box publishes one; a reader that cannot fetch it loses
+   nothing but the box's self-reported facts.
 
-A card that passes steps 1 to 5 makes a contact, starts a bond and yields
-rendezvous material. A box is dialled only after step 6. A client MUST show
-which of the two states a contact is in.
+A client MUST show whether a box is dialled on the card's endorsement or
+on a refreshed Link card.
 
 ## 4. What the reader derives
 
@@ -159,13 +174,13 @@ which of the two states a contact is in.
 - **First private relay.** The box's Link card, once step 6 holds, is the
   first relay hint the client uses for this contact and, if it had none, the
   first it ever uses. No vendor endpoint is ever needed to reach it.
-- **Rendezvous.** With the reader's own static key and the card's `p` and
-  `eph`, the reader derives Link tags (`docs/RENDEZVOUS.md` §2, one-sided
+- **Rendezvous.** With the reader's own rendezvous key and the card's `rz`
+  and `eph`, the reader derives Link tags (`docs/RENDEZVOUS.md` §2, one-sided
   case with the card's side carrying) and dead-drop keys under the same
-  input key material. When the reader hands back its own card the pair
-  moves to the both-sided case. The ikm is byte-identical across the two
-  uses, so a pair that exchanged cards for one purpose has the other for
-  free.
+  input key material. When the reader hands back its own card the
+  pair moves to the both-sided case. The ikm is byte-identical across the
+  two uses, so a pair that exchanged cards for one purpose has the other
+  for free.
 - **Bond.** The `bond` payload starts the in-person ceremony: an ECDH bond
   between the two keys and spoken words derived from it, confirmed aloud. A
   completed bond is a verified relationship; the card alone is an
@@ -186,7 +201,7 @@ keys with a person.
 ## Security considerations
 
 - **A card is a capability, and a small one.** Its holder can reach the
-  named box and learns `p` and `eph`. They cannot derive rendezvous
+  named box and learns `p`, `rz` and `eph`. They cannot derive rendezvous
   material: the one-sided tag needs either the reader's own static secret
   or the ephemeral's private half, and a card carries neither. A lost card
   yields a box address and two public keys. It is not identity: the box
@@ -200,6 +215,10 @@ keys with a person.
   ceremony is where a person is confirmed, and the card cannot skip it.
 - **The name.** Free text from a stranger, shown beside the key and never
   as authority, exactly as elsewhere in the profile.
+- **A stolen device.** A device holds the private half of `rz`, never of
+  `p`. Losing one leaks the rendezvous material for the current index; the
+  person moves to the next index, issues new cards, and their identity is
+  untouched.
 - **Linkage.** Nothing on a card ties `p` to any other key. A reader that
   wants that asks a bonded friend on the sheltered lane.
 
@@ -216,10 +235,10 @@ keys with a person.
 
 ## Vectors
 
-`vectors/contact-card.json` in this repository carries ten cards using the
-same test keys as forgesworn-link: one that passes with a box, a Link card
+`vectors/contact-card.json` in this repository carries ten cards using the same test keys as
+forgesworn-link and nostr-deaddrop: one that passes with a box, a Link card
 and a bond; one that passes with none of those; and one failing at each of
 steps 1 to 5, including a tampered name, a tampered box and an expired Link
-card inside. Step 6, the box's binding chain, is not exercised: the claim id
-is a placeholder and the Link node key is test-only. Signatures carry random
-auxiliary data, so a verifier checks them and does not compare bytes.
+card inside; and two refresh cases, a fresh Link card under the pinned node
+id that is accepted and one under a different node id that is refused. Signatures carry
+random auxiliary data, so a verifier checks them and does not compare bytes.

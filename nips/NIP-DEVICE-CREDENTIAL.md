@@ -58,7 +58,7 @@ runs.
 
 Kind 20460 is ephemeral by number, and that is deliberate: this event is
 never published bare to any relay. It travels inside encryption, in
-the encrypted roster of a room, in a sealed message to the box, or in the
+the encrypted roster of a room, in a sealed message to a box, or in the
 device's own storage. A relay that sees one has seen a mistake.
 
 ## 2. What a device does with it
@@ -72,15 +72,14 @@ places:
   person admits the device. A device cannot mint a room credential, because
   a room credential is signed by the participant key and the device does
   not hold it; that is the point.
-- **DMs and dead drops.** Rendezvous material for a contact is an ECDH
-  between the identity's static key and the contact's, which the device
-  cannot compute without the identity secret. Two shapes are allowed and a
-  client says which it uses: the root hands the device the per-contact
-  shared secret (`static_x`) for each contact, at pairing and whenever a
-  contact is added, inside NIP-44; or the device asks the root for it over
-  NIP-46 when needed. The device never holds the identity secret in either
-  shape. **Open:** NIP-46 has no method that returns a raw shared secret,
-  and a client that wants the second shape has to add one.
+- **DMs and dead drops.** Rendezvous never touches the identity key. A
+  person's contact card carries a rendezvous key `rz`, a child of the root
+  with purpose `rendezvous`, and every Link tag and dead-drop key is an
+  ECDH against `rz`. The root hands the device the private half of `rz` at
+  pairing, inside NIP-44, alongside the credential. A device therefore
+  derives every rendezvous on its own, with no round trip to the signer,
+  and never holds the identity secret. Losing a device means moving `rz`
+  to the next index and issuing new cards; the identity does not change.
 - **The box.** A box admits uploads and reads for the keeper's tier from
   any device holding a current person credential for the keeper's key, and
   logs the device, not the person, as the signer of what it stored.
@@ -91,22 +90,25 @@ places:
 ## 3. Issue, renew, revoke
 
 - **Issue.** The root, wherever it lives (a hardware signer, a NIP-55
-  signer, a NIP-46 bunker), signs the credential for a new device after a pairing the person
+  signer, a NIP-46 bunker),
+  signs the credential for a new device after a pairing the person
   performed on the new device: the QR and code flow KithMoot already has,
-  widened to the person. The pairing carries the credential and the shared
-  material of §2 to the device inside NIP-44 and nothing else. The identity
-  secret never moves.
+  widened to the person. The pairing carries the credential and the private
+  half of the current rendezvous key `rz` to the device inside NIP-44 and
+  nothing else. The identity secret never moves.
 - **Renew.** A device asks for a fresh credential before expiry through any
   channel that reaches the root. The root MAY renew silently for a device it
   has renewed before and MUST prompt the person the first time.
-- **Revoke.** The root signs a tombstone: a kind 5 naming the credential's
+- **Revoke.** The root signs a tombstone and, because the device held
+  `rz`, moves `rz` to the next index and issues fresh contact cards to the
+  people who should still reach it. The root signs the tombstone: a kind 5 naming the credential's
   id, carried on the sheltered lane to every room, box and device the
   person has. A revoked device is refused everywhere the tombstone reaches
   and the person's identity does not change. A client MUST show the person
   their devices with labels and let them revoke any one of them, and MUST
   show a revocation as a device event, not an identity event.
-- **Loss of the root.** Out of scope here. That is NIP-SUCCESSION, and a
-  person credential lapses on its own inside 30 days.
+- **Loss of the root.** Out of scope here. That is NIP-SUCCESSION, and a person credential lapses on its own
+  inside 30 days.
 
 ## 4. Verification
 
@@ -147,9 +149,9 @@ the person form is the same function with the two extra checks.
 
 ## Vectors
 
-`vectors/device-credential.json` in this repository carries a person
-credential that passes, a room credential that passes the room check, each
-presented to the other's verifier (refused), a room credential carrying a
-`scope` tag (refused), an expired one, one beyond 30 days, and a tombstone
-that revokes the passing one. Signatures carry random auxiliary data, so a
-verifier checks them and does not compare bytes.
+`vectors/device-credential.json` in this repository carries a person credential that passes, a
+room credential that passes the room check, each presented to the other's
+verifier (refused), a room credential carrying a `scope` tag (refused), an
+expired one, one beyond 30 days, and a tombstone that revokes the passing
+one. Signatures carry random auxiliary data, so a verifier
+checks them and does not compare bytes.
