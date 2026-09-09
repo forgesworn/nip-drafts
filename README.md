@@ -28,7 +28,7 @@ All drafts are `draft` `optional` unless noted otherwise.
 | [NIP-APPROVAL](nips/NIP-APPROVAL.md) | Multi-Party Approval Gates | upstream | `draft` | 30570, 30571 | NIP-01, NIP-40, NIP-44 |
 | [NIP-CUSTODY](nips/NIP-CUSTODY.md) | Chain-of-Custody Tracking | upstream | `draft` | 30572 | NIP-01, NIP-44, NIP-EVIDENCE, NIP-LOCATION |
 | [NIP-CONSENSUS](nips/NIP-CONSENSUS.md) | Multi-Party Consensus | upstream | `draft` | 30574, 30575 | NIP-01, NIP-40, NIP-44 |
-| [NIP-SUCCESSION](nips/NIP-SUCCESSION.md) | Key Succession with Pre-commitment and Consent | upstream | `draft` | reuses 360, 361 (nostr-protocol/nips#2137) | NIP-01, NIP-03, NIP-59, NIP-IDENTITY-TREES |
+| [NIP-SUCCESSION](nips/NIP-SUCCESSION.md) | Key Succession with Pre-commitment and Consent | upstream | `draft` | 1360, 1361 | NIP-01, NIP-03, NIP-IDENTITY-TREES |
 | [NIP-CONTACT-CARD](nips/NIP-CONTACT-CARD.md) | Contact Card: one QR that makes a contact, names a box and starts a bond | ecosystem | `draft` | none | NIP-01, NIP-19, forgesworn-link |
 | [NIP-DEVICE-CREDENTIAL](nips/NIP-DEVICE-CREDENTIAL.md) | Device Credential for a Person | upstream | `draft` | reuses 20460 (KithMoot) | NIP-01, NIP-09, NIP-40, NIP-44 |
 | [NIP-MATCHING](nips/NIP-MATCHING.md) | Competitive Matching & Selection | upstream | `draft` | 30576, 30577 | NIP-01, NIP-15, NIP-40, NIP-44, NIP-99 |
@@ -119,13 +119,13 @@ When mature, each NIP may be proposed as a PR to [nostr-protocol/nips](https://g
 
 These NIPs use the following kind ranges:
 
-- **Regular (1xxx):** 1315, 1316 (NIP-SPATIAL-SIGNALS)
+- **Regular (1xxx):** 1315, 1316 (NIP-SPATIAL-SIGNALS), 1360, 1361 (NIP-SUCCESSION)
 - **Regular (7xxx):** 7543 (NIP-DISPUTES)
 - **Ephemeral (20xxx):** 20500-20502
 - **Addressable (30xxx):** 30401, 30404, 30414-30416, 30480, 30510-30511, 30515, 30517, 30520, 30527-30528, 30530-30533, 30535, 30543, 30545, 30547-30549, 30556, 30565, 30570-30572, 30574-30579, 30582-30584, 30588, 30594-30595, 30599
 - **Addressable (31xxx):** 31402 (NIP-PAID-SERVICES)
 
-NIP-SUCCESSION reuses kinds 360 and 361 as proposed in nostr-protocol/nips#2137 and moves with them; NIP-DEVICE-CREDENTIAL reuses KithMoot's kind 20460; NIP-CONTACT-CARD allocates nothing. Their known-answer vectors are in `vectors/`.
+NIP-SUCCESSION allocates 1360 and 1361 and shares no numbers with any upstream proposal; NIP-DEVICE-CREDENTIAL reuses KithMoot's kind 20460; NIP-CONTACT-CARD allocates nothing. Their known-answer vectors are in `vectors/`.
 
 Kind numbers will need formal allocation when proposed to `nostr-protocol/nips`.
 
