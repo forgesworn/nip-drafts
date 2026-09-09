@@ -52,7 +52,7 @@ needed and an HTTP server never sees the fragment. A card is at most 16 KiB.
   "relays": ["wss://…", "wss://…"],
   "boxes": [
     {
-      "p": "<64 hex, the box's own key (bothy key)>",
+      "p": "<64 hex, the box's own key>",
       "claim": "<64 hex, event id of the keeper-signed claim that binds this box to the person>",
       "card": "<base64url FSL-CARD-1, carried opaquely>",
       "carriers": ["tor", "i2p"]
@@ -80,8 +80,8 @@ Field rules:
 - `relays` are public-lane relays, at most 8, `wss://` only, no commas.
 - `boxes` has at most 4 entries. `card` is opaque bytes exactly as Link
   SPEC §2 intends, and is at most 4096 bytes decoded. `carriers` names the
-  carriers the box speaks (VENNEL §4.4); a reader ignores names it does not
-  know.
+  anonymous carriers the box speaks (for example `tor`, `i2p`); a reader
+  ignores names it does not know.
 - `eph` is a fresh secp256k1 key for this card and MUST NOT be reused across
   cards. It plays the part of Link's hint `0x04` for pairs that do not yet
   hold each other's Link cards: with it, the reader derives one-sided
@@ -98,7 +98,7 @@ Field rules:
 ## 2. Signature
 
 There is no canonical JSON. The signature covers a digest built from the
-parsed fields, in the way kenspeckle's join invite does, so a reader
+parsed fields, in the way a signed join invite does, so a reader
 recomputes it from what it has already validated:
 
 ```

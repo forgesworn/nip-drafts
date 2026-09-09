@@ -1,6 +1,6 @@
 {
   "format": "nostr-contact-card-known-answer-v1",
-  "note": "Signatures use random auxiliary data; verify, do not compare. The Link node key here is test-only and the claim id is a placeholder: step 6 (the Bothy chain) is not exercised by these vectors.",
+  "note": "Signatures use random auxiliary data; verify, do not compare. The Link node key here is test-only and the claim id is a placeholder: step 6 (the box's binding chain) is not exercised by these vectors.",
   "now": 1793577600,
   "testOnlyKeys": {
     "aPrivHex": "4873374aacd9fbbdf073a29078b6cf9f27c137107530c521458d5d83118ae733",
