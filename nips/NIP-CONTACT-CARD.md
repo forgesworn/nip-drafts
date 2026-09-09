@@ -38,18 +38,39 @@ published.
 
 ## 1. Shape
 
-A card is a UTF-8 JSON object, encoded as unpadded base64url, carried after
-`#` in a link or as the whole content of a QR code. Nothing before `#` is
-needed and an HTTP server never sees the fragment. A card is at most 16 KiB.
+A card is a signed Nostr event of kind 30641, encoded as unpadded base64url
+of its JSON, carried after `#` in a link or as the whole content of a QR
+code. Nothing before `#` is needed and an HTTP server never sees the
+fragment. A card is never published to a relay; the kind is reserved so
+that a client which meets one by mistake does nothing with it. A card is at
+most 16 KiB.
+
+The event's `pubkey` is the person's key `p`, its `created_at` is `issued`,
+its NIP-40 `expiration` tag is `expires`, and its `content` is the card.
+That is the whole reason it is an event: a NIP-07 extension or a NIP-46
+bunker signs events and nothing else, and the profile keeps the identity
+secret inside the signer, so the signature a signer already
+makes has to be the card's signature.
+
+```json
+{
+  "kind": 30641,
+  "pubkey": "<64 hex, x-only public key of the person or persona: p>",
+  "created_at": <unix seconds: issued>,
+  "tags": [["d", "card"], ["expiration", "<unix seconds: expires>"]],
+  "content": "<the JSON object below, as a string>",
+  "id": "<64 hex, NIP-01 id>",
+  "sig": "<128 hex, BIP-340 signature over the id, by p>"
+}
+```
+
+The content, before it is a string:
 
 ```json
 {
   "v": 1,
-  "p": "<64 hex, x-only public key of the person or persona>",
   "rz": "<64 hex, x-only rendezvous public key, a child of the person's root>",
   "name": "<display name; sanitised on read, never trusted>",
-  "issued": <unix seconds>,
-  "expires": <unix seconds>,
   "relays": ["wss://…", "wss://…"],
   "boxes": [
     {
@@ -61,10 +82,14 @@ needed and an HTTP server never sees the fragment. A card is at most 16 KiB.
   ],
   "eph": "<64 hex, x-only ephemeral public key, fresh for this card>",
   "attest": "<optional naddr of an attestation about p>",
-  "bond": { "v": 1, "pubkey": "<64 hex>", "displayName": "<optional>", "nonce": "<32 hex>", "personas": [ { "pubkey": "<64 hex>", "label": "<optional>" } ] },
-  "sig": "<128 hex, BIP-340 signature by p>"
+  "bond": { "v": 1, "pubkey": "<64 hex>", "displayName": "<optional>", "nonce": "<32 hex>", "personas": [ { "pubkey": "<64 hex>", "label": "<optional>" } ] }
 }
 ```
+
+The event carries exactly two tags, `d` with the value `card` and
+`expiration`, and no other: a tag is inside the signature, and a third one
+could carry what a card may not. `p`, `issued` and `expires` live on the
+event and nowhere in the content.
 
 Field rules:
 
@@ -126,6 +151,12 @@ Field rules:
   U+E007F only after one, so an emoji family or a flag reads and a hidden
   joiner does not. A reader refuses a card that breaks this rather than
   cleaning it, because a cleaned name is not the one that was signed.
+  Which characters are unassigned, and which are pictographic, depends on
+  the Unicode version a reader carries: a reader follows Unicode 15.0 or
+  later, and a code point its version has not assigned is refused. Two
+  readers on different versions can disagree about a name using a
+  character assigned between them; a writer that wants a card read
+  everywhere keeps to characters assigned by 15.0.
 - `relays`: each is `wss://`, parses as a URL whose host is a DNS name or
   an IP literal, carries no username, password or fragment, no comma and
   no unprintable character; a port, path and query are allowed. This is
@@ -137,37 +168,23 @@ Field rules:
   `A-Z a-z 0-9 . _ -`; `attest`, when present, is 1 to 512 characters
   with no colon, no space or separator and no unprintable or format
   character. An empty `name`, `attest` or `carriers` is refused rather
-  than read as absent. These bounds are what makes the §2 digest
-  injective: no field can carry the character that separates it from the
-  next, and nothing empty hashes the same as nothing there.
+  than read as absent, so that a reader can never mistake nothing there
+  for nothing said.
 
 ## 2. Signature
 
-There is no canonical JSON. The signature covers a digest built from the
-parsed fields, in the way a signed join invite does, so a reader
-recomputes it from what it has already validated:
+The signature is the event's, as NIP-01 defines it: `id` is the SHA-256 of
+the serialised array `[0, pubkey, created_at, kind, tags, content]` and
+`sig` is BIP-340 over `id` under `pubkey`. There is no canonical JSON to
+agree on beyond what NIP-01 already fixes, and `content` is signed byte
+for byte as carried: a reader verifies the event first and only then
+parses the content by §1, so a field the draft does not name, or a key
+in a different case, changes nothing about what was signed and never
+reaches the application.
 
-```
-box_i  = p_i || "/" || claim_i || "/" || card_i || "/" || carriers_i.join("+")
-digest = sha256( utf8( "nostr-contact-card:v1"
-                       + ":" + p + ":" + rz
-                       + ":" + issued + ":" + expires
-                       + ":" + eph
-                       + ":" + relays.join(",")
-                       + ":" + boxes.map(box).join(",")
-                       + ":" + (attest ?? "")
-                       + ":" + (bond ? sha256hex(handshakeBytes(bond)) : "")
-                       + ":" + sha256hex(utf8(name)) ) )
-sig    = BIP-340 sign(digest, secret key of p)
-```
-
-`handshakeBytes` is the canonical form of the bond object: UTF-8 JSON with
-no whitespace, keys in exactly this order and absent keys omitted:
-`v`, `pubkey`, `displayName`, `nonce`, `personas`; inside `personas`, each
-entry's keys in the order `pubkey`, `label`. It is defined here so that a reader in any
-language reproduces it from parsed fields. Fields that could carry a separator are hashed, not
-joined. A reader MUST reject a card whose
-`relays` contain a comma or whose box fields contain `/`.
+`handshakeBytes`, the canonical form of the bond object, is no longer
+needed for the signature; it remains what the bond ceremony hashes when
+it runs, and a reader that stores a bond stores it cleaned by §1.
 
 ## 3. Reading a card
 
@@ -176,14 +193,18 @@ In this order, and the first failure rejects the card:
 1. the part after the last `#` is at most 16 KiB (the cap is the card's,
    not the link's); base64url decodes; the bytes are valid UTF-8 with no
    byte-order mark (a reader never repairs bytes to U+FFFD); JSON parses
-   to an object; `v` is 1;
-2. every hex field is the right length and lower case after normalisation,
-   and every other field has the shape and bounds §1 gives it: names and
-   labels, relays, boxes, carriers, `attest`, `bond`;
-3. `expires > now` and `expires - issued <= 30 days` and `issued <= now +
-   300`;
-4. the signature verifies under `p` over the digest in §2, computed from
-   the fields §1 names and nothing else;
+   to an object whose `kind` is 30641; its `content` parses to an object
+   whose `v` is 1;
+2. the event's `pubkey`, `id` and `sig` are hex of the right length, lower
+   case after normalisation; its `tags` are exactly `["d","card"]` and
+   one `expiration`; and every field of the content has the shape and
+   bounds §1 gives it: `rz` and `eph`, names and labels, relays, boxes,
+   carriers, `attest`, `bond`;
+3. `issued` is the event's `created_at` and `expires` the `expiration`
+   tag's value, an unsigned decimal integer; `expires > now` and
+   `expires - issued <= 30 days` and `issued <= now + 300`;
+4. `id` is the NIP-01 id of the six fields as carried and `sig` verifies
+   over it under `pubkey`;
 5. each box's `card` decodes and passes Link SPEC §2.3, rules 1 to 8,
    verified as that section now states them: the signature check is the
    strict, cofactorless one (canonical encodings, no small-order node id
@@ -203,9 +224,12 @@ A card that passes steps 1 to 5 makes a contact, starts a bond, yields
 rendezvous material and names a box the reader may dial at once. Nothing
 outside the card is fetched to get there.
 
-What the reader returns is a card rebuilt from the fields §1 names. A key
-on the wire that §1 does not name, `__proto__` included, is outside the
-signature and MUST NOT reach the application under a verified result.
+What the reader returns is a card rebuilt from the fields §1 names: `p`,
+`issued` and `expires` from the event, the rest from the content, plus the
+event's `id` and `sig`. A key on the wire that §1 does not name,
+`__proto__` included, whether on the event (where it is outside the
+signature) or inside the content (where it is signed), MUST NOT reach the
+application under a verified result.
 Hex case is normalised and base64url padding tolerated, so one card has
 several wire forms; anything that caches or deduplicates a card MUST key
 on its fields, not its bytes.
@@ -283,6 +307,13 @@ keys with a person.
 
 ## Compatibility
 
+- **Why an event and not a bare digest.** An earlier form of this draft
+  signed a 32-byte digest of the fields, which only a client holding the
+  raw key could produce. A NIP-07 extension or a NIP-46 bunker signs
+  events and nothing else, and the profile keeps the identity secret in
+  the signer, so that form could not be made by the people the profile is
+  for. It was found while wiring the reference clients on 2026-09-09 and
+  replaced before publication; nothing was issued under the old form.
 - A client that knows nothing of this draft receives a link it cannot open
   and an npub it can. A card SHOULD be shown beside its npub wherever it is
   displayed so that the fallback is a copy away.
@@ -290,22 +321,26 @@ keys with a person.
   BIP-340 signatures, forgesworn-link `FSL-CARD-1` and rendezvous
   derivation, the box's own claim and status events, the bond handshake
   and ceremony, and whatever attestation `attest` points at.
-- No kind is allocated and no tag name is reserved.
+- Kind 30641 is reserved for the card event, beside the box's own kinds, and
+  never appears on a relay; `d` and `expiration` are NIP-01 and NIP-40
+  tags with their ordinary meaning. No other tag name is reserved.
 
 ## Vectors
 
-`vectors/contact-card.json` in this repository carries twenty-seven cards using the same
-test keys as forgesworn-link: cards that pass with a
-box, a Link card and a bond; with none of those; with unnamed keys on
-the wire, which the reader must strip; with an emoji sequence in the
-name; with upper-case bond hex, which the reader normalises; and cards
-failing at each of steps 1 to 5, including a tampered name, a tampered
-box, an expired Link card inside, a name with a format character, too
-long, or holding a lone surrogate, a box card outside base64url, an
-empty carrier list, an empty attest, a malformed bond, a future issue
-date, an expiry before the issue date, a non-`wss://` relay, a relay
-with credentials, and Link cards whose relay hint is not a URL or starts
-with a byte-order mark. Six refresh cases: a fresh Link card under the
+`vectors/contact-card.json` in this repository carries thirty-two cards using the same test
+keys as forgesworn-link: cards that pass with a box, a
+Link card and a bond; with none of those; with unnamed keys on the event
+and inside the signed content, which the reader must strip; with an
+emoji sequence in the name; with upper-case bond hex, which the reader
+normalises; and cards failing at each of steps 1 to 5, including the
+wrong kind or content version, an extra tag, an expiration that is not a
+number, a tampered name, a tampered box, a tampered time, a foreign key
+on the event, an expired Link card inside, a name with a format
+character, too long, or holding a lone surrogate, a box card outside
+base64url, an empty carrier list, an empty attest, a malformed bond, a
+future issue date, an expiry before the issue date, a non-`wss://`
+relay, a relay with credentials, and Link cards whose relay hint is not a
+URL or starts with a byte-order mark. Six refresh cases: a fresh Link card under the
 pinned node id that is accepted; one under a different node id, a stale
 one, one under a small-order node id with a signature that ZIP-215 would
 accept, one whose nonce point carries torsion so that only a cofactored
