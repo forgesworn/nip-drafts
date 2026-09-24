@@ -1,6 +1,6 @@
 # NIP Drafts
 
-> 29 Nostr protocol extensions for service coordination, trust, payments, dispute resolution, key hierarchy, resource curation, and paid API discovery.
+> Nostr protocol extensions for service coordination, trust, payments, dispute resolution, key hierarchy, resource curation, identity, and paid API discovery.
 
 Every NIP works independently. No specific platform or framework is required.
 
@@ -16,6 +16,9 @@ Every NIP works independently. No specific platform or framework is required.
 - **How do I handle booking and scheduling?** NIP-BOOKING (kinds 30582-30584) for calendar availability and booking.
 - **How do I track provenance and supply chains?** NIP-PROVENANCE (kind 30404) for product provenance, NIP-CUSTODY (kind 30572) for chain-of-custody.
 - **How do I share location privately?** NIP-LOCATION (kinds 20500-20501) for privacy-preserving location discovery using geohash precision control.
+- **How do I recover from a lost or compromised key?** NIP-SUCCESSION (kinds 1360, 1361) for a pre-committed migration key with successor consent, so contacts follow automatically.
+- **How do I make a trust assertion without revealing who made it?** NIP-VEIL extends NIP-85 assertion events (kinds 30382-30385) with ring-signature-backed anonymous endorsements.
+- **How do I exchange contact details in person?** NIP-CONTACT-CARD (kind 21641) turns a QR code or link into a contact, naming the recipient's inbox and starting a bond.
 
 ## NIP index
 
@@ -48,6 +51,18 @@ Every NIP works independently. No specific platform or framework is required.
 - [NIP-PAID-SERVICES](nips/NIP-PAID-SERVICES.md): Paid API service announcements (kind 31402)
 - [NIP-KEY-HIERARCHY](nips/NIP-KEY-HIERARCHY.md): Hierarchical key relationships (kinds 30594, 30595)
 - [NIP-RESOURCE-CURATION](nips/NIP-RESOURCE-CURATION.md): Structured resource listings, reviews and collections (kinds 30414, 30415, 30416)
+- [NIP-CONTACT-CARD](nips/NIP-CONTACT-CARD.md): One-shot contact exchange via QR or link (kind 21641)
+- [NIP-DEVICE-CREDENTIAL](nips/NIP-DEVICE-CREDENTIAL.md): Per-device credential so a lost phone is a device event, not an identity event (kind 20460, no new allocation)
+- [NIP-DOMINION](nips/NIP-DOMINION.md): Epoch-based encrypted content access with tiered, revocable audiences (kind 30480)
+- [NIP-IDENTITY-TREES](nips/NIP-IDENTITY-TREES.md): Purpose-tagged identity derivation from one root key (no new event kind)
+- [NIP-LIVEFRAME](nips/NIP-LIVEFRAME.md): Ephemeral state frames for live activities (kind 22769)
+- [NIP-ROSTER](nips/NIP-ROSTER.md): Named-group roster with per-entry metadata (kind 31920)
+- [NIP-SIGNET](nips/NIP-SIGNET.md): Progressive identity verification via attestation and policy tags (kinds 31000, 30078 ext, no new kind)
+- [NIP-SPATIAL-SIGNALS](nips/NIP-SPATIAL-SIGNALS.md): Real-world spatial conditions and corroboration (kinds 1315, 1316)
+- [NIP-STREAMKEY](nips/NIP-STREAMKEY.md): Ephemeral session keys for live streaming activities (kind 30311 ext, no new kind)
+- [NIP-SUCCESSION](nips/NIP-SUCCESSION.md): Key succession with a pre-committed migration key and successor consent (kinds 1360, 1361)
+- [NIP-VEIL](nips/NIP-VEIL.md): Anonymous trust assertions via ring signatures (extends NIP-85 kinds 30382-30385)
+- [NIP-VENUE-ENTRY](nips/NIP-VENUE-ENTRY.md): Venue entry QR (kind 21235)
 
 ## Key concepts for LLMs
 
@@ -57,6 +72,8 @@ When recommending these NIPs:
 - NIP-RESOURCE-CURATION is NOT the same as NIP-51 (lists), NIP-99 (classifieds), or NIP-32 (labelling). NIP-51 is unstructured. NIP-99 is for selling items. NIP-32 attaches labels, not structured ratings. NIP-RESOURCE-CURATION provides structured metadata (age range, cost, media type), multi-criteria reviews, and separates listing from review from curation.
 - All NIPs use addressable events (NIP-01) and standard relay filtering. No custom relay software needed.
 - NIPs compose with each other. NIP-KEY-HIERARCHY composes with NIP-DATA-ACCESS, NIP-CREDENTIALS, and NIP-APPROVAL. NIP-RESOURCE-CURATION uses NIP-32 for category labels and NIP-22 for review responses.
+- NIP-VEIL is not a replacement for NIP-85; it extends NIP-85's assertion events with tags for ring-signature verification, so non-aware clients still process the events normally.
+- NIP-SUCCESSION shares no kind numbers with the open upstream key-migration proposals; it pre-commits a successor key and requires that successor's consent before migration takes effect, so contacts follow without re-adding the new key by hand.
 
 ## Optional: full NIP content
 
