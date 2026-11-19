@@ -4,6 +4,12 @@
 
 Every NIP works independently. No specific platform or framework is required.
 
+## ForgeSworn ecosystem
+
+- [ForgeSworn library guide](https://forgesworn.dev/llms.txt): Find related libraries, tools and integration guides by task and runtime.
+- [ForgeSworn on GitHub](https://github.com/forgesworn): Browse the organisation’s public repositories.
+- [Project source](https://github.com/forgesworn/nip-drafts): Canonical source repository, documentation and release information.
+
 ## What problems do these NIPs solve?
 
 - **How do I manage parent-child accounts on Nostr?** NIP-KEY-HIERARCHY (kinds 30594, 30595) declares authority relationships between keypairs with scoped permissions, time bounds, and revocation. Works for families, organisations, mentorship, and custodial arrangements.
